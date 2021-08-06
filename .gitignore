@@ -1,0 +1,8 @@
+*.directory
+*.code-workspace
+
+__*
+_*
+
+.vscode
+venv
