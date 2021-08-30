@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>KeyPressWidget</class>
+ <widget class="QWidget" name="KeyPressWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>726</width>
+    <height>53</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>40</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>60</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	background-color: white;
+}
+</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="minimumSize">
+      <size>
+       <width>25</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>X.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="ctrlMod">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton:selected {
+		color: white;
+}</string>
+     </property>
+     <property name="text">
+      <string>Ctrl</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="altMod">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="text">
+      <string>Alt</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="shiftMod">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="text">
+      <string>Shift</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="metaMod">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="text">
+      <string>Meta</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="CKeySequenceEdit" name="keySequenceEdit"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="clearButton">
+     <property name="icon">
+      <iconset theme="edit-clear">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="moveUp">
+     <property name="icon">
+      <iconset theme="go-up">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="moveDown">
+     <property name="icon">
+      <iconset theme="go-down">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="delButton">
+     <property name="icon">
+      <iconset theme="list-remove">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CKeySequenceEdit</class>
+   <extends>QKeySequenceEdit</extends>
+   <header location="global">gui.customwidgets</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>keySequenceEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>38</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>541</x>
+     <y>29</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>delButton</sender>
+   <signal>clicked()</signal>
+   <receiver>KeyPressWidget</receiver>
+   <slot>_remove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>707</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>668</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moveDown</sender>
+   <signal>clicked()</signal>
+   <receiver>KeyPressWidget</receiver>
+   <slot>_moveDown()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>661</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>629</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moveUp</sender>
+   <signal>clicked()</signal>
+   <receiver>KeyPressWidget</receiver>
+   <slot>_moveUp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>624</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>593</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>ctrlMod</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>563</x>
+     <y>22</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>77</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>altMod</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>30</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>166</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>shiftMod</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>566</x>
+     <y>28</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>265</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>metaMod</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>573</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>370</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>_remove()</slot>
+  <slot>_moveUp()</slot>
+  <slot>_moveDown()</slot>
+ </slots>
+</ui>
