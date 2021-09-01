@@ -23,6 +23,8 @@ from devices.allkeys import *
 
 currProfile = MEMORY_1
 
+APP_NAME = "Keyboard Center Service"
+
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
 
@@ -56,7 +58,7 @@ async def switchProfile(profile):
 
     # this is a blocking operation, py-notify will hopefully fix that
     Notification(
-        app_name="Keyboard Center",
+        app_name=APP_NAME,
         title=f"Switched to profile {profile}",
         icon_path=path,
         urgency="normal"
@@ -139,8 +141,12 @@ async def usbListener(keyboard: core.Device,
                 else:
                     pass
         
+        # older versions of python3-usb throw USBError instead of USBTimeoutError
+        # all glory to backwards compatibility I guess....
+        except core.USBError:
+            pass        
         except core.USBTimeoutError:
-            pass    
+            pass
 
 def inotifyReader(inotify: INotify):
     for _ in inotify.read():
@@ -148,7 +154,7 @@ def inotifyReader(inotify: INotify):
         logging.info("config changed - realoading...")
         if config.load():
             Notification(
-                app_name="Keyboard Center",
+                app_name=APP_NAME,
                 title="Configuration changed",
                 description="new config loaded!",
                 icon_path=os.path.join(PARENT_LOCATION, "assets", "input-keyboard-virtual.png"),
