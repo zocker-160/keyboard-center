@@ -2,7 +2,7 @@
 Name=G910 gui
 Version=1.0
 Exec=G910-gui %f
-Comment=Application to edit G-keys on G910
+Comment=Application to map G-keys on G910
 Icon=g910gui
 Type=Application
 Terminal=false
