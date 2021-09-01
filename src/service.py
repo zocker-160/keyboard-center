@@ -26,7 +26,9 @@ currProfile = MEMORY_1
 APP_NAME = "Keyboard Center Service"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
+TEMPLATE_LOCATION = os.path.join(
+    PARENT_LOCATION, "config", "testconfig.yaml.example"
+)
 
 def _stop(*args):
     global evLoop
