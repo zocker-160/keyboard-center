@@ -17,41 +17,8 @@ from gui.customwidgets import KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-CONFIG_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml")
+TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
 
-class MainWindow_old(QMainWindow):
-
-    def __init__(self, app):
-        super().__init__()
-
-        list = CListWidget()
-        self.setCentralWidget(list)
-
-        list.addWidget(KeyPressWidget())
-        list.addWidget(KeyPressWidget())
-        #list.addWidget(KeyPressWidget())
-        #list.addWidget(KeyPressWidget())
-
-        self.first: KeyPressWidget = list.getEntries()[0]
-        #self.first.keySequenceEdit.editingFinished.connect(self.test)
-        #self.first.keySequenceEdit.keySequenceChanged.connect(self.test2)
-
-        #self.first.keySequenceEdit.keyPressEvent = self.test3
-
-
-    def test3(self, a0: QKeyEvent):
-        print(a0.nativeScanCode())
-        super().keyPressEvent(a0)
-
-    def test(self):
-        print("trigger")
-        seq = self.first.keySequenceEdit.keySequence()
-        
-        print(seq.toString())
-
-    def test2(self, seq):
-        print("trigger2")
-        print(seq)
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app: QApplication):
