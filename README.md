@@ -1,4 +1,6 @@
-# ![](images/g910-icon.png) G910-gui
+# ![](images/g910-icon.png) G910-gui (WiP)
+
+**(work in progress)**
 
 G910-gui is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
 
