@@ -147,10 +147,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 data=data,
                 bSavetoFile=saveToFile
             )
-            return True
         except Exception as e:
             self.showErrorMSG(str(e))
             return False
+        self.bottomStatusBar.showMessage("Configuration saved!", 2000)
+        return True
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
