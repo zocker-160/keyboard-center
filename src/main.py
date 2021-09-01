@@ -18,7 +18,9 @@ from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_Dialog as Ui_AboutWindow
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
+TEMPLATE_LOCATION = os.path.join(
+    PARENT_LOCATION, "config", "testconfig.yaml.example"
+)
 
 PLACEHOLDER_STR = "$$$"
 VERSION = "0.1.0-testing"
