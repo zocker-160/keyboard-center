@@ -8,7 +8,6 @@ pre_install() {
 }
 
 post_install() {
-    #ln -fs "/usr/lib/EEStudio2/EEStudio2.py" "/usr/bin/EEStudio2"
     python3 -m compileall /usr/lib/G910-gui
     
     # enable and start service
