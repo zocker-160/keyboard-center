@@ -24,7 +24,7 @@ from devices.allkeys import *
 currProfile = MEMORY_1
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-CONFIG_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml")
+TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
 
 def _stop(*args):
     global evLoop
@@ -204,7 +204,7 @@ def main():
     )
 
     inotify = INotify()
-    inotify.add_watch(CONFIG_LOCATION, flags.MODIFY)
+    inotify.add_watch(config.configFile, flags.MODIFY)
 
     logging.info("starting service...")
     global evLoop
@@ -232,6 +232,6 @@ if __name__ == "__main__":
     disableGkeyMapping()
 
     global config
-    config = Configparser(CONFIG_LOCATION) # TODO: catch possible errors
+    config = Configparser(TEMPLATE_LOCATION) # TODO: catch possible errors
 
     main()

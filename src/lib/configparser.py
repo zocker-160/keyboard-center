@@ -1,3 +1,5 @@
+import os
+import shutil
 from ruamel.yaml import YAML
 import logging
 
@@ -18,11 +20,28 @@ MOD_META = "Meta"
 
 class Configparser:
 
-    def __init__(self, configFile: str, silent=True):
-        self.configFile = configFile
+    def __init__(self, locConfTemplate: str, silent=True):
+        self.configFile = self._getConfigLocation(locConfTemplate)
 
         self.configYAML = YAML(typ='safe')
         self.load(silent)
+
+    def _getConfigLocation(self, confTemplate: str):
+        xdg_home = os.environ["XDG_CONFIG_HOME"]
+
+        if not xdg_home:
+            xdg_home = os.path.join(os.environ["HOME"], ".config")
+        
+        confFolder = os.path.join(xdg_home, "g910-gui")
+        confLoc = os.path.join(confFolder, "settings.yml")
+
+        # check if file and folder exists
+        if not os.path.isdir(confFolder):
+            os.mkdir(confFolder)
+        if not os.path.isfile(confLoc):
+            shutil.copyfile(confTemplate, confLoc)
+
+        return confLoc
 
     def getSettings(self) -> dict:
         return self.settings["settings"]

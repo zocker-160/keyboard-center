@@ -35,7 +35,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def readConfiguration(self):
         try:
-            self.configparser = Configparser(CONFIG_LOCATION, False)
+            self.configparser = Configparser(TEMPLATE_LOCATION, False)
         except Exception as e:
             self.showErrorMSG(
                 "Could not load config file! \n\n"+str(e),
