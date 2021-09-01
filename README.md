@@ -2,7 +2,7 @@
 
 G910-gui is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
 
-// showcase
+![showcase](images/animation1.gif)
 
 **NOTE:** This application is written for **Linux only**, on Windows use whatever bloatware the vendor wants you to use.
 
