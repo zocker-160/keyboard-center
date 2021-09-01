@@ -6,7 +6,7 @@ import webbrowser
 
 from PyQt5.QtGui import QCloseEvent, QKeyEvent, QKeySequence
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAbstractItemView, QApplication, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QAbstractItemView, QApplication, QDialog, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from devices.keyboard import SUPPORTED_DEVICES
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
@@ -15,10 +15,22 @@ from lib.configparser import Configparser
 from gui.CEntryButton import CEntryButton
 from gui.customwidgets import KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
+from gui.Ui_aboutWindow import Ui_Dialog as Ui_AboutWindow
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(PARENT_LOCATION, "config", "testconfig.yaml.example")
 
+PLACEHOLDER_STR = "$$$"
+VERSION = "0.1.0-testing"
+
+class AboutWindow(QDialog, Ui_AboutWindow):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.setupUi(self)
+        self.about_maintext.setText(
+            self.about_maintext.text().replace(PLACEHOLDER_STR, VERSION)
+        )
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app: QApplication):
@@ -57,6 +69,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def initGuiControls(self):
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
+        self.actionAbout.triggered.connect(self.showAbout)
+
         self.actionGitHub.triggered.connect(self.showGitHub)
         self.actionReport_issue.triggered.connect(self.showReportIssue)
         self.actionExit.triggered.connect(self.close)
@@ -222,6 +236,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         msg.setDefaultButton(QMessageBox.Yes)
         
         return msg.exec_()
+
+    ### secondary windows
+    def showAbout(self):
+        about = AboutWindow(self)
+        about.show()
 
 def main():
     app = QApplication(sys.argv)
