@@ -27,7 +27,7 @@ class Configparser:
         self.load(silent)
 
     def _getConfigLocation(self, confTemplate: str):
-        xdg_home = os.environ["XDG_CONFIG_HOME"]
+        xdg_home = os.environ.get("XDG_CONFIG_HOME")
 
         if not xdg_home:
             xdg_home = os.path.join(os.environ["HOME"], ".config")
