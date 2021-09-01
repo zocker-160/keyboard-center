@@ -6,3 +6,6 @@ _*
 
 .vscode
 venv
+linux_packaging/src
+linux_packaging/pkg
+linux_packaging/G910*
