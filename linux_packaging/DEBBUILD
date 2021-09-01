@@ -27,7 +27,8 @@ build() {
 package() {
   cd $pkgname-$pkgver
   
-  #install -d -m755 src "$pkgdir"/usr/lib/"$pkgname"
+  install -d -m755 src "$pkgdir"/usr/lib/"$pkgname"
+  
   cp -r src/assets "$pkgdir"/usr/lib/"$pkgname"
   cp -r src/config "$pkgdir"/usr/lib/"$pkgname"
   cp -r src/devices "$pkgdir"/usr/lib/"$pkgname"
