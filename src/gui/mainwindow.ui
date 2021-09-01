@@ -151,7 +151,7 @@ QLabel#asd:pressed {
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Add Delay</string>
+             <string>Add Delay (soon)</string>
             </property>
             <property name="icon">
              <iconset theme="list-add">
@@ -307,7 +307,7 @@ QLabel#asd:pressed {
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Export config...</string>
+    <string>Export config...(soon)</string>
    </property>
   </action>
   <action name="actionImport_config">
@@ -316,7 +316,7 @@ QLabel#asd:pressed {
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Import config...</string>
+    <string>Import config...(soon)</string>
    </property>
   </action>
   <action name="actionExit">
