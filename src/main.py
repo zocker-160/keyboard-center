@@ -82,7 +82,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             ]
         except Exception as e:
             self.showErrorMSG(
-                "No supported keyboard found! \n\n"+str(e),
+                "No supported keyboard found! \n\n"+str(e)+"\n\n\n\
+                try restarting the service: systemctl restart g910-gui.service",
                 title_msg="FATAL ERROR"
             )
             sys.exit()
