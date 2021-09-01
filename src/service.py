@@ -203,14 +203,18 @@ def main():
         vendor=keyboardDev.usbVendor
     )
 
-    inotify = INotify()
-    inotify.add_watch(config.configFile, flags.MODIFY)
-
     logging.info("starting service...")
     global evLoop
     evLoop = asyncio.get_event_loop()
     evLoop.create_task(usbListener(keyboard, keyboardEndpoint, keyboardDev))
-    evLoop.add_reader(inotify, lambda: inotifyReader(inotify))
+
+    try:
+        inotify = INotify()
+        inotify.add_watch(config.configFile, flags.MODIFY)
+        evLoop.add_reader(inotify, lambda: inotifyReader(inotify))
+    except Exception as e:
+        logging.exception("Failed to init inotify :(...", str(e))
+
     evLoop.add_signal_handler(signal.SIGINT, _stop)
     evLoop.add_signal_handler(signal.SIGTERM, _stop)
     evLoop.run_forever()
