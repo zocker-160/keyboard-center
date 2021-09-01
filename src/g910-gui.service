@@ -1,0 +1,9 @@
+[Unit]
+Description=background service for the G910-gui application
+
+[Service]
+ExecStart=python3 /usr/lib/G910-gui/service.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
