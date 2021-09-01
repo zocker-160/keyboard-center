@@ -29,10 +29,4 @@ mappings:
       - - [1, 23]
       - - [1, 46]
       - - [1, 18]
-  MEMORY_2:
-    MACRO_1:
-      name: asd
-      string: D
-      type: key
-      value: [1, 32]
 settings: {usbTimeout: 1000}
