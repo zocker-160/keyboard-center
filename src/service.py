@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
-import os, sys
-from posixpath import join
+import os
+import sys
 import time
 import subprocess
 import signal
