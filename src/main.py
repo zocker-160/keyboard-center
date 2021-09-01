@@ -136,7 +136,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 
     def saveData(self, saveToFile=False):
-        print("SSAAAVE")
+        print("saving")
         try:
             data = self.keyListWidgetContents.getKeyData()
             print(data)
