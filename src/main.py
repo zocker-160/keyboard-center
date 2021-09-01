@@ -166,7 +166,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as e:
             self.showErrorMSG(str(e))
             return False
-        self.bottomStatusBar.showMessage("Configuration saved!", 2000)
+        if saveToFile:
+            self.bottomStatusBar.showMessage(
+                "Configuration saved to file!", 2000
+            )
         return True
 
     def loadData(self):
