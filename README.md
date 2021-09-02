@@ -28,7 +28,7 @@ Package will be available in the AUR: [g910-gui](https://aur.archlinux.org/packa
   - `systemctl --user enable g910-gui.service`
   - `systemctl --user start g910-gui.service` 
   
-if you are upgrading, please run instead: `systemctl --user restart g910-gui.service`
+if you are upgrading, please run instead: `systemctl --user daemon-reload`
 
 ## Dependencies
 
