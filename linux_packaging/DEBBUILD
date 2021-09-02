@@ -1,7 +1,7 @@
 # Maintainer: zocker_160 <zocker1600 at posteo dot net>
 
 pkgname=G910-gui
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="Application by zocker_160 to edit G-keys on G910."
 arch=('x86_64')
