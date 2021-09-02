@@ -1,5 +1,6 @@
 [Unit]
 Description=background service for the G910-gui application
+Requires = dbus.service
 
 [Service]
 ExecStart=python3 /usr/lib/G910-gui/service.py
