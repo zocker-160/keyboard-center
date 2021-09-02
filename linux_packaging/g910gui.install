@@ -11,16 +11,16 @@ post_install() {
     python3 -m compileall /usr/lib/G910-gui
     
     # enable and start service
-    systemctl enable g910-gui.service
-    systemctl start g910-gui.service
+    systemctl --user enable g910-gui.service
+    systemctl --user start g910-gui.service
 }
 
 pre_upgrade() {
-    systemctl stop g910-gui.service
+    systemctl --user stop g910-gui.service
 }
 
 post_upgrade() {
-    systemctl start g910-gui.service
+    systemctl --user start g910-gui.service
 }
 
 pre_remove() {
@@ -30,6 +30,6 @@ pre_remove() {
 }
 
 post_remove() {
-    systemctl stop g910-gui.service
-    systemctl disable g910-gui.service
+    systemctl --user stop g910-gui.service
+    systemctl --user disable g910-gui.service
 }

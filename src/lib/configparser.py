@@ -20,20 +20,23 @@ MOD_META = "Meta"
 
 class Configparser:
 
-    def __init__(self, locConfTemplate: str, silent=True):
-        self.configFile = self._getConfigLocation(locConfTemplate)
+    def __init__(self, locConfTemplate: str, *args, silent=True):
+        self.configFile = self._getConfigLocation(locConfTemplate, args)
 
         self.configYAML = YAML(typ='safe')
         self.load(silent)
 
-    def _getConfigLocation(self, confTemplate: str):
+    def _getConfigLocation(self, confTemplate: str, *args):
         xdg_home = os.environ.get("XDG_CONFIG_HOME")
 
         if not xdg_home:
-            xdg_home = os.path.join(os.environ["HOME"], ".config")
+            home = os.environ.get("HOME") or args[1]
+            xdg_home = os.path.join(home, ".config")
         
         confFolder = os.path.join(xdg_home, "g910-gui")
         confLoc = os.path.join(confFolder, "settings.yml")
+
+        logging.debug("Config file location:", confLoc)
 
         # check if file and folder exists
         if not os.path.isdir(confFolder):

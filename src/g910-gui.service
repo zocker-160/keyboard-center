@@ -1,10 +1,12 @@
 [Unit]
 Description=background service for the G910-gui application
-Requires = dbus.service
+Requires=dbus.service
 
 [Service]
-ExecStart=python3 /usr/lib/G910-gui/service.py
-Restart=on-failure
+ExecStart=python3 /usr/lib/G910-gui/service.py %h
+#Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
+#WantedBy=multi-user.target
+#WantedBy=graphical.target

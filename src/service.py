@@ -244,6 +244,6 @@ if __name__ == "__main__":
     disableGkeyMapping()
 
     global config
-    config = Configparser(TEMPLATE_LOCATION) # TODO: catch possible errors
+    config = Configparser(TEMPLATE_LOCATION, sys.argv) # TODO: catch possible errors
 
     main()

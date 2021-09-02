@@ -1,7 +1,7 @@
 # Maintainer: zocker_160 <zocker1600 at posteo dot net>
 
 pkgname=G910-gui
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc="Application by zocker_160 to edit G-keys on G910."
 arch=('x86_64')
@@ -39,7 +39,7 @@ package() {
   
   install -D -m755 src/main.py -t "$pkgdir"/usr/lib/"$pkgname"
   install -D -m755 src/service.py -t "$pkgdir"/usr/lib/"$pkgname"
-  install -D -m644 src/g910-gui.service -t "$pkgdir"/etc/systemd/system
+  install -D -m644 src/g910-gui.service -t "$pkgdir"/etc/systemd/user
   
   install -D -m644 linux_packaging/assets/g910gui.png -t "$pkgdir"/usr/share/icons/hicolor/512x512/apps
   install -D -m644 linux_packaging/assets/G910-gui.desktop -t "$pkgdir"/usr/share/applications  
