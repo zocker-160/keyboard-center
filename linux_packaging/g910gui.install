@@ -10,22 +10,22 @@ pre_install() {
 post_install() {
     python3 -m compileall /usr/lib/G910-gui
     
-    # enable and start service
-    systemctl --user enable g910-gui.service
-    systemctl --user start g910-gui.service
+    ## enable and start service
+    #systemctl enable g910-gui.service
+    #systemctl start g910-gui.service
 }
 
-pre_upgrade() {
-    systemctl --user stop g910-gui.service
-}
+#pre_upgrade() {
+#    systemctl stop g910-gui.service
+#}
 
-post_upgrade() {
-    systemctl --user start g910-gui.service
-}
+#post_upgrade() {
+#    systemctl start g910-gui.service
+#}
 
 pre_remove() {
-    systemctl --user stop g910-gui.service
-    systemctl --user disable g910-gui.service
+    #systemctl stop g910-gui.service
+    #systemctl disable g910-gui.service
     
     rm -f "/usr/bin/G910-gui"
     find /usr/lib/G910-gui -type f -iname \*.pyc -delete
