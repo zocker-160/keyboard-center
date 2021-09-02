@@ -23,7 +23,10 @@ Package will be available in the AUR: [g910-gui](https://aur.archlinux.org/packa
 ### Debian / Ubuntu
 
 - Download `.deb` from [release page](https://github.com/zocker-160/G910-gui/releases)
-- Install using package manager of your choice or in terminal with `gdebi <packagename>.deb`
+- Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
+- enable and start background service: (**do NOT run as root**)
+  - `systemctl --user enable g910-gui.service`
+  - `systemctl --user start g910-gui.service`
 
 ## Dependencies
 
