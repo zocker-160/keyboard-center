@@ -26,7 +26,9 @@ Package will be available in the AUR: [g910-gui](https://aur.archlinux.org/packa
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
 - enable and start background service: (**do NOT run as root**)
   - `systemctl --user enable g910-gui.service`
-  - `systemctl --user start g910-gui.service`
+  - `systemctl --user start g910-gui.service` 
+  
+if you are upgrading, please run instead: `systemctl --user restart g910-gui.service`
 
 ## Dependencies
 
