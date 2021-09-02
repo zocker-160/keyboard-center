@@ -24,12 +24,13 @@ post_upgrade() {
 }
 
 pre_remove() {
+    systemctl --user stop g910-gui.service
+    systemctl --user disable g910-gui.service
+    
     rm -f "/usr/bin/G910-gui"
     find /usr/lib/G910-gui -type f -iname \*.pyc -delete
     find /usr/lib/G910-gui -type d -iname __pycache__ -delete
 }
 
-post_remove() {
-    systemctl --user stop g910-gui.service
-    systemctl --user disable g910-gui.service
-}
+#post_remove() {
+#}
