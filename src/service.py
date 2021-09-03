@@ -37,7 +37,7 @@ def _stop(*args):
     evLoop.stop()
     virtualKeyboard.destroy()
 
-def disableGkeyMapping():
+async def disableGkeyMapping():
     try:
         logging.debug("disabling g810-led gkey mapping")
         subprocess.run("g810-led -gkm 1".split())
@@ -106,6 +106,10 @@ async def usbListener(keyboard: core.Device,
                 keyboardDev: KeyboardInterface):
 
     _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
+
+    await asyncio.sleep(0)
+    # disable G key mapping in case g810-led is installed
+    await disableGkeyMapping()
 
     await asyncio.sleep(0)
     # Send the sequence to disable the G keys
@@ -251,8 +255,6 @@ if __name__ == "__main__":
     logging.basicConfig(
         format="%(levelname)s: %(message)s", level=logging.DEBUG
     )
-
-    disableGkeyMapping()
 
     global config
     config = Configparser(TEMPLATE_LOCATION, sys.argv) # TODO: catch possible errors
