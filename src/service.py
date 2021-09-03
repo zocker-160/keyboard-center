@@ -106,6 +106,8 @@ async def usbListener(keyboard: core.Device,
                 keyboardEndpoint: core.Endpoint,
                 keyboardDev: KeyboardInterface):
 
+    _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
+
     await asyncio.sleep(0)
     # Send the sequence to disable the G keys
     if keyboardDev.disableGKeys:
@@ -114,7 +116,7 @@ async def usbListener(keyboard: core.Device,
         keyboard.write(
             keyboardEndpoint.bEndpointAddress,
             keyboardDev.disableGKeys,
-            config.settings["settings"].get("usbTimeout")
+            _usbTimeout
         )
 
     while True:
@@ -125,7 +127,7 @@ async def usbListener(keyboard: core.Device,
             fromKeyboard = keyboard.read(
                 keyboardEndpoint.bEndpointAddress,
                 keyboardEndpoint.wMaxPacketSize,
-                config.settings["settings"].get("usbTimeout")
+                _usbTimeout
             )
 
             if fromKeyboard:
