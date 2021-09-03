@@ -11,7 +11,9 @@ class KeyboardInterface:
 
     usbVendor: int
     usbProduct: int
-    usbInterface: int
+    usbConfiguration: int
+    usbInterface: tuple # tuple[int, int] | (index of interface, index of alternate setting)
+    usbEndpoint: int
 
     numMacroKeys: int
     numMemoryKeys: int # number of memory / profile keys
@@ -31,7 +33,9 @@ class Logitech_G910(KeyboardInterface):
 
     usbVendor = 0x046d
     usbProduct = 0xc335
-    usbInterface = 1
+    usbConfiguration = 0
+    usbInterface = (1, 0)
+    usbEndpoint = 0
 
     numMacroKeys = 9
     numMemoryKeys = 3
@@ -76,7 +80,9 @@ class Logitech_G710p(KeyboardInterface):
 
     usbVendor = 0x046d
     usbProduct = 0xc24d
-    usbInterface = 1
+    usbConfiguration = 0
+    usbInterface = (1, 0)
+    usbEndpoint = 0
 
     numMacroKeys = 6
     numMemoryKeys = 3

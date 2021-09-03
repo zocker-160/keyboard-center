@@ -208,11 +208,14 @@ def main():
     else:
         logging.debug(f"time taken to find keyboard in ms: {t2-t1}")
 
-    keyboardEndpoint: core.Endpoint = keyboard[0][(keyboardDev.usbInterface, 0)][0]
+    keyboardEndpoint: core.Endpoint = keyboard\
+                                        [keyboardDev.usbConfiguration]\
+                                        [keyboardDev.usbInterface]\
+                                        [keyboardDev.usbEndpoint]
 
     logging.debug("check and detach kernel driver if active")
-    if keyboard.is_kernel_driver_active(keyboardDev.usbInterface):
-        keyboard.detach_kernel_driver(keyboardDev.usbInterface)
+    if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
+        keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
 
     logging.debug("creating uinput device...")
     global virtualKeyboard
