@@ -58,7 +58,6 @@ async def switchProfile(profile):
     logging.debug("notification icon path " + path)
     logging.debug("triggering notification")
 
-    # this is a blocking operation, py-notify will hopefully fix that
     Notification(
         app_name=APP_NAME,
         title=f"Switched to profile {profile}",
@@ -150,7 +149,6 @@ async def usbListener(keyboard: core.Device,
                         #logging.debug(data)
 
                 elif data in keyboardDev.memoryKeys:
-                    # sending notification is blocking
                     await switchProfile(keyboardDev.memoryKeys[data])
                     #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
                 else:
