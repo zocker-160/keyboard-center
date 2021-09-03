@@ -81,6 +81,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.saveButton.clicked.connect(lambda: self.saveData(True))
         self.clearAllButton.clicked.connect(
             self.keyListWidgetContents.clearAllEntries)
+        self.clearAllButton.clicked.connect(self.macroNameEdit.clear)
         self.resetButton.clicked.connect(self.loadData)
         #self.resetButton.clicked.connect(self._resetMemoryButtons)
 
