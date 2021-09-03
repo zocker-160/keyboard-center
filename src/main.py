@@ -8,7 +8,7 @@ from PyQt5.QtGui import QCloseEvent, QKeyEvent, QKeySequence
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QApplication, QDialog, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
-from devices.keyboard import SUPPORTED_DEVICES
+from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
 from lib.configparser import Configparser
 
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sys.exit()
 
         try:
-            self.usbDevice = SUPPORTED_DEVICES[
+            self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[
                 self.configparser.getSettings()["usbDeviceID"]
             ]
         except Exception as e:
