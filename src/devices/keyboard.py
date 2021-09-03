@@ -1,7 +1,7 @@
 from typing import Union
 import uinput
 from devices import allkeys as key
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,9 @@ class KeyboardInterface:
 
     numMacroKeys: int
     numMemoryKeys: int # number of memory / profile keys
+
+    # Following is sent to disable the default G keys mapping
+    disableGKeys: bytes = field(default=b'')
 
 
 @dataclass(frozen=True)
@@ -104,6 +107,8 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x00\x00\x00', # M release
         b'\x03\x00\x00\x00', # MR release
     }
+
+    disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 SUPPORTED_DEVICES = [
     Logitech_G910,
