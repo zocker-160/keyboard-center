@@ -121,10 +121,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for i in range(self.memoryKeySlots.count()):
             if i == id:
                 __setMarked(self.memoryKeySlots.itemAt(i).widget(), True)
-                #self.memoryKeySlots.itemAt(i).widget().setMarked(True)
             else:
                 __setMarked(self.memoryKeySlots.itemAt(i).widget(), False)
-                #self.memoryKeySlots.itemAt(i).widget().setMarked(False)
 
         if load: self.loadData()
 
@@ -142,10 +140,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.macroKeySlots.itemAt(i).widget().setChecked(False)
 
         if load: self.loadData()
-
-    #def _resetMemoryButtons(self):
-    #    for i in range(self.memoryKeySlots.count()-1): # ignore spacer
-    #        self.memoryKeySlots.itemAt(i).widget().setChecked(False)
 
     def addBlankKeyWidget(self):
         self.keyListWidgetContents.addWidget(KeyPressWidget())
