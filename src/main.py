@@ -83,7 +83,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.keyListWidgetContents.clearAllEntries)
         self.clearAllButton.clicked.connect(self.macroNameEdit.clear)
         self.resetButton.clicked.connect(self.loadData)
-        #self.resetButton.clicked.connect(self._resetMemoryButtons)
 
     def generateProfileButtons(self):
         # set device name
