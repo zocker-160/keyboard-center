@@ -1,4 +1,3 @@
-from typing import Union
 import uinput
 from devices import allkeys as key
 from dataclasses import dataclass, field
