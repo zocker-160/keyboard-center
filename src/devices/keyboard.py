@@ -8,16 +8,17 @@ from dataclasses import dataclass, field
 class KeyboardInterface:
 
     devicename: str
+
     usbVendor: int
     usbProduct: int
     usbInterface: int
 
+    numMacroKeys: int
+    numMemoryKeys: int # number of memory / profile keys
+
     macroKeys: dict # dict[bytes, str]
     memoryKeys: dict # dict[bytes, str]
     releaseEvents: str # str[bytes]
-
-    numMacroKeys: int
-    numMemoryKeys: int # number of memory / profile keys
 
     # Following is sent to disable the default G keys mapping
     disableGKeys: bytes = field(default=b'')
@@ -27,6 +28,7 @@ class KeyboardInterface:
 class Logitech_G910(KeyboardInterface):
 
     devicename = "Logitech G910"
+
     usbVendor = 0x046d
     usbProduct = 0xc335
     usbInterface = 1
@@ -71,6 +73,7 @@ class Logitech_G910(KeyboardInterface):
 class Logitech_G710p(KeyboardInterface):
 
     devicename = "Logitech G710+"
+
     usbVendor = 0x046d
     usbProduct = 0xc24d
     usbInterface = 1
