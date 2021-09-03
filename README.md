@@ -11,8 +11,7 @@ G910-gui is an application attempting to create an easy way for users to map the
 ## Supported Keyboards
 
 - Logitech G910 Orion Spectrum (046d:c335)
-
-this is the only keyboard I own right now, but I am planning to support as many as possible
+- Logitech G710+ (046d:c24d) (thanks to @nirenjan)
 
 ## Install
 
