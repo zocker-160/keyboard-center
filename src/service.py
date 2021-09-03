@@ -40,7 +40,7 @@ def _stop(*args):
 async def disableGkeyMapping():
     try:
         logging.debug("disabling g810-led gkey mapping")
-        subprocess.run("g810-led -gkm 1".split())
+        subprocess.Popen("g810-led -gkm 1".split())
     except FileNotFoundError:
         logging.info("g810-led could not be found")
     except Exception as e:
