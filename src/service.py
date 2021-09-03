@@ -249,9 +249,6 @@ if __name__ == "__main__":
         format="%(levelname)s: %(message)s", level=logging.DEBUG
     )
 
-    #signal.signal(signal.SIGINT, _stop)
-    #signal.signal(signal.SIGTERM, _stop)
-
     disableGkeyMapping()
 
     global config
