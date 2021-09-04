@@ -22,8 +22,11 @@ jobs:
       with:
         submodules: 'true'    
         
+    - name: makedeb bug workaround # https://github.com/makedeb/makedeb/issues/30
+      run: mv ./linux_packaging/DEBBUILD ./linux_packaging/PKGBUILD
+        
     - name: build deb package
-      run: cd ./linux_packaging && makedeb -F DEBBUILD
+      run: cd ./linux_packaging && makedeb
 
     - name: save deb file
       uses: actions/upload-artifact@master
