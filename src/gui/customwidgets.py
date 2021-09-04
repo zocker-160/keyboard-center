@@ -1,5 +1,3 @@
-
-from ruamel.yaml.tokens import FlowMappingStartToken
 import uinput
 
 from PyQt5.QtCore import pyqtSignal, Qt
