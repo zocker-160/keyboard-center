@@ -58,13 +58,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sys.exit()
 
         try:
-            self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[
-                self.configparser.getSettings()["usbDeviceID"]
-            ]
+            _did = self.configparser.getSettings()["usbDeviceID"]
+            self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[_did]
         except Exception as e:
             self.showErrorMSG(
-                "No supported keyboard found! \n\n"+str(e)+"\n\n\n\
-                try restarting the service: systemctl restart g910-gui.service",
+                f"No supported keyboard found! :(\n(err:{_did})",
                 title_msg="FATAL ERROR"
             )
             sys.exit()
