@@ -1,0 +1,32 @@
+name: DEB builder
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  Linux-deb:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: setup makedeb
+      run: |
+        wget -qO - 'https://proget.hunterwittenborn.com/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg &> /dev/null
+        echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.hunterwittenborn.com/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list
+        sudo apt-get update
+        sudo apt-get install -y makedeb
+        
+    - name: clone repo
+      uses: actions/checkout@v1
+      with:
+        submodules: 'true'    
+        
+    - name: build deb package
+      run: cd ./linux_packaging && makedeb -F DEBBUILD
+
+    - name: save deb file
+      uses: actions/upload-artifact@master
+      with:
+        name: G910-gui-git
+        path: ./linux_packaging/*.deb
