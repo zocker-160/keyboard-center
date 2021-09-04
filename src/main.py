@@ -124,7 +124,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f"No supported keyboard found! :(\n(err:{_did})",
                 title_msg="FATAL ERROR"
             )
-            sys.exit()
+            r = self.showQuestionMSG("Do you want to try again?")
+            if r == QMessageBox.Yes:
+                # we need to add a small delay, since detecting the keyboard
+                # takes a little bit of time
+                self.checkServiceStatus()
+                from time import sleep
+                sleep(0.5)
+                self.readConfiguration()
+            else:
+                sys.exit()
 
     def initGuiControls(self):
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
