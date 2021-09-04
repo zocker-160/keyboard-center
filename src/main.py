@@ -5,12 +5,13 @@ import sys
 import webbrowser
 
 from PyQt5.QtGui import QCloseEvent, QKeyEvent, QKeySequence
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QAbstractItemView, QApplication, QDialog, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
 from lib.configparser import Configparser
+from lib.servicehelper import *
 
 from gui.CEntryButton import CEntryButton
 from gui.customwidgets import KeyPressWidget
@@ -34,10 +35,56 @@ class AboutWindow(QDialog, Ui_AboutWindow):
             self.about_maintext.text().replace(PLACEHOLDER_STR, VERSION)
         )
 
+class ServiceWindow(QMessageBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setIcon(QMessageBox.Information)
+        self.setWindowTitle("Service Status Checker")
+        self.setText("checking background service status:")
+        #self.setWindowFlag(Qt.FramelessWindowHint)
+
+        self.addButton(QMessageBox.Ignore)
+        self.addButton(QMessageBox.Cancel)
+        self.setDefaultButton(QMessageBox.Cancel)
+
+        self.checkService()
+
+    def checkService(self):
+        self.setInformativeText("service enabled?")
+        if not isServiceEnabled():
+            self.setInformativeText("enabling service...")
+            if not enableService():
+                self._errorState("failed to enable service!")
+                return
+
+        self.setInformativeText("service running?")
+        if not isServiceRunning():
+            self.setInformativeText("starting service...")
+            if not startService():
+                self._errorState("failed to start service!")
+                return
+
+        self.setInformativeText("service needs reload?")
+        if needsReload():
+            self.setInformativeText("relading service...")
+            if not reloadService():
+                self._errorState("failed to reload service!")
+                return
+
+    def setInformativeText(self, text: str) -> None:
+        print(text)
+        return super().setInformativeText(text)
+
+    def _errorState(self, msg: str):
+        self.setInformativeText("ERROR: "+msg)
+        self.addButton(QMessageBox.Retry)
+
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, app: QApplication):
+    def __init__(self, app: QApplication, devmode=False):
         super().__init__()
         self.app = app
+        if not devmode: self.checkServiceStatus()
         self.readConfiguration()
 
         self.setupUi(self)
@@ -46,6 +93,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.setCurrMemory(0, save=False, load=False)
         self.setCurrMacro(0, save=False)
+
+    def checkServiceStatus(self):
+        msg = ServiceWindow(self)
+        ret = msg.exec_()
+
+        if ret == QMessageBox.Ignore:
+            pass
+        elif ret == QMessageBox.Cancel:
+            sys.exit()
+        elif ret == QMessageBox.Retry:
+            self.checkServiceStatus()
 
     def readConfiguration(self):
         try:
@@ -243,8 +301,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    devmode = True if "-dev" in sys.argv else False
 
-    window = MainWindow(app)
+    window = MainWindow(app, devmode)
     window.show()
 
     sys.exit(app.exec_())
