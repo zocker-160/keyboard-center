@@ -283,7 +283,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         msg.setDefaultButton(QMessageBox.Close)
         return msg.exec_()
 
-    def showInfoMSG(self, msg_str: str, title_msg="INFO"):
+    def showInfoMSG(self, msg_str: str, title_msg="Info"):
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Information)
         msg.setText(msg_str)
@@ -291,7 +291,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         msg.setDefaultButton(QMessageBox.Close)
         return msg.exec_()
 
-    def showQuestionMSG(self, msg_str: str, title_msg="QUESTION"):
+    def showQuestionMSG(self, msg_str: str, title_msg="Question"):
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Question)
         msg.setText(msg_str)
