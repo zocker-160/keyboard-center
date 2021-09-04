@@ -19,7 +19,7 @@ prepare() {
   # nothing to see here
 }
 
-build() {  
+build() {
   cd $pkgname-$pkgver
   # still nothing to see here
 }
