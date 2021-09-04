@@ -205,7 +205,7 @@ def main():
 
     if not keyboard:
         logging.critical("no supported keyboard found")
-        config.settings["settings"]["usbDeviceID"] = None
+        config.settings["settings"]["usbDeviceID"] = "None"
         config.save()
 
         sys.exit(1)
