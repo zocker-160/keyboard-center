@@ -52,7 +52,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.configparser = Configparser(TEMPLATE_LOCATION, False)
         except Exception as e:
             self.showErrorMSG(
-                "Could not load config file! \n\n"+str(e),
+                "Could not load config file! \n\n",
+                detailText=str(e),
                 title_msg="FATAL ERROR"
             )
             sys.exit()
@@ -206,10 +207,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         webbrowser.open("https://github.com/zocker-160/G910-gui/issues")
 
     ### popup messages
-    def showErrorMSG(self, msg_str, title_msg="ERROR"):
+    def showErrorMSG(self, msg_str, title_msg="ERROR", detailText=""):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText(str(msg_str))
+        msg.setDetailedText(detailText)
         msg.setWindowTitle(title_msg)
         msg.setDefaultButton(QMessageBox.Close)
         return msg.exec_()
