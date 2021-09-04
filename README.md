@@ -2,6 +2,8 @@
 
 **(work in progress)**
 
+[![DEB builder git](https://github.com/zocker-160/G910-gui/actions/workflows/debbuilder-git.yml/badge.svg)](https://github.com/zocker-160/G910-gui/actions/workflows/debbuilder-git.yml)
+
 G910-gui is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
 
 ![showcase](images/animation1.gif)
