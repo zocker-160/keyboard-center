@@ -2,7 +2,7 @@
 
 pkgname=G910-gui-git
 _gitname=G910-gui
-pkgver=66.79ab90b
+pkgver=82.6e552f5
 pkgrel=1
 pkgdesc="Application by zocker_160 to edit G-keys on G910."
 arch=('x86_64')
