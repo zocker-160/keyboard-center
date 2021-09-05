@@ -41,7 +41,7 @@ package() {
   cp -r src/gui "$pkgdir"/usr/lib/"$_gitname"
   cp -r src/lib "$pkgdir"/usr/lib/"$_gitname"
   
-  install -D -m755 linux_packaging/assets/G910-gui.sh "$pkgdir"/usr/bin/G910-gui
+  install -D -m755 linux_packaging/assets/G910-gui.sh "$pkgdir"/usr/bin/"$_gitname"
   
   install -D -m755 src/main.py -t "$pkgdir"/usr/lib/"$_gitname"
   install -D -m755 src/service.py -t "$pkgdir"/usr/lib/"$_gitname"
