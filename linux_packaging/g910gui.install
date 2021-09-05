@@ -26,8 +26,8 @@ post_install() {
 pre_remove() {
     #systemctl stop g910-gui.service
     #systemctl disable g910-gui.service
+    #rm -f "/usr/bin/G910-gui" || true
     
-    rm -f "/usr/bin/G910-gui"
     find /usr/lib/G910-gui -type f -iname \*.pyc -delete
     find /usr/lib/G910-gui -type d -iname __pycache__ -delete
 }
