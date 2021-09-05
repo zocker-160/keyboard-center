@@ -1,4 +1,4 @@
-# ![](images/g910-icon.png) G910-gui (WiP)
+# ![](images/g910-icon.png) Keyboard Center (WiP)
 
 **(work in progress)**
 
