@@ -19,7 +19,7 @@ G910-gui is an application attempting to create an easy way for users to map the
 
 ### Arch / Manjaro (soon)
 
-Package will be available in the AUR: [g910-gui](https://aur.archlinux.org/packages/g910-gui/)
+Package will be available in the AUR: [keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
 
 ### Debian / Ubuntu
 
