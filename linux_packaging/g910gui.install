@@ -36,5 +36,5 @@ post_remove() {
     echo "IMPORTANT: in order to stop the background service ###############################################################"
     echo 'please run "systemctl --user stop g910-gui.service" and "systemctl --user disable g910-gui.service" as NON ROOT'
     echo "##################################################################################################################"
-    sleep(3)
+    sleep 3
 }
