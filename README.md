@@ -17,19 +17,14 @@ Keyboard Center is an application attempting to create an easy way for users to 
 
 ## Install
 
-### Arch / Manjaro (soon)
+### Arch / Manjaro
 
-Package will be available in the AUR: [keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
+Package is available in the AUR: [keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
 
 ### Debian / Ubuntu
 
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
-- enable and start background service: (**do NOT run as root**)
-  - `systemctl --user enable keyboard-center.service`
-  - `systemctl --user start keyboard-center.service` 
-  
-if you are upgrading, please run instead: `systemctl --user daemon-reload`
 
 ## Dependencies
 
