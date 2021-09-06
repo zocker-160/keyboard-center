@@ -16,7 +16,7 @@ from lib.servicehelper import *
 from gui.CEntryButton import CEntryButton
 from gui.customwidgets import KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
-from gui.Ui_aboutWindow import Ui_Dialog as Ui_AboutWindow
+from gui.Ui_aboutWindow import Ui_aboutWindow
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
@@ -26,7 +26,7 @@ TEMPLATE_LOCATION = os.path.join(
 PLACEHOLDER_STR = "$$$"
 VERSION = "0.1.4-testing"
 
-class AboutWindow(QDialog, Ui_AboutWindow):
+class AboutWindow(QDialog, Ui_aboutWindow):
     def __init__(self, parent):
         super().__init__(parent)
 
