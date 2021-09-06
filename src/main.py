@@ -52,6 +52,8 @@ class ServiceWindow(QDialog, Ui_serviceWindow):
 
         self.checkService()
 
+    # this is not great, because the subprocesses are blocking
+    # TODO: use QTimer to make the UI update
     def checkService(self):
         self.setInformativeText("service enabled?")
         if not isServiceEnabled():
