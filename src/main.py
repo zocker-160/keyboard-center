@@ -4,9 +4,9 @@ import os
 import sys
 import webbrowser
 
-from PyQt5.QtGui import QCloseEvent, QKeyEvent, QKeySequence
+from PyQt5.QtGui import QCloseEvent, QKeyEvent
 from PyQt5.QtCore import QTimer, Qt, pyqtSignal
-from PyQt5.QtWidgets import QAbstractItemView, QApplication, QDialog, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
