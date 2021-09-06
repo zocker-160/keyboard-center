@@ -1,7 +1,7 @@
 pre_install() {
     pip3 install --upgrade pip
     pip3 install --upgrade inotify-simple
-    pip3 install --upgrade py-notifier
+    #pip3 install --upgrade py-notifier
     #pip3 install --upgrade python-uinput
     #pip3 install --upgrade pyusb
     #pip3 install --upgrade ruamel.yaml
