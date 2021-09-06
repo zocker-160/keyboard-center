@@ -4,8 +4,8 @@ import sys
 import subprocess
 
 def isServiceEnabled() -> bool:
-    out: str = subprocess.check_output("systemctl --user -at service".split()).decode()
-    if out.find(SERVICE_NAME) != -1:
+    ret = subprocess.call(f"systemctl --user is-enabled --quiet {SERVICE_NAME}".split())
+    if ret == 0:
         return True
     else:
         return False
