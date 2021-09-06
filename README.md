@@ -2,9 +2,9 @@
 
 **(work in progress)**
 
-[![DEB builder git](https://github.com/zocker-160/G910-gui/actions/workflows/debbuilder-git.yml/badge.svg)](https://github.com/zocker-160/G910-gui/actions/workflows/debbuilder-git.yml)
+[![DEB builder git](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder-git.yml/badge.svg)](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder-git.yml)
 
-G910-gui is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
+Keyboard Center is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
 
 ![showcase](images/animation1.gif)
 
@@ -23,11 +23,11 @@ Package will be available in the AUR: [keyboard-center](https://aur.archlinux.or
 
 ### Debian / Ubuntu
 
-- Download `.deb` from [release page](https://github.com/zocker-160/G910-gui/releases)
+- Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
 - enable and start background service: (**do NOT run as root**)
-  - `systemctl --user enable g910-gui.service`
-  - `systemctl --user start g910-gui.service` 
+  - `systemctl --user enable keyboard-center.service`
+  - `systemctl --user start keyboard-center.service` 
   
 if you are upgrading, please run instead: `systemctl --user daemon-reload`
 

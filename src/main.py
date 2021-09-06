@@ -268,10 +268,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     ### menu actions
     def showGitHub(self):
-        webbrowser.open("https://github.com/zocker-160/G910-gui")
+        webbrowser.open("https://github.com/zocker-160/keyboard-center")
 
     def showReportIssue(self):
-        webbrowser.open("https://github.com/zocker-160/G910-gui/issues")
+        webbrowser.open("https://github.com/zocker-160/keyboard-center/issues")
 
     ### popup messages
     def showErrorMSG(self, msg_str, title_msg="ERROR", detailText=""):

@@ -1,19 +1,19 @@
 # Maintainer: zocker_160 <zocker1600 at posteo dot net>
 
-pkgname=G910-gui-git
-_gitname=G910-gui
+pkgname=keyboard-center-git
+_gitname=keyboard-center
 pkgver=88.d30362d
 pkgrel=1
 pkgdesc="Application by zocker_160 to edit G-keys on G910."
 arch=('x86_64')
-url="https://github.com/zocker-160/G910-gui"
+url="https://github.com/zocker-160/keyboard-center"
 license=('GPL3')
 depends=('python3' 'python3-pip' 'python3-pyqt5' 'python3-uinput' 'python3-ruamel.yaml' 'python3-usb' 'libnotify-bin')
 #conflicts=('')
-source=("git+https://github.com/zocker-160/G910-gui.git")
+source=("git+https://github.com/zocker-160/keyboard-center.git")
 sha256sums=('SKIP')
 
-install=g910gui.install
+install=keyboard-center.install
 
 pkgver() {
   cd ${srcdir}/${_gitname}
@@ -41,12 +41,12 @@ package() {
   cp -r src/gui "$pkgdir"/usr/lib/"$_gitname"
   cp -r src/lib "$pkgdir"/usr/lib/"$_gitname"
   
-  install -D -m755 linux_packaging/assets/G910-gui.sh "$pkgdir"/usr/bin/"$_gitname"
+  install -D -m755 linux_packaging/assets/keyboard-center.sh "$pkgdir"/usr/bin/"$_gitname"
   
   install -D -m755 src/main.py -t "$pkgdir"/usr/lib/"$_gitname"
   install -D -m755 src/service.py -t "$pkgdir"/usr/lib/"$_gitname"
-  install -D -m644 src/g910-gui.service -t "$pkgdir"/usr/lib/systemd/user
+  install -D -m644 src/keyboard-center.service -t "$pkgdir"/usr/lib/systemd/user
   
-  install -D -m644 linux_packaging/assets/g910gui.png -t "$pkgdir"/usr/share/icons/hicolor/512x512/apps
-  install -D -m644 linux_packaging/assets/G910-gui.desktop -t "$pkgdir"/usr/share/applications  
+  install -D -m644 linux_packaging/assets/keyboard-center.png -t "$pkgdir"/usr/share/icons/hicolor/512x512/apps
+  install -D -m644 linux_packaging/assets/keyboard-center.desktop -t "$pkgdir"/usr/share/applications  
 }

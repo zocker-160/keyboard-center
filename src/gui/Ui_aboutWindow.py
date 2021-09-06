@@ -53,5 +53,5 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "About"))
-        self.about_maintext.setText(_translate("Dialog", "<html><head/><body><p>G910-gui - $$$</p><p>made by zocker_160</p><p>licensed under GPLv3 | 2021</p><p>source code: <a href=\"https://github.com/zocker-160/G910-gui\"><span style=\" text-decoration: underline; color:#2980b9;\">https://github.com/zocker-160/G910-gui</span></a></p></body></html>"))
+        self.about_maintext.setText(_translate("Dialog", "<html><head/><body><p>Keyboard Center - $$$</p><p>made by zocker_160</p><p>licensed under GPLv3 | 2021</p><p>source code: <a href=\"https://github.com/zocker-160/keyboard-center\"><span style=\" text-decoration: underline; color:#2980b9;\">https://github.com/zocker-160/keyboard-center</span></a></p></body></html>"))
 from . import ressources_rc

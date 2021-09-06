@@ -34,5 +34,5 @@ jobs:
     - name: save deb file
       uses: actions/upload-artifact@master
       with:
-        name: G910-gui-git
+        name: keyboard-center-git
         path: ./linux_packaging/*.deb

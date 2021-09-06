@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>G910-gui</string>
+   <string>Keyboard Center</string>
   </property>
   <property name="windowIcon">
    <iconset resource="ressources.qrc">

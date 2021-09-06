@@ -8,33 +8,33 @@ pre_install() {
 }
 
 post_install() {
-    python3 -m compileall /usr/lib/G910-gui
+    python3 -m compileall /usr/lib/keyboard-center
     
     ## enable and start service
-    #systemctl enable g910-gui.service
-    #systemctl start g910-gui.service
+    #systemctl enable keyboard-center.service
+    #systemctl start keyboard-center.service
 }
 
 #pre_upgrade() {
-#    systemctl stop g910-gui.service
+#    systemctl stop keyboard-center.service
 #}
 
 #post_upgrade() {
-#    systemctl start g910-gui.service
+#    systemctl start keyboard-center.service
 #}
 
 pre_remove() {
-    #systemctl stop g910-gui.service
-    #systemctl disable g910-gui.service
-    #rm -f "/usr/bin/G910-gui" || true
+    #systemctl stop keyboard-center.service
+    #systemctl disable keyboard-center.service
+    #rm -f "/usr/bin/keyboard-center" || true
     
-    find /usr/lib/G910-gui -type f -iname \*.pyc -delete
-    find /usr/lib/G910-gui -type d -iname __pycache__ -delete
+    find /usr/lib/keyboard-center -type f -iname \*.pyc -delete
+    find /usr/lib/keyboard-center -type d -iname __pycache__ -delete
 }
 
 post_remove() {
     echo "IMPORTANT: in order to stop the background service ###############################################################"
-    echo 'please run "systemctl --user stop g910-gui.service" and "systemctl --user disable g910-gui.service" as NON ROOT'
+    echo 'please run "systemctl --user stop keyboard-center.service" and "systemctl --user disable keyboard-center.service" as NON ROOT'
     echo "##################################################################################################################"
     sleep 3
 }

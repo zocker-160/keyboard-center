@@ -192,7 +192,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "G910-gui"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Keyboard Center"))
         self.supportedDevice.setText(_translate("MainWindow", "no supported device found :("))
         self.addKey.setText(_translate("MainWindow", "Add Key"))
         self.addDelay.setText(_translate("MainWindow", "Add Delay (soon)"))

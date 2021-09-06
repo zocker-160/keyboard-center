@@ -33,7 +33,7 @@ class Configparser:
             home = os.environ.get("HOME") or args[1]
             xdg_home = os.path.join(home, ".config")
         
-        confFolder = os.path.join(xdg_home, "g910-gui")
+        confFolder = os.path.join(xdg_home, "keyboard-center")
         confLoc = os.path.join(confFolder, "settings.yml")
 
         logging.debug("Config file location:", confLoc)

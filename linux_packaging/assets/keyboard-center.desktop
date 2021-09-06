@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Keyboard Center
+Version=1.0
+Exec=keyboard-center %f
+Comment=Application to map G-keys on (some) Logitech Gaming Keyboards
+Icon=keyboard-center
+Type=Application
+Terminal=false
+StartupNotify=true
+Encoding=UTF-8
+Categories=Utility;

@@ -1,4 +1,4 @@
-SERVICE_NAME = "g910-gui.service"
+SERVICE_NAME = "keyboard-center.service"
 
 import sys
 import subprocess
