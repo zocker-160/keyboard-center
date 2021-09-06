@@ -13,10 +13,10 @@ import asyncio
 import uinput
 from usb import core
 
-from pynotifier import Notification
 from inotify_simple import INotify, flags
 
 from lib.configparser import *
+from lib.pynotifier import Notification
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
