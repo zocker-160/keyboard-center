@@ -29,6 +29,9 @@ PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
     PARENT_LOCATION, "config", "testconfig.yaml.example"
 )
+ICON_LOCATION = os.path.join(
+    PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
+)
 
 def _stop(*args):
     global evLoop
@@ -174,7 +177,7 @@ def inotifyReader(inotify: INotify):
                 app_name=APP_NAME,
                 title="Configuration changed",
                 description="new config loaded!",
-                icon_path=os.path.join(PARENT_LOCATION, "assets", "input-keyboard-virtual.png"),
+                icon_path=ICON_LOCATION,
                 urgency="normal"
             ).send_linux()
 
@@ -192,9 +195,15 @@ def main():
 
         if keyboard:
             logging.info("keyboard found: " + device.devicename)
+            Notification(
+                app_name=APP_NAME,
+                title="Keyboard Search",
+                description="keyboard found: " + device.devicename,
+                icon_path=ICON_LOCATION,
+                urgency="low"
+            ).send_linux()
 
             logging.info("saving deviceID into config")
-            # TODO: create notification feedback
             config.settings["settings"]["usbDeviceID"] = i
             config.save()
 
@@ -207,6 +216,14 @@ def main():
         logging.critical("no supported keyboard found")
         config.settings["settings"]["usbDeviceID"] = "None"
         config.save()
+
+        Notification(
+            app_name=APP_NAME,
+            title="Keyboard Search",
+            description="no supported keyboard found!",
+            icon_path=ICON_LOCATION,
+            urgency="critical"
+        ).send_linux()
 
         sys.exit(1)
     else:
