@@ -2,9 +2,9 @@
 
 pkgname=keyboard-center-git
 _gitname=keyboard-center
-pkgver=88.d30362d
+pkgver=93.5712c7a
 pkgrel=1
-pkgdesc="Application by zocker_160 to edit G-keys on G910."
+pkgdesc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 arch=('x86_64')
 url="https://github.com/zocker-160/keyboard-center"
 license=('GPL3')
