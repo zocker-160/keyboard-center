@@ -36,7 +36,7 @@ class Configparser:
         confFolder = os.path.join(xdg_home, "keyboard-center")
         confLoc = os.path.join(confFolder, "settings.yml")
 
-        logging.debug("Config file location:", confLoc)
+        logging.debug("Config file location: "+confLoc)
 
         # check if file and folder exists
         if not os.path.isdir(confFolder):
