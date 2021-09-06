@@ -258,6 +258,14 @@ def main():
     except Exception as e:
         logging.critical("Failed to init inotify :(..."+str(e))
 
+        Notification(
+            app_name=APP_NAME,
+            title="Inotify Init",
+            description="Failed to init inotify! :(\n"+str(e),
+            icon_path=ICON_LOCATION,
+            urgency="critical"
+        ).send_linux()
+
     evLoop.add_signal_handler(signal.SIGINT, _stop)
     evLoop.add_signal_handler(signal.SIGTERM, _stop)
     evLoop.run_forever()
