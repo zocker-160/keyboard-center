@@ -67,7 +67,7 @@ class ServiceWindow(QMessageBox):
 
         self.setInformativeText("service needs reload?")
         if needsReload():
-            self.setInformativeText("relading service...")
+            self.setInformativeText("reloading service...")
             if not reloadService():
                 self._errorState("failed to reload service!")
                 return
