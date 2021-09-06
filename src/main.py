@@ -320,11 +320,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         about = AboutWindow(self)
         about.show()
 
+    ### other ui stuff
+    def center(self):
+        qr = self.frameGeometry()
+        qr.moveCenter(
+            self.app.primaryScreen().availableGeometry().center())
+        self.move(qr.topLeft())
+
 def main():
     app = QApplication(sys.argv)
     devmode = True if "-dev" in sys.argv else False
 
     window = MainWindow(app, devmode)
+    window.center()
     window.show()
 
     sys.exit(app.exec_())
