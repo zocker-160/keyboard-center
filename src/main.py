@@ -5,7 +5,7 @@ import sys
 import webbrowser
 
 from PyQt5.QtGui import QCloseEvent, QKeyEvent, QKeySequence
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import QTimer, Qt, pyqtSignal
 from PyQt5.QtWidgets import QAbstractItemView, QApplication, QDialog, QHBoxLayout, QLabel, QListView, QListWidget, QListWidgetItem, QMainWindow, QMessageBox, QPushButton, QScrollArea, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
@@ -17,6 +17,7 @@ from gui.CEntryButton import CEntryButton
 from gui.customwidgets import KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_aboutWindow
+from gui.Ui_serviceWindow import Ui_serviceWindow
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
@@ -35,18 +36,19 @@ class AboutWindow(QDialog, Ui_aboutWindow):
             self.about_maintext.text().replace(PLACEHOLDER_STR, VERSION)
         )
 
-class ServiceWindow(QMessageBox):
+class ServiceWindow(QDialog, Ui_serviceWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.returnState = 0 # 0: ignore / OK; 1: retry; 2: cancel
 
-        self.setIcon(QMessageBox.Information)
+        self.setupUi(self)
         self.setWindowTitle("Service Status Checker")
-        self.setText("checking background service status:")
-        #self.setWindowFlag(Qt.FramelessWindowHint)
+        self.mainText.setText("checking background service status:")
+        self.informativeText.setText("fuck off")
 
-        self.addButton(QMessageBox.Ignore)
-        self.addButton(QMessageBox.Cancel)
-        self.setDefaultButton(QMessageBox.Cancel)
+        self.ignoreButton.clicked.connect(lambda: self._setReturnState(0))
+        self.retryButton.clicked.connect(lambda: self._setReturnState(1))
+        self.cancelButton.clicked.connect(lambda: self._setReturnState(2))
 
         self.checkService()
 
@@ -72,13 +74,23 @@ class ServiceWindow(QMessageBox):
                 self._errorState("failed to reload service!")
                 return
 
+        QTimer.singleShot(200, self.ignoreButton.click)
+
     def setInformativeText(self, text: str) -> None:
         print(text)
-        return super().setInformativeText(text)
+        self.informativeText.setText(text)
+
+    def _setReturnState(self, state: int):
+        self.returnState = state
+        self.close()
 
     def _errorState(self, msg: str):
         self.setInformativeText("ERROR: "+msg)
-        self.addButton(QMessageBox.Retry)
+        self.retryButton.setEnabled(True)
+
+    def exec_(self) -> int:
+        super().exec_()
+        return self.returnState
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app: QApplication, devmode=False):
@@ -95,15 +107,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setCurrMacro(0, save=False)
 
     def checkServiceStatus(self):
-        msg = ServiceWindow(self)
+        msg = ServiceWindow()
         ret = msg.exec_()
 
-        if ret == QMessageBox.Ignore:
+        if ret == 0: # ignore / OK
             pass
-        elif ret == QMessageBox.Cancel:
-            sys.exit()
-        elif ret == QMessageBox.Retry:
+        elif ret == 1: # retry
             self.checkServiceStatus()
+        elif ret == 2: # cancel
+            sys.exit()
 
     def readConfiguration(self):
         try:
