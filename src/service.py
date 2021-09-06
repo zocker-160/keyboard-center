@@ -256,7 +256,7 @@ def main():
         inotify.add_watch(config.configFile, flags.MODIFY)
         evLoop.add_reader(inotify, lambda: inotifyReader(inotify))
     except Exception as e:
-        logging.exception("Failed to init inotify :(...", str(e))
+        logging.critical("Failed to init inotify :(..."+str(e))
 
     evLoop.add_signal_handler(signal.SIGINT, _stop)
     evLoop.add_signal_handler(signal.SIGTERM, _stop)
