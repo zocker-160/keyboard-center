@@ -33,10 +33,8 @@ available in the MPR:
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
 
-## Dependencies
-
-### Debian / Ubuntu
-
+### Dependencies
+#### Debian / Ubuntu
 - python3
 - python3-pip
 - python3-pyqt5
@@ -44,3 +42,13 @@ available in the MPR:
 - python3-uinput
 - python3-ruamel.yaml
 - libnotify-bin
+
+#### Arch / Manjaro
+- python >= 3.8
+- python-pyqt5 >= 5.14
+- python-pip >= 20
+- python-uinput >= 0.11.2
+- python-ruamel-yaml >= 0.15
+- python-pyusb >= 1.0.2
+- python-inotify-simple >= 1.3 (prior to version 0.1.4)
+- libnotify >= 0.7.9
