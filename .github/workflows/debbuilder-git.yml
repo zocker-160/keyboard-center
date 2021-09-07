@@ -18,21 +18,19 @@ jobs:
         wget -qO - 'https://proget.hunterwittenborn.com/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg &> /dev/null
         echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.hunterwittenborn.com/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list
         sudo apt-get update
-        sudo apt-get install -y makedeb
+        sudo apt-get install -y makedeb git
         
-    - name: clone repo
-      uses: actions/checkout@v1
-      with:
-        submodules: 'true'    
+    - name: clone MPR-git repo
+      run: git clone https://mpr.hunterwittenborn.com/keyboard-center-git.git
         
     - name: install dependencies
       run: sudo apt-get install -y python3 python3-pip python3-pyqt5 python3-uinput python3-ruamel.yaml python3-usb libnotify-bin
         
     - name: build deb package (git)
-      run: cd ./linux_packaging && makedeb -F DEBBUILD-git
+      run: cd ./keyboard-center-git && makedeb
 
     - name: save deb file
       uses: actions/upload-artifact@master
       with:
         name: keyboard-center-git
-        path: ./linux_packaging/*.deb
+        path: ./keyboard-center-git/*.deb

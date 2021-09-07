@@ -17,19 +17,17 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y makedeb
         
-    - name: clone repo
-      uses: actions/checkout@v1
-      with:
-        submodules: 'true'    
-        
+    - name: clone MPR-git repo
+      run: git clone https://mpr.hunterwittenborn.com/keyboard-center.git
+    
     - name: install dependencies
       run: sudo apt-get install -y python3 python3-pip python3-pyqt5 python3-uinput python3-ruamel.yaml python3-usb libnotify-bin
 
     - name: build deb package
-      run: cd ./linux_packaging && makedeb -F DEBBUILD
+      run: cd ./keyboard-center && makedeb -F DEBBUILD
 
     - name: save deb file
       uses: actions/upload-artifact@master
       with:
         name: keyboard-center
-        path: ./linux_packaging/*.deb
+        path: ./keyboard-center/*.deb
