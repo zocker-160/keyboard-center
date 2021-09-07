@@ -20,9 +20,15 @@ Keyboard Center is an application attempting to create an easy way for users to 
 
 ### Arch / Manjaro
 
-Package is available in the AUR: [keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
+available in the AUR: [[AUR] keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
 
 ### Debian / Ubuntu
+
+available in the MPR: 
+- [[MPR] keyboard-center](https://mpr.hunterwittenborn.com/packages/keyboard-center/)
+- [[MPR] keyboard-center-git](https://mpr.hunterwittenborn.com/packages/keyboard-center-git/)
+
+#### Direct download
 
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
