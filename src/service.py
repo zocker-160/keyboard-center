@@ -170,7 +170,7 @@ async def usbListener(keyboard: core.Device,
 def inotifyReader(inotify: INotify):
     for _ in inotify.read():
         # reload configuration
-        logging.info("config changed - realoading...")
+        logging.info("config changed - reloading...")
         if config.load():
             Notification(
                 app_name=APP_NAME,
