@@ -138,7 +138,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 f"No supported keyboard found! :(\n(err:{_did})",
                 title_msg="FATAL ERROR"
             )
-            r = self.showQuestionMSG("Do you want to try again?")
+            r = self.showQuestionMSG("Do you want to search again?")
             if r == QMessageBox.Yes:
                 # we need to add a small delay, since detecting the keyboard
                 # takes a little bit of time
