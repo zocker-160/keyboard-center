@@ -2,13 +2,14 @@
 
 pkgname=keyboard-center-git
 _gitname=keyboard-center
-pkgver=93.5712c7a
+pkgver=94.5a4ea8b
 pkgrel=1
 pkgdesc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 arch=('x86_64')
 url="https://github.com/zocker-160/keyboard-center"
 license=('GPL3')
 depends=('python3' 'python3-pip' 'python3-pyqt5' 'python3-uinput' 'python3-ruamel.yaml' 'python3-usb' 'libnotify-bin')
+makedepends=('git')
 #conflicts=('')
 source=("git+https://github.com/zocker-160/keyboard-center.git")
 sha256sums=('SKIP')
