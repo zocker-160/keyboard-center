@@ -25,7 +25,7 @@ TEMPLATE_LOCATION = os.path.join(
 )
 
 PLACEHOLDER_STR = "$$$"
-VERSION = "0.1.4-testing"
+VERSION = "0.1.5-testing"
 
 class AboutWindow(QDialog, Ui_aboutWindow):
     def __init__(self, parent):
