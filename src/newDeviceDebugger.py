@@ -5,13 +5,21 @@ import sys
 import time
 import subprocess
 import signal
-
 import logging
-
 import asyncio
-
-import uinput
 from usb import core
+
+
+# Logitech, Inc. G910 Orion Spark Mechanical Keyboard
+usbVendor = 0x046d
+usbProduct = 0xc32b
+
+usbConfiguration = 0
+usbInterface = (1, 0)
+usbEndpoint = 0
+
+disableGKeys = None
+
 
 def _stop(*args):
     global evLoop
@@ -50,6 +58,7 @@ async def usbListener(keyboard: core.Device,
             _usbTimeout
         )
 
+    logging.debug(f"listening to USB Interface {usbInterface}")
     while True:
         await asyncio.sleep(0)
         try:
@@ -75,16 +84,6 @@ async def usbListener(keyboard: core.Device,
 
 def main():
 
-    # Logitech, Inc. G910 Orion Spark Mechanical Keyboard
-    usbVendor = 0x046d
-    usbProduct = 0xc32b
-
-    usbConfiguration = 0
-    usbInterface = (1, 0)
-    usbEndpoint = 0
-
-    disableGKeys = None
-
     logging.debug("Searching for keyboard...")
     keyboard: core.Device = core.find(
         idVendor=usbVendor, idProduct=usbProduct
@@ -105,6 +104,10 @@ def main():
     logging.debug("check and detach kernel driver if active")
     if keyboard.is_kernel_driver_active(usbInterface[0]):
         keyboard.detach_kernel_driver(usbInterface[0])
+
+    print("###")
+    print(keyboard)
+    print("###")
 
     logging.info("starting service...")
     global evLoop
