@@ -1,8 +1,7 @@
 *.directory
 *.code-workspace
 
-__*
-_*
+__pycache*
 
 .vscode
 venv
