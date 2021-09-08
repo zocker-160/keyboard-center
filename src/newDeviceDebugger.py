@@ -18,7 +18,6 @@ def _stop(*args):
     logging.info("stopping...")
 
     evLoop.stop()
-    virtualKeyboard.destroy()
 
 async def disableGkeyMapping():
     try:
@@ -106,14 +105,6 @@ def main():
     logging.debug("check and detach kernel driver if active")
     if keyboard.is_kernel_driver_active(usbInterface[0]):
         keyboard.detach_kernel_driver(usbInterface[0])
-
-    logging.debug("creating uinput device...")
-    global virtualKeyboard
-    virtualKeyboard = uinput.Device(
-        ALL_KNOWN_KEYS,
-        name="Testkeyboard vdev",
-        vendor=usbVendor
-    )
 
     logging.info("starting service...")
     global evLoop
