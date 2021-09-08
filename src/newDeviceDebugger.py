@@ -83,7 +83,7 @@ async def usbListener(keyboard: core.Device,
 
             if fromKeyboard:
                 data = bytes(fromKeyboard)
-                print("got data from keyboard:")
+                print("got data from keyboard:", end="")
                 print(data)
 
         # older versions of python3-usb throw USBError instead of USBTimeoutError
@@ -95,8 +95,9 @@ async def usbListener(keyboard: core.Device,
 
 def main():
 
+    # Logitech, Inc. G910 Orion Spark Mechanical Keyboard
     usbVendor = 0x046d
-    usbProduct = 0xc335
+    usbProduct = 0xc32b
 
     usbConfiguration = 0
     usbInterface = (1, 0)
