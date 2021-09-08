@@ -332,6 +332,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 def main():
     app = QApplication(sys.argv)
     devmode = True if "-dev" in sys.argv else False
+    if "--version" in sys.argv or "-v" in sys.argv:
+        print("version:", VERSION)
+        sys.exit()
 
     window = MainWindow(app, devmode)
     window.center()
