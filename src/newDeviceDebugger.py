@@ -13,25 +13,6 @@ import asyncio
 import uinput
 from usb import core
 
-from lib.configparser import *
-from lib.pynotifier import Notification
-from lib.inotify_simple import INotify, flags
-
-from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
-from devices.allkeys import *
-
-currProfile = MEMORY_1
-
-APP_NAME = "Keyboard Center Service"
-
-PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(
-    PARENT_LOCATION, "config", "testconfig.yaml.example"
-)
-ICON_LOCATION = os.path.join(
-    PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
-)
-
 def _stop(*args):
     global evLoop
     logging.info("stopping...")
