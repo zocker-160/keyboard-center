@@ -1,2 +1,0 @@
-inotify-simple==1.3.5
-py-notifier==0.3.2
