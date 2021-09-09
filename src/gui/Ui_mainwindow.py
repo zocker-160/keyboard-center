@@ -30,10 +30,6 @@ class Ui_MainWindow(object):
 "QLabel#asd:pressed {\n"
 "    border-color: red;\n"
 "}\n"
-"\n"
-".CListWidgetContent {\n"
-"    background-color: white;\n"
-"}\n"
 "")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")

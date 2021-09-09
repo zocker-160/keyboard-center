@@ -31,10 +31,6 @@ QLabel#asd:hover {
 QLabel#asd:pressed {
 	border-color: red;
 }
-
-.CListWidgetContent {
-	background-color: white;
-}
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">

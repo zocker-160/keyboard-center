@@ -36,7 +36,8 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-color: white;
+	#this does break dark mode stupid me
+	#background-color: white;
 }
 </string>
   </property>

@@ -23,7 +23,8 @@ class Ui_KeyPressWidget(object):
         KeyPressWidget.setMaximumSize(QtCore.QSize(16777215, 60))
         KeyPressWidget.setAutoFillBackground(True)
         KeyPressWidget.setStyleSheet("QWidget {\n"
-"    background-color: white;\n"
+"    #this does break dark mode stupid me\n"
+"    #background-color: white;\n"
 "}\n"
 "")
         self.horizontalLayout = QtWidgets.QHBoxLayout(KeyPressWidget)
