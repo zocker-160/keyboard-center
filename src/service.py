@@ -241,7 +241,7 @@ def main():
     global virtualKeyboard
     virtualKeyboard = uinput.Device(
         ALL_KNOWN_KEYS,
-        name=keyboardDev.devicename+" vdev",
+        name=keyboardDev.devicename+" (keyboard-center)",
         vendor=keyboardDev.usbVendor
     )
 
