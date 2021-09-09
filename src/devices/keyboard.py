@@ -26,9 +26,9 @@ class KeyboardInterface:
 
 
 @dataclass(frozen=True)
-class Logitech_G910(KeyboardInterface):
+class Logitech_G910_OrionSpectrum(KeyboardInterface):
 
-    devicename = "Logitech G910"
+    devicename = "Logitech G910 Orion Spectrum"
 
     usbVendor = 0x046d
     usbProduct = 0xc335
@@ -71,6 +71,11 @@ class Logitech_G910(KeyboardInterface):
         b'\x11\xff\t\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M release
         b'\x11\xff\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
     }
+
+@dataclass(frozen=True)
+class Logitech_G910_OrionSpark(Logitech_G910_OrionSpectrum):
+    devicename = "Logitech G910 Orion Spark"
+    usbProduct = 0xc32b
 
 @dataclass(frozen=True)
 class Logitech_G710p(KeyboardInterface):
@@ -119,6 +124,7 @@ class Logitech_G710p(KeyboardInterface):
     disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 SUPPORTED_DEVICES = [
-    Logitech_G910,
+    Logitech_G910_OrionSpectrum,
     Logitech_G710p,
+    Logitech_G910_OrionSpark
 ]
