@@ -67,6 +67,11 @@ if __name__ == '__main__':
         "reload": reloadService,
         "enable": enableService,
         "disable": disableService,
+        "needsReload": needsReload
     }
+    arg = sys.argv[1]
 
-    print( commands[sys.argv[1]]() )
+    try:
+        print( commands[arg]() )
+    except KeyError:
+        print(f'Unknown option: "{arg}"')
