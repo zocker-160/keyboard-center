@@ -18,7 +18,11 @@ def isServiceRunning() -> bool:
         return False
 
 def needsReload() -> bool:
-    out: str = subprocess.check_output(f"systemctl --user status {SERVICE_NAME}".split()).decode()
+    out: str = subprocess.check_output(
+        ["/bin/sh", "-c", f"systemctl --user status {SERVICE_NAME}; exit 0"],
+        stderr=subprocess.STDOUT
+        ).decode()
+
     if out.find(f"{SERVICE_NAME} changed on disk") != -1:
         return True
     else:
