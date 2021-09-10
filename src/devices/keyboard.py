@@ -72,6 +72,8 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x11\xff\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
     }
 
+    disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpark(Logitech_G910_OrionSpectrum):
     devicename = "Logitech G910 Orion Spark"
