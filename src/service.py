@@ -234,9 +234,29 @@ def main():
                                         [keyboardDev.usbEndpoint]
 
     logging.debug("check and detach kernel driver if active")
-    if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
-        keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
+    try:
+        if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
+            keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
+    except core.USBError as e:
+        print("AAA")
+        Notification(
+            app_name=APP_NAME,
+            title="Kernel driver init",
+            description=str(e),
+            icon_path=ICON_LOCATION,
+            urgency="critical"
+        ).send_linux()
 
+        Notification(
+            app_name=APP_NAME,
+            title="Kernel driver init",
+            description="Please plug your keyboard out and in again\n\
+                or a restart could solve this issue.",
+            icon_path=ICON_LOCATION,
+            urgency="critical"
+        ).send_linux()
+        sys.exit(1)
+    
     logging.debug("creating uinput device...")
     global virtualKeyboard
     virtualKeyboard = uinput.Device(
