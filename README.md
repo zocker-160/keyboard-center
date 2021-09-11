@@ -42,6 +42,7 @@ available in the MPR:
 - python3-usb
 - python3-uinput
 - python3-ruamel.yaml
+- libhidapi-hidraw0 | libhidapi-libusb0 (>= 0.1.9)
 - libnotify-bin
 
 #### Arch / Manjaro
@@ -51,5 +52,6 @@ available in the MPR:
 - python-uinput >= 0.11.2
 - python-ruamel-yaml >= 0.15
 - python-pyusb >= 1.0.2
+- hidapi>=0.10 (>= 0.1.9)
 - python-inotify-simple >= 1.3 (only for <= 0.1.4)
 - libnotify >= 0.7.9
