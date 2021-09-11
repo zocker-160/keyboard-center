@@ -84,6 +84,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setObjectName("label")
+        self.horizontalLayout_4.addWidget(self.label)
         self.macroNameEdit = QtWidgets.QLineEdit(self.centralwidget)
         self.macroNameEdit.setObjectName("macroNameEdit")
         self.horizontalLayout_4.addWidget(self.macroNameEdit)
@@ -190,6 +193,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Keyboard Center"))
         self.supportedDevice.setText(_translate("MainWindow", "no supported device found :("))
+        self.label.setText(_translate("MainWindow", "Profile:"))
+        self.macroNameEdit.setPlaceholderText(_translate("MainWindow", "name"))
         self.addKey.setText(_translate("MainWindow", "Add Key"))
         self.addDelay.setText(_translate("MainWindow", "Add Delay (soon)"))
         self.resetButton.setText(_translate("MainWindow", "Reset"))

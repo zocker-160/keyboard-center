@@ -115,7 +115,18 @@ QLabel#asd:pressed {
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QLineEdit" name="macroNameEdit"/>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Profile:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="macroNameEdit">
+            <property name="placeholderText">
+             <string>name</string>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_2">
