@@ -1,25 +1,22 @@
 #! /usr/bin/env python3
 
-import os
 import sys
-import time
-import subprocess
 import signal
 import logging
 import asyncio
-from usb import core
 
+from usb import core
+from lib.hid import Device as HIDDevice
 
 # Logitech, Inc. G910 Orion Spark Mechanical Keyboard
 usbVendor = 0x046d
-usbProduct = 0xc32b
+usbProduct = 0xc335
 
 usbConfiguration = 0
 usbInterface = (1, 0)
 usbEndpoint = 0
 
-disableGKeys = None
-
+disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def _stop(*args):
     global evLoop
@@ -27,14 +24,11 @@ def _stop(*args):
 
     evLoop.stop()
 
-async def disableGkeyMapping():
-    try:
-        logging.debug("disabling g810-led gkey mapping")
-        subprocess.Popen("g810-led -gkm 1".split())
-    except FileNotFoundError:
-        logging.info("g810-led could not be found")
-    except Exception as e:
-        logging.warning(e)
+async def disableGkeyMapping(data: bytes):
+    logging.debug("Connection using HIDAPI...")
+    with HIDDevice(usbVendor, usbProduct) as hdev:
+        logging.debug("Sending sequence to disable G keys")
+        hdev.write(data)
 
 
 async def usbListener(keyboard: core.Device,
@@ -44,19 +38,12 @@ async def usbListener(keyboard: core.Device,
     _usbTimeout: int = 1000
 
     await asyncio.sleep(0)
-    # disable G key mapping in case g810-led is installed
-    await disableGkeyMapping()
-
-    await asyncio.sleep(0)
+    
     # Send the sequence to disable the G keys
     if disableGKeys:
-        logging.debug("Sending sequence to disable G keys")
+        await disableGkeyMapping(disableGKeys)
 
-        keyboard.write(
-            keyboardEndpoint.bEndpointAddress,
-            disableGKeys,
-            _usbTimeout
-        )
+    await asyncio.sleep(0)
 
     logging.debug(f"listening to USB Interface {usbInterface}")
     while True:
