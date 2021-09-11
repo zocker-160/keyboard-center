@@ -12,14 +12,29 @@ from lib.hid import Device as HIDDevice
 usbVendor = 0x046d
 usbProduct = 0xc335
 
+# Logitech, Inc. G815
+#usbVendor = 0x046d
+#usbProduct = ?
+
 usbConfiguration = 0
 usbInterface = (1, 0)
 usbEndpoint = 0
 
+## G710+
+#disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+## G910
 disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+## G815
+#disableGKeys = b'\x11\xff\x0a\x2b\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def _stop(*args):
     global evLoop
+    global keyboard
+    global usbInterface
+
+    #keyboard.attach_kernel_driver(usbInterface[0])
     logging.info("stopping...")
 
     evLoop.stop()
@@ -70,6 +85,7 @@ async def usbListener(keyboard: core.Device,
             pass
 
 def main():
+    global usbInterface
 
     logging.debug("Searching for keyboard...")
     keyboard: core.Device = core.find(
