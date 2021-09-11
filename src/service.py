@@ -3,7 +3,6 @@
 import os
 import sys
 import time
-import subprocess
 import signal
 
 import logging
@@ -16,6 +15,7 @@ from usb import core
 from lib.configparser import *
 from lib.pynotifier import Notification
 from lib.inotify_simple import INotify, flags
+from lib.hid import Device as HIDDevice
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
@@ -39,15 +39,11 @@ def _stop(*args):
     evLoop.stop()
     virtualKeyboard.destroy()
 
-async def disableGkeyMapping():
-    try:
-        logging.debug("disabling g810-led gkey mapping")
-        subprocess.Popen("g810-led -gkm 1".split())
-    except FileNotFoundError:
-        logging.info("g810-led could not be found")
-    except Exception as e:
-        logging.warning(e)
 
+async def disableGkeyMapping(keyDev: KeyboardInterface):
+    logging.debug("Connection using HIDAPI...")
+    with HIDDevice(keyDev.usbVendor, keyDev.usbProduct) as hdev:
+        hdev.write(keyDev.disableGKeys)
 
 async def switchProfile(profile):
     global currProfile
@@ -110,19 +106,11 @@ async def usbListener(keyboard: core.Device,
     _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
 
     await asyncio.sleep(0)
-    # disable G key mapping in case g810-led is installed
-    await disableGkeyMapping()
-
-    await asyncio.sleep(0)
+    
     # Send the sequence to disable the G keys
     if keyboardDev.disableGKeys:
         logging.debug("Sending sequence to disable G keys")
-
-        keyboard.write(
-            keyboardEndpoint.bEndpointAddress,
-            keyboardDev.disableGKeys,
-            _usbTimeout
-        )
+        await disableGkeyMapping(keyboardDev)
 
     while True:
         await asyncio.sleep(0)
