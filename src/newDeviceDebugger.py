@@ -84,7 +84,7 @@ async def usbListener(keyboard: core.Device,
         except core.USBTimeoutError:
             pass
 
-def main():
+def main(info=False):
     global usbInterface
 
     logging.debug("Searching for keyboard...")
@@ -112,6 +112,10 @@ def main():
     print(keyboard)
     print("###")
 
+    if info:
+        keyboard.attach_kernel_driver(usbInterface[0])
+        sys.exit()
+
     logging.info("starting service...")
     global evLoop
     evLoop = asyncio.get_event_loop()
@@ -131,4 +135,8 @@ if __name__ == "__main__":
         format="%(levelname)s: %(message)s", level=logging.DEBUG
     )
 
-    main()
+    if len(sys.argv) > 1:
+        info = "--info" == sys.argv[1]
+        main(info)
+    else:
+        main()
