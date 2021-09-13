@@ -16,6 +16,7 @@ from lib.configparser import *
 from lib.pynotifier import Notification
 from lib.inotify_simple import INotify, flags
 from lib.hid import Device as HIDDevice
+import lib.hid as hid
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
@@ -99,9 +100,37 @@ async def emitKeys(profile, key, uinput=False):
         print(macro)
         await executeMacro(macro)
 
+async def handleRawData(fromKeyboard, 
+                    keyboardDev: KeyboardInterface):
+
+    data = bytes(fromKeyboard)
+    #print(data)
+
+    if data in keyboardDev.macroKeys:
+        pressed = keyboardDev.macroKeys.get(data)
+
+        if pressed:
+            # TODO: clean this up
+            if isinstance(pressed, str):
+                await emitKeys(currProfile, pressed)
+                #Thread(target=emitKeys, args=(currProfile,pressed), daemon=True).start()
+            else: # uinput key
+                await emitKeys(currProfile, pressed, True)
+                #Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
+        else:
+            pass
+            #logging.debug("recieved data could not get mapped to a macro key")
+            #logging.debug(data)
+
+    elif data in keyboardDev.memoryKeys:
+        await switchProfile(keyboardDev.memoryKeys[data])
+        #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
+    else:
+        pass    
+
 async def usbListener(keyboard: core.Device,
                 keyboardEndpoint: core.Endpoint,
-                keyboardDev: KeyboardInterface):
+                keyboardDev: KeyboardInterface, HIDpath: str=None):
 
     _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
 
@@ -112,48 +141,44 @@ async def usbListener(keyboard: core.Device,
         logging.debug("Sending sequence to disable G keys")
         await disableGkeyMapping(keyboardDev)
 
-    while True:
-        await asyncio.sleep(0)
-        try:
-            # hmm this could end up problematic if it blocks while
-            # running slower macros.....might need to go back to Threads
-            fromKeyboard = keyboard.read(
-                keyboardEndpoint.bEndpointAddress,
-                keyboardEndpoint.wMaxPacketSize,
-                _usbTimeout
-            )
+    if HIDpath:
+        with HIDDevice(path=HIDpath) as hdev:
+            hdev.nonblocking = True
 
-            if fromKeyboard:
-                data = bytes(fromKeyboard)
-                #print(data)
-                
-                if data in keyboardDev.macroKeys:
-                    pressed = keyboardDev.macroKeys.get(data)
+            while True:
+                await asyncio.sleep(0)
+                try:
+                    fromKeyboard = hdev.read(
+                        keyboardEndpoint.wMaxPacketSize,
+                        _usbTimeout
+                    )
 
-                    if pressed:
-                        if isinstance(pressed, str):
-                            await emitKeys(currProfile, pressed)
-                            #Thread(target=emitKeys, args=(currProfile,pressed), daemon=True).start()
-                        else: # uinput key
-                            await emitKeys(currProfile, pressed, True)
-                            #Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
-                    else:
-                        pass
-                        #logging.debug("recieved data could not get mapped to a macro key")
-                        #logging.debug(data)
-
-                elif data in keyboardDev.memoryKeys:
-                    await switchProfile(keyboardDev.memoryKeys[data])
-                    #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
-                else:
+                    if fromKeyboard:
+                        await handleRawData(fromKeyboard, keyboardDev)
+                except hid.HIDException:
                     pass
-        
-        # older versions of python3-usb throw USBError instead of USBTimeoutError
-        # all glory to backwards compatibility I guess....
-        except core.USBError:
-            pass        
-        except core.USBTimeoutError:
-            pass
+    else:
+        logging.debug("Using libusb backend as backup...")
+        while True:
+            await asyncio.sleep(0)
+            try:
+                # hmm this could end up problematic if it blocks while
+                # running slower macros.....might need to go back to Threads
+                fromKeyboard = keyboard.read(
+                    keyboardEndpoint.bEndpointAddress,
+                    keyboardEndpoint.wMaxPacketSize,
+                    _usbTimeout
+                )
+
+                if fromKeyboard:
+                    await handleRawData(fromKeyboard, keyboardDev)
+            
+            # older versions of python3-usb throw USBError instead of USBTimeoutError
+            # all glory to backwards compatibility I guess....
+            except core.USBError:
+                pass
+            except core.USBTimeoutError:
+                pass
 
 def inotifyReader(inotify: INotify):
     for _ in inotify.read():
@@ -221,30 +246,41 @@ def main():
                                         [keyboardDev.usbInterface]\
                                         [keyboardDev.usbEndpoint]
 
-    logging.debug("check and detach kernel driver if active")
-    try:
-        if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
-            keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
-    except core.USBError as e:
-        print("AAA")
-        Notification(
-            app_name=APP_NAME,
-            title="Kernel driver init",
-            description=str(e),
-            icon_path=ICON_LOCATION,
-            urgency="critical"
-        ).send_linux()
-
-        Notification(
-            app_name=APP_NAME,
-            title="Kernel driver init",
-            description="Please plug your keyboard out and in again\n\
-                or a restart could solve this issue.",
-            icon_path=ICON_LOCATION,
-            urgency="critical"
-        ).send_linux()
-        sys.exit(1)
+    HIDpath = None
+    logging.debug("Searching for HIDraw endpoint...")
+    for dev in hid.enumerate(device.usbVendor, device.usbProduct):
+        if dev.get("interface_number") == keyboardDev.usbInterface[0]:
+            HIDpath: bytes = dev.get("path")
+            logging.debug(f"HIDraw endpoint found: {HIDpath.decode()}")
+            break
+    else:
+        logging.warning("HIDraw endpoint could not be found!\n\
+            switching to libusb as backup")
     
+        logging.debug("check and detach kernel driver if active")
+        try:
+            if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
+                keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
+        except core.USBError as e:
+            print("AAA")
+            Notification(
+                app_name=APP_NAME,
+                title="Kernel driver init",
+                description=str(e),
+                icon_path=ICON_LOCATION,
+                urgency="critical"
+            ).send_linux()
+
+            Notification(
+                app_name=APP_NAME,
+                title="Kernel driver init",
+                description="Please plug your keyboard out and in again\n\
+                    or a restart could solve this issue.",
+                icon_path=ICON_LOCATION,
+                urgency="critical"
+            ).send_linux()
+            sys.exit(1)
+
     logging.debug("creating uinput device...")
     global virtualKeyboard
     virtualKeyboard = uinput.Device(
@@ -256,7 +292,8 @@ def main():
     logging.info("starting service...")
     global evLoop
     evLoop = asyncio.get_event_loop()
-    evLoop.create_task(usbListener(keyboard, keyboardEndpoint, keyboardDev))
+    evLoop.create_task(usbListener(
+        keyboard, keyboardEndpoint, keyboardDev, HIDpath))
 
     try:
         inotify = INotify()
