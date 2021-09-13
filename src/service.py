@@ -35,8 +35,15 @@ ICON_LOCATION = os.path.join(
 
 def _stop(*args):
     global evLoop
+    global attachDriver
+
     logging.info("stopping...")
 
+    try:
+        attachDriver()
+    except NameError:
+        # is not defined when using HID interface
+        pass
     evLoop.stop()
     virtualKeyboard.destroy()
 
@@ -261,6 +268,11 @@ def main():
         try:
             if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
                 keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
+                global attachDriver
+                attachDriver = lambda: keyboard.attach_kernel_driver(
+                    keyboardDev.usbInterface[0]
+                )
+
         except core.USBError as e:
             print("AAA")
             Notification(
