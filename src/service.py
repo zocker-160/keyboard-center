@@ -155,8 +155,8 @@ async def usbListener(keyboard: core.Device,
 
                     if fromKeyboard:
                         await handleRawData(fromKeyboard, keyboardDev)
-                except hid.HIDException:
-                    pass
+                except hid.HIDException as e:
+                    logging.debug(f"HIDerror: probably exiting? {str(e)}")
     else:
         logging.debug("Using libusb backend as backup...")
         while True:
