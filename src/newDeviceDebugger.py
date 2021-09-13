@@ -4,30 +4,28 @@ import sys
 import signal
 import logging
 import asyncio
-
 from usb import core
 from lib.hid import Device as HIDDevice
 
-# Logitech, Inc. G910 Orion Spark Mechanical Keyboard
+## Logitech, Inc. G815
 usbVendor = 0x046d
-usbProduct = 0xc335
-
-# Logitech, Inc. G815
-#usbVendor = 0x046d
-#usbProduct = ?
+usbProduct = 0xc33f
 
 usbConfiguration = 0
 usbInterface = (1, 0)
 usbEndpoint = 0
 
+## Logitech, Inc. G910 Orion Spark Mechanical Keyboard
+#usbVendor = 0x046d
+#usbProduct = 0xc335
+
 ## G710+
 #disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-
 ## G910
-disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+#disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 ## G815
-#disableGKeys = b'\x11\xff\x0a\x2b\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+disableGKeys = b'\x11\xff\x0a\x2b\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def _stop(*args):
     global evLoop
@@ -125,12 +123,6 @@ def main(info=False):
     evLoop.run_forever()
 
 if __name__ == "__main__":
-    #logging.basicConfig(
-    #    filename="",
-    #    format='%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-    #    level=logging.DEBUG
-    #)
-
     logging.basicConfig(
         format="%(levelname)s: %(message)s", level=logging.DEBUG
     )
