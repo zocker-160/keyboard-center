@@ -57,3 +57,20 @@ available in the MPR:
 - hidapi>=0.10 (>= 0.1.9)
 - python-inotify-simple >= 1.3 (<= 0.1.4)
 - libnotify >= 0.7.9
+
+### Contribute New Keyboard
+
+- make sure all required dependencies are installed + `git`
+- `git clone https://github.com/zocker-160/keyboard-center`
+- `cd keyboard-center`
+- make sure that `usbVendor` and `usbProduct` in `src/newDeviceDebugger.py` is set properly\
+(you can check with `lsusb`)
+- **you might need to run the following commands with `sudo` if you get permission errors**
+- `python3 src/newDeviceDebugger.py --info`
+- `python3 src/newDeviceDebugger.py` and press all memory keys, macro keys and multimedia keys one after each other
+- exit with `CTRL + C` (can take a second or two)
+- open a new issue and provide output of the last two commands and the USB ID of your keyboard
+
+**overall it should look something like this:**
+
+![addKeyAnim](images/KeyboardCenter_add.gif)
