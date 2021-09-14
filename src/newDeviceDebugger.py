@@ -72,7 +72,7 @@ async def usbListener(keyboard: core.Device,
 
             if fromKeyboard:
                 data = bytes(fromKeyboard)
-                print("got data from keyboard:", end="")
+                print("got data from keyboard: ", end="")
                 print(data)
 
         # older versions of python3-usb throw USBError instead of USBTimeoutError
@@ -105,12 +105,12 @@ def main(info=False):
     logging.debug("check and detach kernel driver if active")
     if keyboard.is_kernel_driver_active(usbInterface[0]):
         keyboard.detach_kernel_driver(usbInterface[0])
-
-    print("###")
-    print(keyboard)
-    print("###")
-
+    
     if info:
+        print("###")
+        print(keyboard)
+        print("###")
+
         keyboard.attach_kernel_driver(usbInterface[0])
         sys.exit()
 
