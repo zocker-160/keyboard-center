@@ -66,8 +66,8 @@ available in the MPR:
 - make sure that `usbVendor` and `usbProduct` in `src/newDeviceDebugger.py` is set properly\
 (you can check with `lsusb`)
 - **you might need to run the following commands with `sudo` if you get permission errors**
-- `python3 src/newDeviceDebugger.py --info`
 - `python3 src/newDeviceDebugger.py` and press all memory keys, macro keys and multimedia keys one after each other
+- `python3 src/newDeviceDebugger.py --info`
 - exit with `CTRL + C` (can take a second or two)
 - open a new issue and provide output of the last two commands and the USB ID of your keyboard
 
