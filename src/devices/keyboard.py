@@ -172,6 +172,7 @@ class Logitech_G815(KeyboardInterface):#
     }
 
     disableGKeys = b'\x11\xff\x0a\x2b\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeysInterface = 0
 
 SUPPORTED_DEVICES = [
     Logitech_G910_OrionSpectrum,
