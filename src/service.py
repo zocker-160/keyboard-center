@@ -260,7 +260,7 @@ def main():
     for dev in hid.enumerate(device.usbVendor, device.usbProduct):
         if dev.get("interface_number") == keyboardDev.usbInterface[0]:
             HIDpath: bytes = dev.get("path")
-            logging.debug(f"HIDraw endpoint found: {HIDpath.decode()}")
+            logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
 
         if dev.get("interface_number") == keyboardDev.disableGKeysInterface:
             HIDpath_disable: bytes = dev.get("path")
