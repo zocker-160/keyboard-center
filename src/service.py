@@ -48,9 +48,9 @@ def _stop(*args):
     virtualKeyboard.destroy()
 
 
-async def disableGkeyMapping(keyDev: KeyboardInterface):
-    logging.debug("Connection using HIDAPI...")
-    with HIDDevice(keyDev.usbVendor, keyDev.usbProduct) as hdev:
+async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
+    logging.debug("Sending sequence to disable G keys")
+    with HIDDevice(path=HIDpath) as hdev:
         hdev.write(keyDev.disableGKeys)
 
 async def switchProfile(profile):
@@ -137,7 +137,9 @@ async def handleRawData(fromKeyboard,
 
 async def usbListener(keyboard: core.Device,
                 keyboardEndpoint: core.Endpoint,
-                keyboardDev: KeyboardInterface, HIDpath: str=None):
+                keyboardDev: KeyboardInterface,
+                HIDpath: str=None,
+                HIDpath_disable: str=None):
 
     _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
 
@@ -145,8 +147,7 @@ async def usbListener(keyboard: core.Device,
     
     # Send the sequence to disable the G keys
     if keyboardDev.disableGKeys:
-        logging.debug("Sending sequence to disable G keys")
-        await disableGkeyMapping(keyboardDev)
+        await disableGkeyMapping(keyboardDev, HIDpath_disable)
 
     if HIDpath:
         with HIDDevice(path=HIDpath) as hdev:
@@ -254,13 +255,18 @@ def main():
                                         [keyboardDev.usbEndpoint]
 
     HIDpath = None
+    HIDpath_disable = None
     logging.debug("Searching for HIDraw endpoint...")
     for dev in hid.enumerate(device.usbVendor, device.usbProduct):
         if dev.get("interface_number") == keyboardDev.usbInterface[0]:
             HIDpath: bytes = dev.get("path")
             logging.debug(f"HIDraw endpoint found: {HIDpath.decode()}")
-            break
-    else:
+
+        if dev.get("interface_number") == keyboardDev.disableGKeysInterface:
+            HIDpath_disable: bytes = dev.get("path")
+            logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
+    
+    if not HIDpath or not HIDpath_disable:
         logging.warning("HIDraw endpoint could not be found!\n\
             switching to libusb as backup")
     
@@ -305,7 +311,7 @@ def main():
     global evLoop
     evLoop = asyncio.get_event_loop()
     evLoop.create_task(usbListener(
-        keyboard, keyboardEndpoint, keyboardDev, HIDpath))
+        keyboard, keyboardEndpoint, keyboardDev, HIDpath, HIDpath_disable))
 
     try:
         inotify = INotify()

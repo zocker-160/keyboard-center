@@ -22,6 +22,7 @@ class KeyboardInterface:
     releaseEvents: str # str[bytes]
 
     # Following is sent to disable the default G keys mapping
+    disableGKeysInterface: int
     disableGKeys: bytes = field(default=b'')
 
 
@@ -73,6 +74,7 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
     }
 
     disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeysInterface = 0
 
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpark(Logitech_G910_OrionSpectrum):
@@ -124,6 +126,7 @@ class Logitech_G710p(KeyboardInterface):
     }
 
     disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeysInterface = 1
 
 SUPPORTED_DEVICES = [
     Logitech_G910_OrionSpectrum,
