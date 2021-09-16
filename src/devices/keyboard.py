@@ -24,6 +24,7 @@ class KeyboardInterface:
     # Following is sent to disable the default G keys mapping
     disableGKeysInterface: int
     disableGKeys: bytes = field(default=b'')
+    disableGKeysUseWrite: bool = field(default=True)
 
 
 @dataclass(frozen=True)
@@ -127,6 +128,7 @@ class Logitech_G710p(KeyboardInterface):
 
     disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     disableGKeysInterface = 1
+    disableGKeysUseWrite = False
 
 @dataclass(frozen=True)
 class Logitech_G815(KeyboardInterface):#
