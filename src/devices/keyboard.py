@@ -131,7 +131,7 @@ class Logitech_G710p(KeyboardInterface):
     disableGKeysUseWrite = False
 
 @dataclass(frozen=True)
-class Logitech_G815(KeyboardInterface):#
+class Logitech_G815(KeyboardInterface):
 
     devicename = "Logitech G815"
 
