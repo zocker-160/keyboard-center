@@ -51,7 +51,10 @@ def _stop(*args):
 async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
     logging.debug("Sending sequence to disable G keys")
     with HIDDevice(path=HIDpath) as hdev:
-        hdev.write(keyDev.disableGKeys)
+        if keyDev.disableGKeysUseWrite:
+            hdev.write(keyDev.disableGKeys)
+        else:
+            hdev.send_feature_report(keyDev.disableGKeys)
 
 async def switchProfile(profile):
     global currProfile
