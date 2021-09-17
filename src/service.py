@@ -160,6 +160,9 @@ async def usbListener(keyboard: core.Device,
         with HIDDevice(path=HIDpath) as hdev:
             hdev.nonblocking = True
 
+            # give visual feedback that application is now running
+            await switchProfile(currProfile)
+
             while True:
                 await asyncio.sleep(0)
                 try:
