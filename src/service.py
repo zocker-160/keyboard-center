@@ -27,7 +27,7 @@ APP_NAME = "Keyboard Center Service"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
-    PARENT_LOCATION, "config", "testconfig.yaml.example"
+    PARENT_LOCATION, "config", "testconfig-example.yaml"
 )
 ICON_LOCATION = os.path.join(
     PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
