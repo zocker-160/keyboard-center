@@ -23,6 +23,10 @@ from devices.allkeys import *
 
 currProfile = MEMORY_1
 
+RETRY_COUNT = 5
+RETRY_TIMEOUT = 5 # in seconds
+USB_TIMEOUT = 1000 # in milliseconds
+
 APP_NAME = "Keyboard Center Service"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
@@ -144,7 +148,7 @@ async def usbListener(keyboard: core.Device,
                 HIDpath: str=None,
                 HIDpath_disable: str=None):
 
-    _usbTimeout: int = config.settings["settings"].get("usbTimeout") or 1000
+    _usbTimeout: int = config.settings["settings"].get("usbTimeout") or USB_TIMEOUT
 
     await asyncio.sleep(0)
     
@@ -227,10 +231,10 @@ def _getHIDpaths(usbVendor, usbProduct, keyboardDev: KeyboardInterface):
                 return False
             else:
                 logging.warning("Could not open HID device, retrying...")
-                time.sleep(5)
+                time.sleep(RETRY_TIMEOUT)
                 return __HIDavailable(HIDpath, tries-1)
 
-    numTries = config.settings["settings"].get("retryCount") or 5
+    numTries = config.settings["settings"].get("retryCount") or RETRY_COUNT
     if HIDpath and not __HIDavailable(HIDpath, numTries):
         raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
 
