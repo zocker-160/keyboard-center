@@ -37,6 +37,21 @@ available in the MPR:
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
 
+## Manage Background Service
+
+Keyboard Center does install a background server, which runs with user rights.
+
+You can manage it using: `systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
+
+## Settings
+
+Settings are stored in a `settings.yml` file, which is located at
+- `$XDG_CONFIG_HOME/keyboard-center` **or** if not defined
+- `$HOME/.config/keyboard-center`
+
+#### Current default settings
+`settings: {usbTimeout: 1000, retryCount: 5}`
+
 ### Dependencies
 #### Debian / Ubuntu
 - python3
@@ -58,12 +73,6 @@ available in the MPR:
 - hidapi>=0.10 (>= 0.1.9)
 - python-inotify-simple >= 1.3 (<= 0.1.4)
 - libnotify >= 0.7.9
-
-## Manage Background Service
-
-Keyboard Center does install a background server, which runs with user rights.
-
-You can manage it using: `systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
 
 ### Contribute New Keyboard
 
