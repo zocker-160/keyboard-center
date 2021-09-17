@@ -41,7 +41,8 @@ available in the MPR:
 
 Keyboard Center does install a background server, which runs with user rights.
 
-You can manage it using: `systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
+You can manage it using:\
+`systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
 
 ## Settings
 
