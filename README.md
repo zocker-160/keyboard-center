@@ -59,6 +59,12 @@ available in the MPR:
 - python-inotify-simple >= 1.3 (<= 0.1.4)
 - libnotify >= 0.7.9
 
+## Manage Background Service
+
+Keyboard Center does install a background server, which runs with user rights.
+
+You can manage it using: `systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
+
 ### Contribute New Keyboard
 
 - make sure all required dependencies are installed + `git`
