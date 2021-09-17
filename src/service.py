@@ -15,7 +15,7 @@ from usb import core
 from lib.configparser import *
 from lib.pynotifier import Notification
 from lib.inotify_simple import INotify, flags
-from lib.hid import Device as HIDDevice
+from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 import lib.hid as hid
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
@@ -204,6 +204,37 @@ def inotifyReader(inotify: INotify):
                 urgency="normal"
             ).send_linux()
 
+def _getHIDpaths(usbVendor, usbProduct, keyboardDev: KeyboardInterface):
+    HIDpath, HIDpath_disable = None, None
+
+    for dev in hid.enumerate(usbVendor, usbProduct):
+        if dev.get("interface_number") == keyboardDev.usbInterface[0]:
+            HIDpath: bytes = dev.get("path")
+            logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
+
+        if dev.get("interface_number") == keyboardDev.disableGKeysInterface:
+            HIDpath_disable: bytes = dev.get("path")
+            logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
+
+    logging.debug("Checking for HID availability...")
+    def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
+        try:
+            with HIDDevice(path=HIDpath) as _:
+                logging.debug(f"Connected to {HIDpath.decode()}")
+            return True
+        except HIDFailedToOpenException:
+            if tries <= 0:
+                return False
+            else:
+                logging.warning("Could not open HID device, retrying...")
+                time.sleep(5)
+                return __HIDavailable(HIDpath, tries-1)
+
+    numTries = config.settings["settings"].get("retryCount") or 5
+    if HIDpath and not __HIDavailable(HIDpath, numTries):
+        raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
+
+    return HIDpath, HIDpath_disable
 
 def main():
     global currProfile
@@ -257,17 +288,9 @@ def main():
                                         [keyboardDev.usbInterface]\
                                         [keyboardDev.usbEndpoint]
 
-    HIDpath = None
-    HIDpath_disable = None
     logging.debug("Searching for HIDraw endpoint...")
-    for dev in hid.enumerate(device.usbVendor, device.usbProduct):
-        if dev.get("interface_number") == keyboardDev.usbInterface[0]:
-            HIDpath: bytes = dev.get("path")
-            logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
-
-        if dev.get("interface_number") == keyboardDev.disableGKeysInterface:
-            HIDpath_disable: bytes = dev.get("path")
-            logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
+    HIDpath, HIDpath_disable = _getHIDpaths(
+        device.usbVendor, device.usbProduct, keyboardDev)
     
     if not HIDpath or not HIDpath_disable:
         logging.warning("HIDraw endpoint could not be found!\n\

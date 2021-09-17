@@ -2,7 +2,7 @@
 LICENSED UNDER MIT
 
 original source: https://github.com/apmorton/pyhidapi/blob/master/hid/__init__.py
-with very small changes by zocker_160
+with small changes by zocker_160
 """
 
 import ctypes
@@ -43,6 +43,8 @@ atexit.register(hidapi.hid_exit)
 class HIDException(Exception):
     pass
 
+class HIDFailedToOpenException(Exception):
+    pass
 
 class DeviceInfo(ctypes.Structure):
     def as_dict(self):
@@ -133,7 +135,7 @@ class Device(object):
             raise ValueError('specify vid/pid or path')
 
         if not self.__dev:
-            raise HIDException('unable to open device')
+            raise HIDFailedToOpenException('unable to open device')
 
     def __enter__(self):
         return self

@@ -29,4 +29,4 @@ mappings:
       - - [1, 23]
       - - [1, 46]
       - - [1, 18]
-settings: {usbTimeout: 1000}
+settings: {usbTimeout: 1000, retryCount: 5}
