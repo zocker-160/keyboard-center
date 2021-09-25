@@ -299,6 +299,8 @@ def main():
     HIDpath, HIDpath_disable = _getHIDpaths(
         device.usbVendor, device.usbProduct, keyboardDev)
     
+    # TODO: use USB fallback only for keyboard that need it
+    # not as a general fallback
     if not HIDpath or not HIDpath_disable:
         logging.error("HIDraw endpoint could not be found!")
         sys.exit(1)
