@@ -332,7 +332,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 def main():
     app = QApplication(sys.argv)
     devmode = True if "-dev" in sys.argv else False
-    print("Entered DEVMODE")
+    if devmode: print("Entered DEVMODE")
     
     if "--version" in sys.argv or "-v" in sys.argv:
         print("version:", VERSION)
