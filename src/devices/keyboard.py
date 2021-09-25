@@ -189,7 +189,6 @@ class Logitech_G815(KeyboardInterface):
     ]
 
     disableGKeysInterface = 1
-    disableGKeysUseWrite = True
 
 SUPPORTED_DEVICES = [
     Logitech_G910_OrionSpectrum,
