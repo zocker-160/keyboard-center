@@ -300,6 +300,9 @@ def main():
         device.usbVendor, device.usbProduct, keyboardDev)
     
     if not HIDpath or not HIDpath_disable:
+        logging.error("HIDraw endpoint could not be found!")
+        sys.exit(1)
+
         logging.warning("HIDraw endpoint could not be found!\n\
             switching to libusb as backup")
     
