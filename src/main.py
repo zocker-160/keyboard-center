@@ -4,9 +4,25 @@ import os
 import sys
 import webbrowser
 
-from PyQt5.QtGui import QCloseEvent, QKeyEvent
-from PyQt5.QtCore import QTimer, Qt, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QDialog, QMainWindow, QMessageBox, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget
+from PyQt5.QtGui import (
+    QCloseEvent,
+    QKeyEvent
+)
+from PyQt5.QtCore import (
+    QTimer,
+    Qt,
+    pyqtSignal
+)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QDialog,
+    QMainWindow,
+    QMessageBox,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget
+)
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
@@ -102,7 +118,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.readConfiguration()
 
         self.setupUi(self)
-        self.initGuiControls()
+        self.setupSlots()
         self.generateProfileButtons()
 
         self.setCurrMemory(0, save=False, load=False)
@@ -149,7 +165,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 sys.exit()
 
-    def initGuiControls(self):
+    def setupSlots(self):
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
 
