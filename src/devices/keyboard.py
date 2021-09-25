@@ -23,7 +23,7 @@ class KeyboardInterface:
 
     # Following is sent to disable the default G keys mapping
     disableGKeysInterface: int
-    disableGKeys: bytes = field(default=b'')
+    disableGKeys = list() # list[bytes]
     disableGKeysUseWrite: bool = field(default=True)
 
 
@@ -74,7 +74,7 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x11\xff\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
     }
 
-    disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeys = [b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
     disableGKeysInterface = 0
 
 @dataclass(frozen=True)
@@ -126,7 +126,7 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x00\x00\x00', # MR release
     }
 
-    disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeys = [b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
     disableGKeysInterface = 1
     disableGKeysUseWrite = False
 
@@ -173,8 +173,23 @@ class Logitech_G815(KeyboardInterface):
         b'\x11\xff\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
     }
 
-    disableGKeys = b'\x11\xff\x0a\x2b\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    disableGKeys = [
+        # switch from keyboard memory mode to client mode - disables everything but the "normal" keys
+        # so we need to enable it again
+        b'\x11\xff\x11\x1a\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 
+        # enable Gkeys
+        b'\x11\xff\n*\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+        # enable LED manual control (not 100% sure but without this package the following
+        # two packages will not do anything)
+        b'\x11\xff\x0fZ\x01\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+        # enable GLogo light
+        b'\x11\xff\x0f\x1a\x00\x02\x00\x00\x00\x00\x00\x084d\x00\x00\x01\x00\x00\x00',
+        # enable default background light
+        b'\x11\xff\x0f\x1a\x01\x04\x00\x00\x00\x00\x00\x004\x01d\x08\x01\x00\x00\x00',
+    ]
+
     disableGKeysInterface = 1
+    disableGKeysUseWrite = True
 
 SUPPORTED_DEVICES = [
     Logitech_G910_OrionSpectrum,
