@@ -119,6 +119,12 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x00\x40\x00': key.MEMORY_3,
     }
 
+    memoryKeysLEDs = {
+        key.MEMORY_1: b'\x06\x10', # M1 LED
+        key.MEMORY_2: b'\x06\x20', # M2 LED
+        key.MEMORY_3: b'\x06\x40', # M3 LED
+    }
+
     mediaKeys = {
         b'\x02\x08': uinput.KEY_PLAYPAUSE,
         b'\x02\x04': uinput.KEY_STOP,
