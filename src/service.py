@@ -51,20 +51,30 @@ def _stop(*args):
     evLoop.stop()
     virtualKeyboard.destroy()
 
+async def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
+    if useWrite:
+        hdev.write(data)
+    else:
+        hdev.send_feature_report(data)
 
 async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
     logging.debug("Sending sequence to disable G keys")
     with HIDDevice(path=HIDpath) as hdev:
-        if keyDev.disableGKeysUseWrite:
-            for data in keyDev.disableGKeys:
-                hdev.write(data)
-        else:
-            for data in keyDev.disableGKeys:
-                hdev.send_feature_report(data)
+        for data in keyDev.disableGKeys:
+            await _sendData(hdev, data, keyDev.disableGKeysUseWrite)
 
-async def switchProfile(profile):
+async def switchProfile(profile: str,
+                    keyDev: KeyboardInterface, HIDpath: str=None):
     global currProfile
     currProfile = profile
+
+    if HIDpath and not keyDev.useLibUsb and keyDev.memoryKeysLEDs:
+        with HIDDevice(path=HIDpath) as hdev:
+            hdev.nonblocking = True
+            await _sendData(hdev,
+                keyDev.memoryKeysLEDs[profile],
+                keyDev.disableGKeysUseWrite
+            )
 
     path = os.path.join(
         PARENT_LOCATION,
@@ -117,7 +127,8 @@ async def emitKeys(profile, key, uinput=False):
         await executeMacro(macro)
 
 async def handleRawData(fromKeyboard, 
-                    keyboardDev: KeyboardInterface):
+                    keyboardDev: KeyboardInterface,
+                    HIDpath: str=None):
 
     data = bytes(fromKeyboard)
     #print(data)
@@ -139,7 +150,7 @@ async def handleRawData(fromKeyboard,
             #logging.debug(data)
 
     elif data in keyboardDev.memoryKeys:
-        await switchProfile(keyboardDev.memoryKeys[data])
+        await switchProfile(keyboardDev.memoryKeys[data], keyboardDev, HIDpath)
         #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
     else:
         pass    
@@ -158,12 +169,12 @@ async def usbListener(keyboard: core.Device,
     if keyboardDev.disableGKeys:
         await disableGkeyMapping(keyboardDev, HIDpath_disable)
 
-    if HIDpath:
+    if not keyboardDev.useLibUsb:
         with HIDDevice(path=HIDpath) as hdev:
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            await switchProfile(currProfile)
+            await switchProfile(currProfile, keyboardDev, HIDpath_disable)
 
             while True:
                 await asyncio.sleep(0)
@@ -174,11 +185,11 @@ async def usbListener(keyboard: core.Device,
                     )
 
                     if fromKeyboard:
-                        await handleRawData(fromKeyboard, keyboardDev)
+                        await handleRawData(fromKeyboard, keyboardDev, HIDpath_disable)
                 except hid.HIDException as e:
                     logging.debug(f"HIDerror: probably exiting? ({str(e)})")
     else:
-        logging.debug("Using libusb backend as backup...")
+        logging.debug("Using libusb backend...")
         while True:
             await asyncio.sleep(0)
             try:
