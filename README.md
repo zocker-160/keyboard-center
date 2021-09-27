@@ -39,7 +39,7 @@ available in the MPR:
 
 ## Manage Background Service
 
-Keyboard Center does install a background server, which runs with user rights.
+Keyboard Center does install a background service, which runs with user rights.
 
 You can manage it using:\
 `systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
