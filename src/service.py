@@ -300,42 +300,41 @@ def main():
     logging.debug("Searching for HIDraw endpoint...")
     HIDpath, HIDpath_disable = _getHIDpaths(keyboardDev)
     
-    # TODO: use USB fallback only for keyboard that need it
-    # not as a general fallback
     if not HIDpath or not HIDpath_disable:
-        logging.error("HIDraw endpoint could not be found!")
-        sys.exit(1)
+        if keyboardDev.useLibUsb:
+            logging.warning("HIDraw endpoint could not be found!\n\
+                switching to libusb as backup")
+        
+            logging.debug("check and detach kernel driver if active")
+            try:
+                if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
+                    keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
+                    global attachDriver
+                    attachDriver = lambda: keyboard.attach_kernel_driver(
+                        keyboardDev.usbInterface[0]
+                    )
 
-        logging.warning("HIDraw endpoint could not be found!\n\
-            switching to libusb as backup")
-    
-        logging.debug("check and detach kernel driver if active")
-        try:
-            if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
-                keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
-                global attachDriver
-                attachDriver = lambda: keyboard.attach_kernel_driver(
-                    keyboardDev.usbInterface[0]
-                )
+            except core.USBError as e:
+                print("AAA")
+                Notification(
+                    app_name=APP_NAME,
+                    title="Kernel driver init",
+                    description=str(e),
+                    icon_path=ICON_LOCATION,
+                    urgency="critical"
+                ).send_linux()
 
-        except core.USBError as e:
-            print("AAA")
-            Notification(
-                app_name=APP_NAME,
-                title="Kernel driver init",
-                description=str(e),
-                icon_path=ICON_LOCATION,
-                urgency="critical"
-            ).send_linux()
-
-            Notification(
-                app_name=APP_NAME,
-                title="Kernel driver init",
-                description="Please plug your keyboard out and in again\n\
-                    or a restart could solve this issue.",
-                icon_path=ICON_LOCATION,
-                urgency="critical"
-            ).send_linux()
+                Notification(
+                    app_name=APP_NAME,
+                    title="Kernel driver init",
+                    description="Please plug your keyboard out and in again\n\
+                        or a restart could solve this issue.",
+                    icon_path=ICON_LOCATION,
+                    urgency="critical"
+                ).send_linux()
+                sys.exit(1)
+        else:
+            logging.error("HIDraw endpoint could not be found!")
             sys.exit(1)
 
     logging.debug("creating uinput device...")

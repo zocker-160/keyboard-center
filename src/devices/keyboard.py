@@ -26,6 +26,7 @@ class KeyboardInterface:
     disableGKeys = list() # list[bytes]
     disableGKeysUseWrite: bool = field(default=True)
 
+    useLibUsb: bool = field(default=False) # will use libhidraw if False
 
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpectrum(KeyboardInterface):
@@ -150,7 +151,7 @@ class Logitech_G815(KeyboardInterface):
         b'\x11\xff\n\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_3,
         b'\x11\xff\n\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_4,
         b'\x11\xff\n\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_5,
-        b'\x03\x08': uinput.KEY_PLAYPAUSE,
+        b'\x03\x08': uinput.KEY_PLAYPAUSE, #TODO: catch media keys only when in USB mode
         b'\x03\x04': uinput.KEY_STOP,
         b'\x03\x02': uinput.KEY_PREVIOUS,
         b'\x03\x01': uinput.KEY_NEXT,
