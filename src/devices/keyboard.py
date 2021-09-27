@@ -19,7 +19,7 @@ class KeyboardInterface:
 
     macroKeys: dict # dict[bytes, str]
     memoryKeys: dict # dict[bytes, str]
-    memoryKeysLEDs: dict # dict[str, bytes]
+    mediaKeys: dict # dict[bytes, str] | only in use when in libUSB mode (kernel driver unloaded)
     releaseEvents: str # str[bytes]
 
     # Following is sent to disable the default G keys mapping
@@ -27,6 +27,8 @@ class KeyboardInterface:
     disableGKeys = list() # list[bytes]
     disableGKeysUseWrite: bool = field(default=True)
 
+    ## optional
+    memoryKeysLEDs = dict() # dict[str, bytes]
     useLibUsb: bool = field(default=False) # will use libhidraw if False
 
 @dataclass(frozen=True)
@@ -53,13 +55,6 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x11\xff\x08\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_7,
         b'\x11\xff\x08\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_8,
         b'\x11\xff\x08\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_9,
-        b'\x02\x08': uinput.KEY_PLAYPAUSE,
-        b'\x02\x04': uinput.KEY_STOP,
-        b'\x02\x02': uinput.KEY_PREVIOUS,
-        b'\x02\x01': uinput.KEY_NEXT,
-        b'\x02@': uinput.KEY_MUTE,
-        b'\x02\x10': uinput.KEY_VOLUMEUP,
-        b'\x02 ': uinput.KEY_VOLUMEDOWN,
         b'\x11\xff\n\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MEMORY_RECORD,
     }
 
@@ -67,6 +62,16 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x11\xff\t\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MEMORY_1,
         b'\x11\xff\t\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MEMORY_2,
         b'\x11\xff\t\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MEMORY_3,
+    }
+
+    mediaKeys = {
+        b'\x02\x08': uinput.KEY_PLAYPAUSE,
+        b'\x02\x04': uinput.KEY_STOP,
+        b'\x02\x02': uinput.KEY_PREVIOUS,
+        b'\x02\x01': uinput.KEY_NEXT,
+        b'\x02@': uinput.KEY_MUTE,
+        b'\x02\x10': uinput.KEY_VOLUMEUP,
+        b'\x02 ': uinput.KEY_VOLUMEDOWN,
     }
 
     releaseEvents = {
@@ -105,13 +110,6 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x08\x00\x00': key.MACRO_4,
         b'\x03\x10\x00\x00': key.MACRO_5,
         b'\x03\x20\x00\x00': key.MACRO_6,
-        b'\x02\x08': uinput.KEY_PLAYPAUSE,
-        b'\x02\x04': uinput.KEY_STOP,
-        b'\x02\x02': uinput.KEY_PREVIOUS,
-        b'\x02\x01': uinput.KEY_NEXT,
-        b'\x02\x40': uinput.KEY_MUTE,
-        b'\x02\x10': uinput.KEY_VOLUMEUP,
-        b'\x02\x20': uinput.KEY_VOLUMEDOWN,
         b'\x03\x00\x80\x00': key.MEMORY_RECORD,
     }
 
@@ -119,6 +117,16 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x00\x10\x00': key.MEMORY_1,
         b'\x03\x00\x20\x00': key.MEMORY_2,
         b'\x03\x00\x40\x00': key.MEMORY_3,
+    }
+
+    mediaKeys = {
+        b'\x02\x08': uinput.KEY_PLAYPAUSE,
+        b'\x02\x04': uinput.KEY_STOP,
+        b'\x02\x02': uinput.KEY_PREVIOUS,
+        b'\x02\x01': uinput.KEY_NEXT,
+        b'\x02\x40': uinput.KEY_MUTE,
+        b'\x02\x10': uinput.KEY_VOLUMEUP,
+        b'\x02\x20': uinput.KEY_VOLUMEDOWN,
     }
 
     releaseEvents = {
@@ -152,13 +160,6 @@ class Logitech_G815(KeyboardInterface):
         b'\x11\xff\n\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_3,
         b'\x11\xff\n\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_4,
         b'\x11\xff\n\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_5,
-        b'\x03\x08': uinput.KEY_PLAYPAUSE, #TODO: catch media keys only when in USB mode
-        b'\x03\x04': uinput.KEY_STOP,
-        b'\x03\x02': uinput.KEY_PREVIOUS,
-        b'\x03\x01': uinput.KEY_NEXT,
-        b'\x03@': uinput.KEY_MUTE,
-        b'\x03\x10': uinput.KEY_VOLUMEUP,
-        b'\x03 ': uinput.KEY_VOLUMEDOWN,
         b'\x11\xff\x0c\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MEMORY_RECORD,
     }
 
@@ -172,6 +173,16 @@ class Logitech_G815(KeyboardInterface):
         key.MEMORY_1: b'\x11\xff\x0b\x1a\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M1 LED
         key.MEMORY_2: b'\x11\xff\x0b\x1a\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M2 LED
         key.MEMORY_3: b'\x11\xff\x0b\x1a\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M3 LED
+    }
+
+    mediaKeys = {
+        b'\x03\x08': uinput.KEY_PLAYPAUSE,
+        b'\x03\x04': uinput.KEY_STOP,
+        b'\x03\x02': uinput.KEY_PREVIOUS,
+        b'\x03\x01': uinput.KEY_NEXT,
+        b'\x03@': uinput.KEY_MUTE,
+        b'\x03\x10': uinput.KEY_VOLUMEUP,
+        b'\x03 ': uinput.KEY_VOLUMEDOWN,
     }
 
     releaseEvents = {

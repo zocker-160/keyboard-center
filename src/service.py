@@ -132,10 +132,9 @@ async def handleRawData(fromKeyboard,
 
     data = bytes(fromKeyboard)
     #print(data)
+    pressed = keyboardDev.macroKeys.get(data)
 
     if data in keyboardDev.macroKeys:
-        pressed = keyboardDev.macroKeys.get(data)
-
         if pressed:
             # TODO: clean this up
             if isinstance(pressed, str):
@@ -152,6 +151,9 @@ async def handleRawData(fromKeyboard,
     elif data in keyboardDev.memoryKeys:
         await switchProfile(keyboardDev.memoryKeys[data], keyboardDev, HIDpath)
         #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
+
+    elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
+        await emitKeys(currProfile, pressed, True)
     else:
         pass    
 
