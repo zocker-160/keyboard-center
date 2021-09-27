@@ -213,10 +213,10 @@ def inotifyReader(inotify: INotify):
                 urgency="normal"
             ).send_linux()
 
-def _getHIDpaths(usbVendor, usbProduct, keyboardDev: KeyboardInterface):
+def _getHIDpaths(keyboardDev: KeyboardInterface):
     HIDpath, HIDpath_disable = None, None
 
-    for dev in hid.enumerate(usbVendor, usbProduct):
+    for dev in hid.enumerate(keyboardDev.usbVendor, keyboardDev.usbProduct):
         if dev.get("interface_number") == keyboardDev.usbInterface[0]:
             HIDpath: bytes = dev.get("path")
             logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
@@ -298,8 +298,7 @@ def main():
                                         [keyboardDev.usbEndpoint]
 
     logging.debug("Searching for HIDraw endpoint...")
-    HIDpath, HIDpath_disable = _getHIDpaths(
-        device.usbVendor, device.usbProduct, keyboardDev)
+    HIDpath, HIDpath_disable = _getHIDpaths(keyboardDev)
     
     # TODO: use USB fallback only for keyboard that need it
     # not as a general fallback
