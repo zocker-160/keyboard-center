@@ -270,7 +270,6 @@ def main():
             config.settings["settings"]["usbDeviceID"] = i
             config.save()
 
-            logging.debug("requesting USB endpoint...")
             keyboardDev: KeyboardInterface = device
             break
     t2 = time.time()
@@ -292,6 +291,7 @@ def main():
     else:
         logging.debug(f"time taken to find keyboard in ms: {t2-t1}")
 
+    logging.debug("requesting USB endpoint...")
     keyboardEndpoint: core.Endpoint = keyboard\
                                         [keyboardDev.usbConfiguration]\
                                         [keyboardDev.usbInterface]\
