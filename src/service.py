@@ -4,10 +4,10 @@ import os
 import sys
 import time
 import signal
-
 import logging
-
 import asyncio
+
+from threading import Thread
 
 import uinput
 from usb import core
@@ -51,7 +51,7 @@ def _stop(*args):
     evLoop.stop()
     virtualKeyboard.destroy()
 
-async def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
+def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
     if useWrite:
         hdev.write(data)
     else:
@@ -61,9 +61,9 @@ async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
     logging.debug("Sending sequence to disable G keys")
     with HIDDevice(path=HIDpath) as hdev:
         for data in keyDev.disableGKeys:
-            await _sendData(hdev, data, keyDev.disableGKeysUseWrite)
+            _sendData(hdev, data, keyDev.disableGKeysUseWrite)
 
-async def switchProfile(profile: str,
+def switchProfile(profile: str,
                     keyDev: KeyboardInterface, HIDpath: str=None):
     global currProfile
     currProfile = profile
@@ -71,7 +71,7 @@ async def switchProfile(profile: str,
     if HIDpath and not keyDev.useLibUsb and keyDev.memoryKeysLEDs:
         with HIDDevice(path=HIDpath) as hdev:
             hdev.nonblocking = True
-            await _sendData(hdev,
+            _sendData(hdev,
                 keyDev.memoryKeysLEDs[profile],
                 keyDev.disableGKeysUseWrite
             )
@@ -90,20 +90,20 @@ async def switchProfile(profile: str,
         urgency="normal"
     ).send_linux() # this shit is targeted at linux only fuck anything else
 
-async def executeMacro(macro: list):
+def executeMacro(macro: list):
     for action in macro:
         if len(action) == 1:
             if action[0][0] == TYPE_CLICK:
                 virtualKeyboard.emit_click(action[0])
             elif action[0][0] == TYPE_DELAY:
-                await asyncio.sleep(action[0][1] / 1000)
+                time.sleep(action[0][1] / 1000)
             
         elif all([ x[0] == TYPE_CLICK for x in action ]):
             virtualKeyboard.emit_combo(action)
         else:
             logging.error("unknown keyboard action...."+str(action))
 
-async def emitKeys(profile, key, uinput=False):
+def emitKeys(profile, key, uinput=False):
     """ 
     Function that emits the requested keys
 
@@ -124,7 +124,7 @@ async def emitKeys(profile, key, uinput=False):
 
     elif type == TYPE_MACRO and macro:
         print(macro)
-        await executeMacro(macro)
+        executeMacro(macro)
 
 async def handleRawData(fromKeyboard, 
                     keyboardDev: KeyboardInterface,
@@ -136,24 +136,20 @@ async def handleRawData(fromKeyboard,
 
     if data in keyboardDev.macroKeys:
         if pressed:
-            # TODO: clean this up
             if isinstance(pressed, str):
-                await emitKeys(currProfile, pressed)
-                #Thread(target=emitKeys, args=(currProfile,pressed), daemon=True).start()
+                Thread(target=emitKeys, args=(currProfile,pressed), daemon=True).start()
             else: # uinput key
-                await emitKeys(currProfile, pressed, True)
-                #Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
+                Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
         else:
             pass
             #logging.debug("recieved data could not get mapped to a macro key")
             #logging.debug(data)
 
     elif data in keyboardDev.memoryKeys:
-        await switchProfile(keyboardDev.memoryKeys[data], keyboardDev, HIDpath)
-        #Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],), daemon=True).start()
+        Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],keyboardDev, HIDpath), daemon=True).start()
 
     elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
-        await emitKeys(currProfile, pressed, True)
+        Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
     else:
         pass    
 
@@ -176,7 +172,7 @@ async def usbListener(keyboard: core.Device,
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            await switchProfile(currProfile, keyboardDev, HIDpath_disable)
+            switchProfile(currProfile, keyboardDev, HIDpath_disable)
 
             while True:
                 await asyncio.sleep(0)
