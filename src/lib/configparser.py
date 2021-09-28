@@ -138,6 +138,8 @@ class Configparser:
 
         @returns dict with data or "False" if entry needs to get removed
         """
+        getType = lambda x: TYPE_DELAY if x == TYPE_DELAY_STR else TYPE_CLICK
+
         if len(data) == 0:
             # no data -> delete this entry
             return False
@@ -149,7 +151,7 @@ class Configparser:
                 string, val = keycombo.pop()
                 return self._generateEntry(
                     TYPE_KEY,
-                    (TYPE_CLICK, val),
+                    (getType(string), val),
                     string,
                     name
                 )
@@ -159,7 +161,7 @@ class Configparser:
                 for key in keycombo:
                     s, v = key
                     string.append(s)
-                    val.append( (TYPE_CLICK, v) )
+                    val.append( (getType(s), v) )
                 return self._generateEntry(TYPE_COMBO, val, string, name)
 
             else:
@@ -172,7 +174,7 @@ class Configparser:
                 for key in keycombo:
                     s, v = key
                     kstring.append(s)
-                    kval.append( (TYPE_CLICK, v) ) # TODO: implement delay
+                    kval.append( (getType(s), v) )
 
                 string.append(kstring)
                 val.append(kval)

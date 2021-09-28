@@ -30,7 +30,7 @@ from lib.configparser import Configparser
 from lib.servicehelper import *
 
 from gui.CEntryButton import CEntryButton
-from gui.customwidgets import KeyPressWidget
+from gui.customwidgets import DelayWidget, KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_aboutWindow
 from gui.Ui_serviceWindow import Ui_serviceWindow
@@ -174,6 +174,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.close)
 
         self.addKey.clicked.connect(self.addBlankKeyWidget)
+        self.addDelay.clicked.connect(self.addBlankDelayWidget)
         self.saveButton.clicked.connect(lambda: self.saveData(True))
         self.clearAllButton.clicked.connect(
             self.keyListWidgetContents.clearAllEntries)
@@ -239,6 +240,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def addBlankKeyWidget(self):
         self.keyListWidgetContents.addWidget(KeyPressWidget())
+
+    def addBlankDelayWidget(self):
+        self.keyListWidgetContents.addWidget(DelayWidget())
 
 
     def saveData(self, saveToFile=False):

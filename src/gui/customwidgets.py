@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QKeyEvent, QKeySequence, QMouseEvent
 from PyQt5.QtWidgets import QKeySequenceEdit, QScrollArea, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
 
-from lib.configparser import MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META
+from lib.configparser import MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META, TYPE_DELAY, TYPE_DELAY_STR
 
 class CKeySequenceEdit(QKeySequenceEdit):
 
@@ -135,6 +135,20 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
                     pass
 
 
+from gui.Ui_delayWidget import Ui_DelayWidget
+
+class DelayWidget(CListWidgetItem, Ui_DelayWidget):
+    def __init__(self, parent=None, delay: int = None):
+        super().__init__(parent=parent)
+
+        self.setupUi(self)
+        self.clearButton.clicked.connect(lambda:self.spinBox.setValue(0))
+
+        if delay: self.spinBox.setValue(delay)
+
+    def getData(self):
+        return [(TYPE_DELAY_STR, self.spinBox.value())]
+
 class CListWidgetContent(QWidget):
 
     def __init__(self, parent=None):
@@ -212,10 +226,12 @@ class CListWidgetContent(QWidget):
                     sKeyRaw = values[i][y]
 
             print("rawvalue:", sKeyRaw)
-            # TODO: add support for delays
-            self.addWidget(KeyPressWidget(
-                bCtrl=bCtrl, bAlt=bAlt, bShift=bShift, bMeta=bmeta,
-                key=sKey, rawKey=sKeyRaw))
+            if sKey == TYPE_DELAY_STR and sKeyRaw[0] == TYPE_DELAY:
+                self.addWidget(DelayWidget(delay=sKeyRaw[1]))
+            else:
+                self.addWidget(KeyPressWidget(
+                    bCtrl=bCtrl, bAlt=bAlt, bShift=bShift, bMeta=bmeta,
+                    key=sKey, rawKey=sKeyRaw))
 
 
     def getLayout(self) -> QVBoxLayout:

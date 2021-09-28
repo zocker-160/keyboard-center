@@ -154,11 +154,8 @@ QLabel#asd:pressed {
           </item>
           <item>
            <widget class="QPushButton" name="addDelay">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
             <property name="text">
-             <string>Add Delay (soon)</string>
+             <string>Add Delay</string>
             </property>
             <property name="icon">
              <iconset theme="list-add">
