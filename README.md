@@ -9,7 +9,7 @@ Keyboard Center is an application attempting to create an easy way for users to 
 
 **Unlike some other solutions, this application works alongside with RGB software like [OpenRGB](https://openrgb.org/)!**
 
-![showcase](images/animation1.gif)
+![showcase](images/animation2.gif)
 
 **NOTE:** This application is written for **Linux only**, on Windows use whatever bloatware the vendor wants you to use.
 
