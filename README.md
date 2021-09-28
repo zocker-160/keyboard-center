@@ -13,6 +13,16 @@ Keyboard Center is an application attempting to create an easy way for users to 
 
 **NOTE:** This application is written for **Linux only**, on Windows use whatever bloatware the vendor wants you to use.
 
+## Features
+
+- [x] Mapping of keys, combos and macros
+- [x] Ablity to add delays to macros
+- [x] libhidraw backend and libusb as backup if needed
+- [ ] Support for switching LEDs of profile keys *(partially complete)*
+- [ ] Import and export of the configuration
+- [ ] Profiles for specific applications
+- [ ] openRGB integration - linking of macro profiles with openRGB profiles
+
 ## Supported Keyboards
 
 - Logitech G910 Orion Spectrum (046d:c335)
