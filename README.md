@@ -51,16 +51,11 @@ available in the MPR:
 ### Step 1: Create Profile(s) in OpenRGB
 ![OpenRGBprofiles](images/OpenRGBprofiles.png)
 
-### Step 2: Enable OpenRGB SDK Server
-**in CLI**: `openrgb --server`
-
-**in GUI**:
-
-![OpenRGBserver](images/OpenRGBserver.png)
-
-### Step 3: Specify Profile in Keyboard Center
+### Step 2: Specify Profile in Keyboard Center
 
 ![OpenRGBkeyboardcenter](images/OpenRGBkeyboardc.png)
+
+**note:** if you install OpenRGB after Keyboard Center, you will need to restart the background service.
 
 ## Manage Background Service
 
