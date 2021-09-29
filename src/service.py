@@ -56,9 +56,16 @@ def _stop(*args):
     virtualKeyboard.destroy()
 
 def setOpenRGBProfile(profile: str, retry: int, first: bool):
+    orgb = config.getOpenRGB().get(profile)
+    if not orgb: return
+
     try:
+        logging.debug("Setting OpenRGB profile "+orgb)
         client = OpenRGBClient()
-        client.load_profile(profile)
+        if first:
+            client.clear() # we need to clear because sometimes load_profile just does not fucking work
+            time.sleep(0.5) # we need to wait a moment after clear
+        client.load_profile(orgb)
     except ConnectionRefusedError:
         if retry <= 0 or not first:
             return

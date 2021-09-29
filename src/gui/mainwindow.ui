@@ -67,6 +67,77 @@ QLabel#asd:pressed {
       <item>
        <layout class="QHBoxLayout" name="memoryKeySlots"/>
       </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>8</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>OpenRGB Profile:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="openRGBedit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="openRGBhelp">
+           <property name="toolTip">
+            <string>just freaking click it!</string>
+           </property>
+           <property name="whatsThis">
+            <string>THIS IS A HELP BUTTON!</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset theme="help-about"/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -104,7 +175,7 @@ QLabel#asd:pressed {
            <x>0</x>
            <y>0</y>
            <width>83</width>
-           <height>465</height>
+           <height>437</height>
           </rect>
          </property>
         </widget>
@@ -190,7 +261,7 @@ QLabel#asd:pressed {
              <x>0</x>
              <y>0</y>
              <width>797</width>
-             <height>413</height>
+             <height>385</height>
             </rect>
            </property>
           </widget>

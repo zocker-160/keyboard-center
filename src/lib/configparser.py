@@ -56,6 +56,14 @@ class Configparser:
         d = self.getMappings().get(profile)
         return d if d else {}
 
+    def getOpenRGB(self) -> dict:
+        d = self.settings.get("openRGB")
+        if d:
+            return d
+        else:
+            self.settings["openRGB"] = {}
+            return self.settings["openRGB"]
+
     def getKey(self, profile: str, key: str) -> tuple:
         """ 
         gets the pressed key + profile and returns either the key tuple 
@@ -95,9 +103,10 @@ class Configparser:
 
     ## load and store from GUI
 
-    def saveFromGui(self, profile: str, macroKey: str, name: str,
+    def saveFromGui(self, profile: str, macroKey: str, name: str, orgb: str,
             data, bSavetoFile=False):
         mapping = self.getMappings()
+        openRGB = self.getOpenRGB()
         print(mapping)
 
         data = self._convertDataFromGuiToYaml(data, name)
@@ -113,20 +122,31 @@ class Configparser:
             except KeyError:
                 pass
 
+        if orgb:
+            openRGB[profile] = orgb
+        else:
+            try:
+                del openRGB[profile]
+            except KeyError:
+                pass
+
         print(self.settings)
         if bSavetoFile: self.save()
 
     def loadForGui(self, profile: str, macroKey: str):
         data: dict = self.getProfile(profile).get(macroKey)
+        openRGB: dict = self.getOpenRGB().get(profile)
+        openRGB = openRGB if openRGB else ""
+        
         if data:
             if data.get("type") == TYPE_COMBO: # TODO: remove this nonsense
-                return ([data.get("string")], data.get("name"), [data.get("value")])
+                return ([data.get("string")], data.get("name"), [data.get("value")], openRGB)
             elif data.get("type") == TYPE_KEY:
-                return ([[data.get("string")]], data.get("name"), [[data.get("value")]])
+                return ([[data.get("string")]], data.get("name"), [[data.get("value")]], openRGB)
             else:
-                return (data.get("string"), data.get("name"), data.get("value"))
+                return (data.get("string"), data.get("name"), data.get("value"), openRGB)
         else:
-            return ({}, "", {})
+            return ({}, "", {}, openRGB)
 
     def _convertDataFromGuiToYaml(self, data: list, name="") -> dict:
         """ 
@@ -189,7 +209,7 @@ class Configparser:
                 data = self.configYAML.load(yaml)
             logging.debug("config loaded: " + str(data))
             
-            self.settings = data
+            self.settings: dict = data
             return True
 
         except FileNotFoundError:

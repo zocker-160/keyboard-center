@@ -255,6 +255,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 profile=ALL_MEMORY_KEYS[self.currMemory],
                 macroKey=ALL_MACRO_KEYS[self.currMacro],
                 name=self.macroNameEdit.text(),
+                orgb=self.openRGBedit.text(),
                 data=data,
                 bSavetoFile=saveToFile
             )
@@ -269,12 +270,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, name, val = self.configparser.loadForGui(
+        d, name, val, orgb = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
 
-        print(d, name, val)
+        print(d, name, val, orgb)
 
         try:
             self.keyListWidgetContents.setKeyData(d, val)
@@ -284,7 +285,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.showErrorMSG(str(e))
         
         self.macroNameEdit.setText(name)
-
+        self.openRGBedit.setText(orgb)
 
     # function overloading
     def keyPressEvent(self, a0: QKeyEvent):
