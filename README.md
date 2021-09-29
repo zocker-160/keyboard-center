@@ -20,8 +20,8 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - [x] libhidraw backend and libusb as backup if needed
 - [ ] Support for switching LEDs of profile keys *(partially complete)*
 - [ ] Import and export of the configuration
-- [ ] Profiles for specific applications
-- [ ] openRGB integration - linking of macro profiles with openRGB profiles
+- [ ] Profiles for specific applications (currently impossible on wayland)
+- [x] openRGB integration - linking of macro profiles with openRGB profiles
 
 ## Supported Keyboards
 
@@ -46,6 +46,21 @@ available in the MPR:
 
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `gdebi <packagename>.deb`
+
+## Setup OpenRGB Integration
+### Step 1: Create Profile(s) in OpenRGB
+![OpenRGBprofiles](images/OpenRGBprofiles.png)
+
+### Step 2: Enable OpenRGB SDK Server
+**in CLI**: `openrgb --server`
+
+**in GUI**:
+
+![OpenRGBserver](images/OpenRGBserver.png)
+
+### Step 3: Specify Profile in Keyboard Center
+
+![OpenRGBkeyboardcenter](images/OpenRGBkeyboardc.png)
 
 ## Manage Background Service
 

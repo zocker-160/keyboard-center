@@ -41,7 +41,7 @@ TEMPLATE_LOCATION = os.path.join(
 )
 
 PLACEHOLDER_STR = "$$$"
-VERSION = "0.1.16-testing"
+VERSION = "0.1.17-testing"
 
 class AboutWindow(QDialog, Ui_aboutWindow):
     def __init__(self, parent):
@@ -172,6 +172,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionGitHub.triggered.connect(self.showGitHub)
         self.actionReport_issue.triggered.connect(self.showReportIssue)
         self.actionExit.triggered.connect(self.close)
+        self.openRGBhelp.clicked.connect(self.showOpenRGBsetup)
 
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
@@ -193,17 +194,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 parent=self)
             btn.onSelection.connect(self.setCurrMemory)
             self.memoryKeySlots.addWidget(btn)
-        else:
-            # this is needed to move all the buttons to the left
-            self.memoryKeySlots.addSpacerItem(QSpacerItem(
-                40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        #else:
+        #    # this is needed to move all the buttons to the left
+        #    self.memoryKeySlots.addSpacerItem(QSpacerItem(
+        #        40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
             
         self.macroKeySlots = QVBoxLayout(self.macroKeys)
         for y in range(self.usbDevice.numMacroKeys):
             btn = CEntryButton(
                 name=f"G{y+1}",
                 position=y,
-                parent=self)
+                parent=self,
+                vert=True)
             btn.onSelection.connect(self.setCurrMacro)
             self.macroKeySlots.addWidget(btn)
     
@@ -254,6 +256,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 profile=ALL_MEMORY_KEYS[self.currMemory],
                 macroKey=ALL_MACRO_KEYS[self.currMacro],
                 name=self.macroNameEdit.text(),
+                orgb=self.openRGBedit.text(),
                 data=data,
                 bSavetoFile=saveToFile
             )
@@ -268,12 +271,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, name, val = self.configparser.loadForGui(
+        d, name, val, orgb = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
 
-        print(d, name, val)
+        print(d, name, val, orgb)
 
         try:
             self.keyListWidgetContents.setKeyData(d, val)
@@ -283,7 +286,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.showErrorMSG(str(e))
         
         self.macroNameEdit.setText(name)
-
+        self.openRGBedit.setText(orgb)
 
     # function overloading
     def keyPressEvent(self, a0: QKeyEvent):
@@ -306,6 +309,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def showReportIssue(self):
         webbrowser.open("https://github.com/zocker-160/keyboard-center/issues")
+
+    def showOpenRGBsetup(self):
+        webbrowser.open("https://github.com/zocker-160/keyboard-center")
 
     ### popup messages
     def showErrorMSG(self, msg_str, title_msg="ERROR", detailText=""):
