@@ -172,6 +172,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionGitHub.triggered.connect(self.showGitHub)
         self.actionReport_issue.triggered.connect(self.showReportIssue)
         self.actionExit.triggered.connect(self.close)
+        self.openRGBhelp.clicked.connect(self.showOpenRGBsetup)
 
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
@@ -308,6 +309,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def showReportIssue(self):
         webbrowser.open("https://github.com/zocker-160/keyboard-center/issues")
+
+    def showOpenRGBsetup(self):
+        webbrowser.open("https://github.com/zocker-160/keyboard-center")
 
     ### popup messages
     def showErrorMSG(self, msg_str, title_msg="ERROR", detailText=""):
