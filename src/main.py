@@ -193,17 +193,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 parent=self)
             btn.onSelection.connect(self.setCurrMemory)
             self.memoryKeySlots.addWidget(btn)
-        else:
-            # this is needed to move all the buttons to the left
-            self.memoryKeySlots.addSpacerItem(QSpacerItem(
-                40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        #else:
+        #    # this is needed to move all the buttons to the left
+        #    self.memoryKeySlots.addSpacerItem(QSpacerItem(
+        #        40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
             
         self.macroKeySlots = QVBoxLayout(self.macroKeys)
         for y in range(self.usbDevice.numMacroKeys):
             btn = CEntryButton(
                 name=f"G{y+1}",
                 position=y,
-                parent=self)
+                parent=self,
+                vert=True)
             btn.onSelection.connect(self.setCurrMacro)
             self.macroKeySlots.addWidget(btn)
     
