@@ -6,6 +6,8 @@ import time
 import signal
 import logging
 import asyncio
+import shutil
+import subprocess
 
 from threading import Thread
 
@@ -17,6 +19,8 @@ from lib.pynotifier import Notification
 from lib.inotify_simple import INotify, flags
 from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 import lib.hid as hid
+
+from lib.openrgb.orgb import OpenRGBClient
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
@@ -51,6 +55,21 @@ def _stop(*args):
     evLoop.stop()
     virtualKeyboard.destroy()
 
+def setOpenRGBProfile(profile: str, retry: int, first: bool):
+    try:
+        client = OpenRGBClient()
+        client.load_profile(profile)
+    except ConnectionRefusedError:
+        if retry <= 0 or not first:
+            return
+        #if retry == RETRY_COUNT and shutil.which("openrgb"):
+        #    subprocess.Popen(["openrgb", "--server"], shell=False)
+        logging.debug("Could not reach OpenRGB SDK, retrying...")
+        time.sleep(RETRY_TIMEOUT)
+        setOpenRGBProfile(profile, retry-1)
+    except ValueError as e:
+        logging.error(str(e))
+
 def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
     if useWrite:
         hdev.write(data)
@@ -64,10 +83,12 @@ async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
             _sendData(hdev, data, keyDev.disableGKeysUseWrite)
 
 def switchProfile(profile: str,
-                    keyDev: KeyboardInterface, HIDpath: str=None):
+                    keyDev: KeyboardInterface, HIDpath: str=None,
+                    first=False):
     global currProfile
     currProfile = profile
 
+    # switch Mkey LED
     if HIDpath and not keyDev.useLibUsb and keyDev.memoryKeysLEDs:
         with HIDDevice(path=HIDpath) as hdev:
             hdev.nonblocking = True
@@ -75,6 +96,9 @@ def switchProfile(profile: str,
                 keyDev.memoryKeysLEDs[profile],
                 keyDev.disableGKeysUseWrite
             )
+
+    # set openRGB profile
+    Thread(target=setOpenRGBProfile, args=(profile, RETRY_COUNT, first), daemon=True).start()
 
     path = os.path.join(
         PARENT_LOCATION,
@@ -172,7 +196,7 @@ async def usbListener(keyboard: core.Device,
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            switchProfile(currProfile, keyboardDev, HIDpath_disable)
+            switchProfile(currProfile, keyboardDev, HIDpath_disable, True)
 
             while True:
                 await asyncio.sleep(0)
