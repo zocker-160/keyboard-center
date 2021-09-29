@@ -311,7 +311,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         webbrowser.open("https://github.com/zocker-160/keyboard-center/issues")
 
     def showOpenRGBsetup(self):
-        webbrowser.open("https://github.com/zocker-160/keyboard-center")
+        webbrowser.open("https://github.com/zocker-160/keyboard-center#setup-openrgb-integration")
 
     ### popup messages
     def showErrorMSG(self, msg_str, title_msg="ERROR", detailText=""):
