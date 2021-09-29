@@ -73,7 +73,7 @@ def setOpenRGBProfile(profile: str, retry: int, first: bool):
         #    subprocess.Popen(["openrgb", "--server"], shell=False)
         logging.debug("Could not reach OpenRGB SDK, retrying...")
         time.sleep(RETRY_TIMEOUT)
-        setOpenRGBProfile(profile, retry-1)
+        setOpenRGBProfile(profile, retry-1, first)
     except ValueError as e:
         logging.error(str(e))
 
