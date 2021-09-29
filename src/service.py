@@ -104,8 +104,8 @@ def switchProfile(profile: str,
         PARENT_LOCATION,
         "assets", f"{profile}.png"
     )
-    logging.debug("notification icon path " + path)
-    logging.debug("triggering notification")
+    #logging.debug("notification icon path " + path)
+    #logging.debug("triggering notification")
 
     Notification(
         app_name=APP_NAME,
