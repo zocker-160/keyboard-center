@@ -14,6 +14,8 @@ class CEntryButton(QPushButton):
         self.setFocusPolicy(Qt.NoFocus)
         if vert:
             self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        else:
+            self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
 
         self.postition = position
 
