@@ -63,6 +63,7 @@ def setOpenRGBProfile(profile: str, retry: int, first: bool):
         logging.debug("Setting OpenRGB profile "+orgb)
         client = OpenRGBClient()
         if first:
+            client.load_profile(orgb) # we need to run this first, in case the profile does not exist
             client.clear() # we need to clear because sometimes load_profile just does not fucking work
             time.sleep(0.5) # we need to wait a moment after clear
         client.load_profile(orgb)
@@ -203,7 +204,8 @@ async def usbListener(keyboard: core.Device,
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            switchProfile(currProfile, keyboardDev, HIDpath_disable, True)
+            switchProfile(currProfile,
+                keyboardDev, HIDpath_disable, "--boot" in sys.argv)
 
             while True:
                 await asyncio.sleep(0)
