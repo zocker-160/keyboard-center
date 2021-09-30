@@ -204,8 +204,7 @@ async def usbListener(keyboard: core.Device,
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            switchProfile(currProfile,
-                keyboardDev, HIDpath_disable, "--boot" in sys.argv)
+            switchProfile(currProfile, keyboardDev, HIDpath_disable, True)
 
             errorCount = 0
             while True:

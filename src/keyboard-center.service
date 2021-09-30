@@ -3,7 +3,7 @@ Description=background service for the Keyboard-Center application
 Requires=dbus.service
 
 [Service]
-ExecStart=python3 /usr/lib/keyboard-center/service.py --boot %h
+ExecStart=python3 /usr/lib/keyboard-center/service.py %h
 #Restart=on-failure
 
 [Install]

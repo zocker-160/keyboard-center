@@ -30,7 +30,7 @@ class Configparser:
         xdg_home = os.environ.get("XDG_CONFIG_HOME")
 
         if not xdg_home:
-            home = os.environ.get("HOME") or args[-1]
+            home = os.environ.get("HOME") or args[1]
             xdg_home = os.path.join(home, ".config")
         
         confFolder = os.path.join(xdg_home, "keyboard-center")
