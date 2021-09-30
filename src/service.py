@@ -207,6 +207,7 @@ async def usbListener(keyboard: core.Device,
             switchProfile(currProfile,
                 keyboardDev, HIDpath_disable, "--boot" in sys.argv)
 
+            errorCount = 0
             while True:
                 await asyncio.sleep(0)
                 try:
@@ -217,8 +218,13 @@ async def usbListener(keyboard: core.Device,
 
                     if fromKeyboard:
                         await handleRawData(fromKeyboard, keyboardDev, HIDpath_disable)
+                        errorCount = 0
                 except hid.HIDException as e:
                     logging.debug(f"HIDerror: probably exiting? ({str(e)})")
+                    if errorCount > 10:
+                        sys.exit(1)
+                    else:
+                        errorCount += 1
     else:
         logging.debug("Using libusb backend...")
         while True:
