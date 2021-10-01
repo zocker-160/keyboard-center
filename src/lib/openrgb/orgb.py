@@ -1,9 +1,9 @@
 from __future__ import annotations
 import struct
 import platform
-from openrgb import utils
 from typing import Union, Optional
-from openrgb.network import NetworkClient
+from lib.openrgb import utils
+from lib.openrgb.network import NetworkClient
 # from dataclasses import dataclass
 from time import sleep
 from os import environ
