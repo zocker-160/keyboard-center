@@ -81,6 +81,7 @@ async def usbListener(keyboard: core.Device,
 
 def main(info=False):
     global usbInterface
+    disableGKeys = None
 
     logging.debug("Searching for keyboard...")
     keyboard: core.Device = core.find(
