@@ -209,12 +209,24 @@ class Configparser:
                 data = self.configYAML.load(yaml)
             logging.debug("config loaded: " + str(data))
             
+            self._configIntegrityCheck()
+
             self.settings: dict = data
             return True
 
         except FileNotFoundError:
             logging.critical("config file not found")
-            if not silent: raise
+            raise
+        except TypeError as e:
+            # from _configIntegrityCheck
+            logging.exception(e)
+            logging.critical("config file is missing important fields")
+            raise
+        except AssertionError as e:
+            # from _configIntegrityCheck
+            logging.exception(e)
+            logging.critical("config file integrity check failed")
+            raise
         except Exception as e:
             logging.exception(e)
             if not silent: raise
@@ -240,3 +252,10 @@ class Configparser:
         with open(src, "r") as s:
             with open(dest, "w") as d:
                 d.write(s.read())
+
+    def _configIntegrityCheck(self):
+        settings = self.getSettings()
+        mappings = self.getMappings()
+
+        assert type(settings) == dict
+        assert type(mappings) == dict
