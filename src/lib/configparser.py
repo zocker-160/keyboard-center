@@ -1,5 +1,4 @@
 import os
-import shutil
 from ruamel.yaml import YAML
 import logging
 
@@ -43,8 +42,7 @@ class Configparser:
             logging.debug("creating confFolder "+confFolder)
             os.mkdir(confFolder)
         if not os.path.isfile(confLoc):
-            logging.debug("copying config to "+confLoc)
-            shutil.copyfile(confTemplate, confLoc)
+            self._copyConfig(confTemplate, confLoc)
 
         return confLoc
 
@@ -233,3 +231,12 @@ class Configparser:
         except Exception as e:
             logging.exception(e)
             if not silent: raise
+
+    def _copyConfig(self, src: str, dest: str):
+        logging.info("copying template config file")
+        logging.debug("source: "+src)
+        logging.debug("destinatin: "+dest)
+
+        with open(src, "r") as s:
+            with open(dest, "w") as d:
+                d.write(s.read())
