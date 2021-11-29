@@ -40,8 +40,10 @@ class Configparser:
 
         # check if file and folder exists
         if not os.path.isdir(confFolder):
+            logging.debug("creating confFolder "+confFolder)
             os.mkdir(confFolder)
         if not os.path.isfile(confLoc):
+            logging.debug("copying config to "+confLoc)
             shutil.copyfile(confTemplate, confLoc)
 
         return confLoc

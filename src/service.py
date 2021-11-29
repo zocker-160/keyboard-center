@@ -430,6 +430,7 @@ if __name__ == "__main__":
     )
 
     global config
+    logging.info("------------ starting -------------")
     config = Configparser(TEMPLATE_LOCATION, sys.argv) # TODO: catch possible errors
 
     main()
