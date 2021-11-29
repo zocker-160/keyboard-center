@@ -151,7 +151,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[_did]
         except Exception as e:
             self.showErrorMSG(
-                f"No supported keyboard found! :(\n(err:{_did})",
+                f"No supported keyboard found! :(\n(err:{str(e)})",
                 title_msg="FATAL ERROR"
             )
             r = self.showQuestionMSG("Do you want to search again?")
