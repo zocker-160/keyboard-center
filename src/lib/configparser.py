@@ -208,10 +208,10 @@ class Configparser:
             with open(self.configFile, "r") as yaml:
                 data = self.configYAML.load(yaml)
             logging.debug("config loaded: " + str(data))
-            
-            self._configIntegrityCheck()
 
             self.settings: dict = data
+
+            self._configIntegrityCheck()
             return True
 
         except FileNotFoundError:
