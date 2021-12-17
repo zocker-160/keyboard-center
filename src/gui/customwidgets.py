@@ -16,6 +16,14 @@ class CKeySequenceEdit(QKeySequenceEdit):
 
         self.editingFinished.connect(self.finalize)
 
+    def getUinputKeycode(self) -> int:
+        # We need to -8 to convert X keycode -> uinput keycode
+        return self.pressedKeycode - 8
+
+    def setKeycode(self, uinputKeycode: int) -> None:
+        # We need to +8 to convert uinput keycode -> X keycode
+        self.pressedKeycode = uinputKeycode + 8
+
     def keyPressEvent(self, a0: QKeyEvent) -> None:
         # only one single non modifier is allowed
         if a0.modifiers() or len(self.tmpKeycodes) > 0: return
@@ -68,50 +76,72 @@ class CListWidgetItem(QWidget):
         self.onMoveDown.emit(self)
 
 from gui.Ui_keypressWidget import Ui_KeyPressWidget
+from lib.configtypes import Key, Delay, Combo, Macro, ConfigEntry
 
 class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
     def __init__(self, parent=None,
-                bCtrl=False, bAlt=False, bShift=False, bMeta=False,
-                key: str = None, rawKey: tuple = None):
+            bCtrl=False, bAlt=False, bShift=False, bMeta=False, 
+            bCustom=False, customKey: Key=None,
+            key: Key=None):
         super().__init__(parent)
 
         self.setupUi(self)
+        self.customModBox.setVisible(False)
 
         self.ctrlMod.setChecked(bCtrl)
         self.altMod.setChecked(bAlt)
         self.shiftMod.setChecked(bShift)
         self.metaMod.setChecked(bMeta)
-        if key: self.keySequenceEdit.setKeySequence(key)
-        # We need to +8 to convert uinput keycode -> X keycode
-        if rawKey: self.keySequenceEdit.pressedKeycode = rawKey[1] + 8
 
-    def getData(self) -> list:
+        if customKey:
+            self.customMod.setChecked(bCustom)
+            self.customModBox.setVisible(bCustom)
+            self.customSequenceEdit.setKeySequence(customKey.keyString)
+            self.customSequenceEdit.setKeycode(customKey.keycode)
+
+        if key:
+            self.keySequenceEdit.setKeySequence(key.keyString)
+            self.keySequenceEdit.setKeycode(key.keycode)
+
+    def getData(self) -> ConfigEntry:
         # return nothing when there is no actual key
         if self.keySequenceEdit.keySequence().count() == 0:
-            return None
+            raise ValueError("No key assigned!")
 
-        res = list()
+        keys = list()
 
-        for mod in [self.ctrlMod, self.altMod, self.shiftMod, self.metaMod]:
-            if mod.isChecked():
-                if mod is self.ctrlMod:
-                    res.append( (MOD_CTRL, uinput.KEY_LEFTCTRL[1]) )
-                elif mod is self.altMod:
-                    res.append( (MOD_ALT, uinput.KEY_LEFTALT[1]) )
-                elif mod is self.shiftMod:
-                    res.append( (MOD_SHIFT, uinput.KEY_LEFTSHIFT[1]) )
-                elif mod is self.metaMod:
-                    res.append( (MOD_META, 125) ) # X keycode is 133
+        if self.ctrlMod.isChecked():
+            keys.append( Key(uinput.KEY_LEFTCTRL[1], MOD_CTRL) )
+
+        if self.altMod.isChecked():
+            keys.append( Key(uinput.KEY_LEFTALT[1], MOD_ALT) )
+
+        if self.shiftMod.isChecked():
+            keys.append( Key(uinput.KEY_LEFTSHIFT[1], MOD_SHIFT) )
+
+        if self.metaMod.isChecked():
+            keys.append( Key(uinput.KEY_LEFTMETA[1], MOD_META) )
+
+        if self.customMod.isChecked():
+            if self.customSequenceEdit.keySequence().count() == 0:
+                raise ValueError("No custom mod key assigned!")
+            else:
+                keys.append( Key(
+                    self.customSequenceEdit.getUinputKeycode(),
+                    self.customSequenceEdit.keySequence().toString()
+                    ) )
 
         # finally add the key itself
-        res.append( (
-            self.keySequenceEdit.keySequence().toString(),
-            # We need to -8 to convert X keycode -> uinput keycode
-            self.keySequenceEdit.pressedKeycode - 8
-            )
-        )
+        keys.append( Key(
+            self.keySequenceEdit.getUinputKeycode(),
+            self.keySequenceEdit.keySequence().toString()
+        ) )
 
-        return res
+        if len(keys) <= 0: return None
+        if len(keys) == 1:
+            return keys.pop()
+        else:
+            return Combo(keys)
 
     def __setData(self, data: list):
         """ 
@@ -147,7 +177,7 @@ class DelayWidget(CListWidgetItem, Ui_DelayWidget):
         if delay: self.spinBox.setValue(delay)
 
     def getData(self):
-        return [(TYPE_DELAY_STR, self.spinBox.value())]
+        return Delay(self.spinBox.value())
 
 class CListWidgetContent(QWidget):
 
@@ -186,18 +216,54 @@ class CListWidgetContent(QWidget):
         self._updateOrder()        
 
 
-    def getKeyData(self):
+    def getKeyData(self) -> ConfigEntry:
         data = list()
         for item in self.getEntries():
-            d = item.getData()
-            if d:
+            d = item.getData()    
+            if type(d) in [Key, Delay, Combo]:
                 data.append(d)
-            else:
-                raise ValueError("Not all entries have a key assigned!")
+                
+        if len(data) == 0:
+            return None
+        if len(data) == 1:
+            return data.pop()
+        else:
+            return Macro(data)
 
-        return data
+    def setKeyData(self, data: ConfigEntry, clear=True):
+        if clear: self.clearAllEntries()
 
-    def setKeyData(self, data: list, values: list):
+        if type(data) == Key:
+            self.addWidget( KeyPressWidget(key=data) )
+
+        elif type(data) == Delay:
+            self.addWidget( DelayWidget(delay=data.duration) )
+
+        elif type(data) == Combo:
+            bCtrl, bShift, bAlt, bMeta, bCustom = [False]*5
+            customKey: Key = None
+            for key in data.keylist:
+                if key.keyString in [MOD_CTRL, MOD_SHIFT, MOD_ALT, MOD_META]:
+                    bCtrl = key.keyString == MOD_CTRL or bCtrl
+                    bShift = key.keyString == MOD_SHIFT or bShift
+                    bAlt = key.keyString == MOD_ALT or bAlt
+                    bMeta = key.keyString == MOD_META or bMeta
+                
+                elif key is data.keylist[-1]:
+                    self.addWidget( KeyPressWidget(
+                        bCtrl=bCtrl, bShift=bShift, bAlt=bAlt, bMeta=bMeta,
+                        bCustom=bCustom, customKey=customKey,
+                        key=key
+                    ) )
+                else:
+                    bCustom = True
+                    customKey = key
+
+        elif type(data) == Macro:
+            for comboKey in data.comboKeyList:
+                self.setKeyData(comboKey, clear=False)
+
+    def setKeyData_old(self, data: list, values: list):
         """
         Converts data into the corresponding widget and adds it
 

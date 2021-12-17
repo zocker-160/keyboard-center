@@ -1,6 +1,7 @@
 import os
 from ruamel.yaml import YAML
 import logging
+from lib import openrgb
 
 TYPE_CLICK = 0x01
 TYPE_PRESSDOWN = 0x02
@@ -16,6 +17,8 @@ MOD_CTRL = "Ctrl"
 MOD_ALT = "Alt"
 MOD_SHIFT = "Shift"
 MOD_META = "Meta"
+
+from lib.configtypes import ConfigEntry
 
 class Configparser:
 
@@ -103,19 +106,20 @@ class Configparser:
 
     ## load and store from GUI
 
-    def saveFromGui(self, profile: str, macroKey: str, name: str, orgb: str,
-            data, bSavetoFile=False):
+    def saveFromGui(self, 
+            profile: str, macroKey: str, name: str, orgb: str,
+            data: ConfigEntry, bSavetoFile=False):
         mapping = self.getMappings()
         openRGB = self.getOpenRGB()
         print(mapping)
 
-        data = self._convertDataFromGuiToYaml(data, name)
+        if data:
+            print(data.toConfig(name))
 
-        if data != False:
             if not mapping.get(profile):
                 mapping[profile] = dict()
         
-            mapping[profile][macroKey] = data
+            mapping[profile][macroKey] = data.toConfig(name)
         else:
             try:
                 del mapping[profile][macroKey]
@@ -134,6 +138,16 @@ class Configparser:
         if bSavetoFile: self.save()
 
     def loadForGui(self, profile: str, macroKey: str):
+        data: dict = self.getProfile(profile).get(macroKey)
+        openRGB: dict = self.getOpenRGB().get(profile)
+        openRGB = openRGB if openRGB else ""
+
+        if data:
+            return *ConfigEntry.fromConfig(data), openRGB
+        else:
+            return None, "", openRGB
+
+    def loadForGui_old(self, profile: str, macroKey: str):
         data: dict = self.getProfile(profile).get(macroKey)
         openRGB: dict = self.getOpenRGB().get(profile)
         openRGB = openRGB if openRGB else ""
