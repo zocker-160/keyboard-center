@@ -271,15 +271,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, name, val, orgb = self.configparser.loadForGui(
+        d, name, orgb = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
 
-        print(d, name, val, orgb)
+        print("AAAAA", d, name, orgb)
 
         try:
-            self.keyListWidgetContents.setKeyData(d, val)
+            self.keyListWidgetContents.setKeyData(d)
         except TypeError:
             self.bottomStatusBar.showMessage("loading failed: ignoring...")
         except Exception as e:
@@ -357,7 +357,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    devmode = True if "-dev" in sys.argv else False
+    devmode = True if "--dev" in sys.argv else False
     if devmode: print("Entered DEVMODE")
     
     if "--version" in sys.argv or "-v" in sys.argv:
