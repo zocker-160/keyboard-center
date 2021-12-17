@@ -1,7 +1,6 @@
 import os
 from ruamel.yaml import YAML
 import logging
-from lib import openrgb
 
 TYPE_CLICK = 0x01
 TYPE_PRESSDOWN = 0x02
@@ -96,14 +95,6 @@ class Configparser:
 
             return (TYPE_KEY, None)
 
-    def _generateEntry(self, type, value, string, name) -> dict:
-        return {
-            "name": name,
-            "type": type,
-            "value": value,
-            "string": string
-        }
-
     ## load and store from GUI
 
     def saveFromGui(self, 
@@ -146,73 +137,6 @@ class Configparser:
             return *ConfigEntry.fromConfig(data), openRGB
         else:
             return None, "", openRGB
-
-    def loadForGui_old(self, profile: str, macroKey: str):
-        data: dict = self.getProfile(profile).get(macroKey)
-        openRGB: dict = self.getOpenRGB().get(profile)
-        openRGB = openRGB if openRGB else ""
-        
-        if data:
-            if data.get("type") == TYPE_COMBO: # TODO: remove this nonsense
-                return ([data.get("string")], data.get("name"), [data.get("value")], openRGB)
-            elif data.get("type") == TYPE_KEY:
-                return ([[data.get("string")]], data.get("name"), [[data.get("value")]], openRGB)
-            else:
-                return (data.get("string"), data.get("name"), data.get("value"), openRGB)
-        else:
-            return ({}, "", {}, openRGB)
-
-    def _convertDataFromGuiToYaml(self, data: list, name="") -> dict:
-        """ 
-        Converts data returned by the GUI to the YAML format
-
-        @example key: [[('A', 38)]]
-        @example combo: [[('Ctrl', 29), ('Shift', 42), ('A', 38)]]
-        @example macro: [[('Ctrl', 29), ('Shift', 42), ('D', 40)], [('Shift', 42), ('A', 38)]]
-
-        @returns dict with data or "False" if entry needs to get removed
-        """
-        getType = lambda x: TYPE_DELAY if x == TYPE_DELAY_STR else TYPE_CLICK
-
-        if len(data) == 0:
-            # no data -> delete this entry
-            return False
-            #raise KeyError("No data was returned from the GUI thread! (0x1)")
-        elif len(data) == 1:
-            keycombo: list = data.pop()
-
-            if len(keycombo) == 1:
-                string, val = keycombo.pop()
-                return self._generateEntry(
-                    TYPE_KEY,
-                    (getType(string), val),
-                    string,
-                    name
-                )
-
-            elif len(keycombo) > 1:
-                string, val = list(), list()
-                for key in keycombo:
-                    s, v = key
-                    string.append(s)
-                    val.append( (getType(s), v) )
-                return self._generateEntry(TYPE_COMBO, val, string, name)
-
-            else:
-                raise KeyError("No data was returned from the GUI thread! (0x2)")
-
-        else:
-            string, val = list(), list()
-            for keycombo in data:
-                kstring, kval = list(), list()
-                for key in keycombo:
-                    s, v = key
-                    kstring.append(s)
-                    kval.append( (getType(s), v) )
-
-                string.append(kstring)
-                val.append(kval)
-            return self._generateEntry(TYPE_MACRO, val, string, name)
 
     ## load and store from config file
 

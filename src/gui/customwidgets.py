@@ -1,8 +1,8 @@
 import uinput
 
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QKeyEvent, QKeySequence, QMouseEvent
-from PyQt5.QtWidgets import QKeySequenceEdit, QScrollArea, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QKeyEvent, QKeySequence
+from PyQt5.QtWidgets import QKeySequenceEdit, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
 
 from lib.configparser import MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META, TYPE_DELAY, TYPE_DELAY_STR
 
@@ -262,43 +262,6 @@ class CListWidgetContent(QWidget):
         elif type(data) == Macro:
             for comboKey in data.comboKeyList:
                 self.setKeyData(comboKey, clear=False)
-
-    def setKeyData_old(self, data: list, values: list):
-        """
-        Converts data into the corresponding widget and adds it
-
-        @example data [['Ctrl', 'C'], ['Ctrl', 'V']]
-        @example data [['Ctrl', 'X'], ['Ctrl', 'V']]
-
-        @example values [[[1, 29], [1, 45]], [[1, 29], [1, 47]]]
-        """
-        self.clearAllEntries()
-        
-        for i, entry in enumerate(data):
-            sKey = None
-            sKeyRaw = None
-            bCtrl, bShift, bAlt, bmeta = [False]*4
-            for y, key in enumerate(entry):
-                if key == MOD_CTRL:
-                    bCtrl = True
-                elif key == MOD_ALT:
-                    bAlt = True
-                elif key == MOD_SHIFT:
-                    bShift = True
-                elif key == MOD_META:
-                    bmeta = True
-                else:
-                    sKey = key
-                    sKeyRaw = values[i][y]
-
-            print("rawvalue:", sKeyRaw)
-            if sKey == TYPE_DELAY_STR and sKeyRaw[0] == TYPE_DELAY:
-                self.addWidget(DelayWidget(delay=sKeyRaw[1]))
-            else:
-                self.addWidget(KeyPressWidget(
-                    bCtrl=bCtrl, bAlt=bAlt, bShift=bShift, bMeta=bmeta,
-                    key=sKey, rawKey=sKeyRaw))
-
 
     def getLayout(self) -> QVBoxLayout:
         return self.list
