@@ -120,7 +120,7 @@ def switchProfile(profile: str,
         title=f"Switched to profile {profile}",
         icon_path=path,
         urgency="normal"
-    ).send_linux() # this shit is targeted at linux only fuck anything else
+    ).send_linux() # this shit is targeted at linux only, fuck anything else
 
 def executeMacro(macro: list):
     for action in macro:
