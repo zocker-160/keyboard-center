@@ -203,7 +203,7 @@ async def usbListener(keyboard: core.Device,
                 HIDpath: str=None,
                 HIDpath_disable: str=None):
 
-    _usbTimeout: int = config.settings["settings"].get("usbTimeout") or USB_TIMEOUT
+    _usbTimeout: int = config.getSettings().get("usbTimeout") or USB_TIMEOUT
 
     await asyncio.sleep(0)
     
@@ -298,7 +298,7 @@ def _getHIDpaths(keyboardDev: KeyboardInterface):
                 time.sleep(RETRY_TIMEOUT)
                 return __HIDavailable(HIDpath, tries-1)
 
-    numTries = config.settings["settings"].get("retryCount") or RETRY_COUNT
+    numTries = config.getSettings().get("retryCount") or RETRY_COUNT
     if HIDpath and not __HIDavailable(HIDpath, numTries):
         raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
 
