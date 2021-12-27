@@ -41,7 +41,7 @@ TEMPLATE_LOCATION = os.path.join(
 )
 
 PLACEHOLDER_STR = "$$$"
-VERSION = "0.1.20-testing"
+VERSION = "0.1.21-testing"
 
 class AboutWindow(QDialog, Ui_aboutWindow):
     def __init__(self, parent):
@@ -251,11 +251,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print("saving")
         try:
             data = self.keyListWidgetContents.getKeyData()
+            if data:
+                data.name = self.macroNameEdit.text()
+                data.gamemode = self.gameMode.isChecked()
             print(data)
             self.configparser.saveFromGui(
                 profile=ALL_MEMORY_KEYS[self.currMemory],
                 macroKey=ALL_MACRO_KEYS[self.currMacro],
-                name=self.macroNameEdit.text(),
                 orgb=self.openRGBedit.text(),
                 data=data,
                 bSavetoFile=saveToFile
@@ -271,12 +273,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, name, orgb = self.configparser.loadForGui(
+        d, orgb = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
-
-        print("AAAAA", d, name, orgb)
 
         try:
             self.keyListWidgetContents.setKeyData(d)
@@ -285,7 +285,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as e:
             self.showErrorMSG(str(e))
         
-        self.macroNameEdit.setText(name)
+        if d:
+            print("AAAAA", d, d.name, orgb)
+            self.macroNameEdit.setText(d.name)
+            self.gameMode.setChecked(d.gamemode)
+        else:
+            self.macroNameEdit.setText("")
+            self.gameMode.setChecked(False)
         self.openRGBedit.setText(orgb)
 
     # function overloading

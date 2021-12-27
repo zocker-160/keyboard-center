@@ -71,46 +71,47 @@ class Configparser:
         gets the pressed key + profile and returns either the key tuple 
         or a combo (for macros)
 
-        @returns tuple(TYPE_KEY, keytuple)
-        @returns tuple(TYPE_COMBO, array[keytuples])
+        @returns TYPE_KEY, keytuple, gamemode
+        @returns TYPE_COMBO, array[keytuples], gamemode
 
         keytuple or array is None when no mapping is found
         """
 
-        macro = self.getProfile(profile).get(key)
+        macro: dict = self.getProfile(profile).get(key)
         if macro:
             if macro["type"] == TYPE_KEY:
-                return (TYPE_KEY, tuple(macro["value"]))
+                return TYPE_KEY, tuple(macro["value"]), macro.get("gamemode")
 
             elif macro["type"] == TYPE_COMBO:
-                return (TYPE_COMBO, [ tuple(x) for x in macro["value"] ])
+                return TYPE_COMBO, [ tuple(x) for x in macro["value"] ], macro.get("gamemode")
 
             elif macro["type"] == TYPE_MACRO:
                 res = list()
                 for combo in macro["value"]:
                     res.append([ tuple(x) for x in combo ])
-                return (TYPE_MACRO, res)
+                return TYPE_MACRO, res, macro.get("gamemode")
         else:
             logging.info(f"key {key} does not have any mapping for {profile}")
 
-            return (TYPE_KEY, None)
-
+            return TYPE_KEY, None, None
+    
     ## load and store from GUI
 
     def saveFromGui(self, 
-            profile: str, macroKey: str, name: str, orgb: str,
+            profile: str, macroKey: str, 
+            orgb: str,
             data: ConfigEntry, bSavetoFile=False):
         mapping = self.getMappings()
         openRGB = self.getOpenRGB()
         print(mapping)
 
         if data:
-            print(data.toConfig(name))
+            print(data.toConfig())
 
             if not mapping.get(profile):
                 mapping[profile] = dict()
         
-            mapping[profile][macroKey] = data.toConfig(name)
+            mapping[profile][macroKey] = data.toConfig()
         else:
             try:
                 del mapping[profile][macroKey]
@@ -134,9 +135,9 @@ class Configparser:
         openRGB = openRGB if openRGB else ""
 
         if data:
-            return *ConfigEntry.fromConfig(data), openRGB
+            return ConfigEntry.fromConfig(data), openRGB
         else:
-            return None, "", openRGB
+            return None, openRGB
 
     ## load and store from config file
 

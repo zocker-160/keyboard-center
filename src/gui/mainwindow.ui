@@ -131,7 +131,8 @@ QLabel#asd:pressed {
             <string/>
            </property>
            <property name="icon">
-            <iconset theme="help-about"/>
+            <iconset theme="help-about">
+             <normaloff>.</normaloff>.</iconset>
            </property>
           </widget>
          </item>
@@ -196,6 +197,16 @@ QLabel#asd:pressed {
            <widget class="QLineEdit" name="macroNameEdit">
             <property name="placeholderText">
              <string>name</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="gameMode">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;quot;GameMode&amp;quot; delays the execution of combos.&lt;/p&gt;&lt;p&gt;Some games truggle to recognize it when execution is too fast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>GameMode</string>
             </property>
            </widget>
           </item>

@@ -29,6 +29,7 @@ currProfile = MEMORY_1
 
 RETRY_COUNT = 5
 RETRY_TIMEOUT = 5 # in seconds
+COMBO_DELAY = 50 # in milliseconds
 USB_TIMEOUT = 1000 # in milliseconds
 
 APP_NAME = "Keyboard Center Service"
@@ -122,6 +123,17 @@ def switchProfile(profile: str,
         urgency="normal"
     ).send_linux() # this shit is targeted at linux only, fuck anything else
 
+def executeCombo(combo: list, gamemode=False):
+    if gamemode == True:
+        for i, c in enumerate(combo):
+            virtualKeyboard.emit(c, 1, i == len(combo)-1)
+        _delay = config.getSettings().get("gamemodeDelay") or COMBO_DELAY
+        time.sleep(_delay / 1000)
+        for i, c in enumerate(combo):
+            virtualKeyboard.emit(c, 0, i == len(combo)-1)
+    else:
+        virtualKeyboard.emit_combo(combo)
+
 def executeMacro(macro: list):
     for action in macro:
         if len(action) == 1:
@@ -144,15 +156,15 @@ def emitKeys(profile, key, uinput=False):
     logging.debug(f"{key} pressed")
 
     if uinput:
-        type, macro = TYPE_KEY, key
+        type, macro, gamemode = TYPE_KEY, key, False
     else:
-        type, macro = config.getKey(profile, key)
+        type, macro, gamemode = config.getKey(profile, key)
 
     if type == TYPE_KEY and macro:
         virtualKeyboard.emit_click(macro)
 
     elif type == TYPE_COMBO and macro:
-        virtualKeyboard.emit_combo(macro)
+        executeCombo(macro, gamemode)
 
     elif type == TYPE_MACRO and macro:
         print(macro)

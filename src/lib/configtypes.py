@@ -13,34 +13,40 @@ log = logging.getLogger("ConfigTypes")
 
 class ConfigEntry:
     type: str
+    name: str = ""
+    gamemode: bool = False
 
     @staticmethod
-    def genConfig(name, type, string, value):
+    def genConfig(type, string, value, name="", gamemode=False):
         return {
             "name": name,
+            "gamemode": gamemode,
             "type": type,
             "string": string,
             "value": value
         }
 
     @staticmethod
-    def fromConfig(data: dict) -> tuple:
+    def fromConfig(data: dict): # -> ConfigEntry
         name = data.get("name")
+        gamemode = data.get("gamemode")
         type = data.get("type")
         string = data.get("string")
         value = data.get("value")
 
+        result: ConfigEntry = None
+
         if type == TYPE_KEY:
-            return Key(value[1], string), name
+            result = Key(value[1], string)
 
         elif type == TYPE_DELAY_STR:
-            return Delay(value[0][1]), name
+            result = Delay(value[0][1])
 
         elif type == TYPE_COMBO:
             keylist = list()
             for i, entry in enumerate(string):
                 keylist.append( Key(value[i][1], entry) )
-            return Combo(keylist), name
+            result = Combo(keylist)
 
         elif type == TYPE_MACRO:
             comboKeylist = list()
@@ -57,13 +63,19 @@ class ConfigEntry:
 
                     comboKeylist.append( Combo(keylist) )
 
-            return Macro(comboKeylist), name
-        else:
-            return None, ""
+            result = Macro(comboKeylist)
 
-    def toConfig(self, entryName=""):
+        if name: result.name = name
+        if gamemode: result.gamemode = gamemode
+
+        return result
+
+    def toConfig(self):
         return self.genConfig(
-            entryName, self.type, self.toConfigString(), self.toConfigValue())
+            self.type, self.toConfigString(), self.toConfigValue(),
+            name=self.name,
+            gamemode=self.gamemode
+        )
 
     def toConfigValue(self) -> list:
         raise NotImplementedError
