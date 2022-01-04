@@ -14,10 +14,10 @@ log = logging.getLogger("ConfigTypes")
 class ConfigEntry:
     type: str
     name: str = ""
-    gamemode: bool = False
+    gamemode: int = 0
 
     @staticmethod
-    def genConfig(type, string, value, name="", gamemode=False):
+    def genConfig(type, string, value, name="", gamemode=0):
         return {
             "name": name,
             "gamemode": gamemode,

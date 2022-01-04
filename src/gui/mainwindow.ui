@@ -211,6 +211,28 @@ QLabel#asd:pressed {
            </widget>
           </item>
           <item>
+           <widget class="QSpinBox" name="gameModeTime">
+            <property name="toolTip">
+             <string>delay in milliseconds</string>
+            </property>
+            <property name="suffix">
+             <string> ms</string>
+            </property>
+            <property name="minimum">
+             <number>10</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::DefaultStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -429,5 +451,22 @@ QLabel#asd:pressed {
  <resources>
   <include location="ressources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>gameMode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gameModeTime</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>480</x>
+     <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

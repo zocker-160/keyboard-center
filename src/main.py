@@ -253,7 +253,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             data = self.keyListWidgetContents.getKeyData()
             if data:
                 data.name = self.macroNameEdit.text()
-                data.gamemode = self.gameMode.isChecked()
+                if self.gameMode.isChecked():
+                    data.gamemode = self.gameModeTime.value()
+                else:
+                    data.gamemode = 0
             print(data)
             self.configparser.saveFromGui(
                 profile=ALL_MEMORY_KEYS[self.currMemory],
@@ -288,10 +291,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if d:
             print("AAAAA", d, d.name, orgb)
             self.macroNameEdit.setText(d.name)
-            self.gameMode.setChecked(d.gamemode)
+
+            if d.gamemode > 1:
+                self.gameMode.setChecked(True)
+                self.gameModeTime.setEnabled(True)
+                self.gameModeTime.setValue(d.gamemode)
+            else:
+                self.gameMode.setChecked(False)
+                self.gameModeTime.setDisabled(True)
         else:
             self.macroNameEdit.setText("")
             self.gameMode.setChecked(False)
+            self.gameModeTime.setDisabled(True)
+        
         self.openRGBedit.setText(orgb)
 
     # function overloading

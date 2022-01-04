@@ -128,6 +128,13 @@ class Ui_MainWindow(object):
         self.gameMode = QtWidgets.QCheckBox(self.centralwidget)
         self.gameMode.setObjectName("gameMode")
         self.horizontalLayout_4.addWidget(self.gameMode)
+        self.gameModeTime = QtWidgets.QSpinBox(self.centralwidget)
+        self.gameModeTime.setMinimum(10)
+        self.gameModeTime.setMaximum(1000)
+        self.gameModeTime.setSingleStep(10)
+        self.gameModeTime.setStepType(QtWidgets.QAbstractSpinBox.DefaultStepType)
+        self.gameModeTime.setObjectName("gameModeTime")
+        self.horizontalLayout_4.addWidget(self.gameModeTime)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem1)
         self.addKey = QtWidgets.QPushButton(self.centralwidget)
@@ -224,6 +231,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuAbout.menuAction())
 
         self.retranslateUi(MainWindow)
+        self.gameMode.clicked['bool'].connect(self.gameModeTime.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -237,6 +245,8 @@ class Ui_MainWindow(object):
         self.macroNameEdit.setPlaceholderText(_translate("MainWindow", "name"))
         self.gameMode.setToolTip(_translate("MainWindow", "<html><head/><body><p>&quot;GameMode&quot; delays the execution of combos.</p><p>Some games truggle to recognize it when execution is too fast.</p></body></html>"))
         self.gameMode.setText(_translate("MainWindow", "GameMode"))
+        self.gameModeTime.setToolTip(_translate("MainWindow", "delay in milliseconds"))
+        self.gameModeTime.setSuffix(_translate("MainWindow", " ms"))
         self.addKey.setText(_translate("MainWindow", "Add Key"))
         self.addDelay.setText(_translate("MainWindow", "Add Delay"))
         self.resetButton.setText(_translate("MainWindow", "Reset"))
