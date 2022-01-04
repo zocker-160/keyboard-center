@@ -304,12 +304,19 @@ def _getHIDpaths(keyboardDev: KeyboardInterface):
 
     return HIDpath, HIDpath_disable
 
-def main():
-    global currProfile
+def _searchKeyboard(retry=RETRY_COUNT):
+    if retry <= 0:
+        Notification(
+            app_name=APP_NAME,
+            title="Keyboard Search",
+            description="no supported keyboard found!",
+            icon_path=ICON_LOCATION,
+            urgency="critical"
+        ).send_linux()
 
-    logging.info("searching for supported keyboard...")
+        sys.exit(1)
 
-    t1 = time.time()
+    tstart = time.time()
     for i, device in enumerate(SUPPORTED_DEVICES):
         keyboard: core.Device = core.find(
             idVendor=device.usbVendor, idProduct=device.usbProduct
@@ -329,26 +336,32 @@ def main():
             config.settings["settings"]["usbDeviceID"] = i
             config.save()
 
-            keyboardDev: KeyboardInterface = device
+            keyboardDev = device
             break
-    t2 = time.time()
 
     if not keyboard:
-        logging.critical("no supported keyboard found")
+        logging.critical("no supported keyboard found, retrying...")
         config.settings["settings"]["usbDeviceID"] = "None"
         config.save()
 
-        Notification(
-            app_name=APP_NAME,
-            title="Keyboard Search",
-            description="no supported keyboard found!",
-            icon_path=ICON_LOCATION,
-            urgency="critical"
-        ).send_linux()
+        time.sleep(5)
+        return _searchKeyboard(retry-1)
+    
+    tend = time.time()
 
-        sys.exit(1)
-    else:
-        logging.debug(f"time taken to find keyboard in ms: {t2-t1}")
+    return keyboard, keyboardDev, tend-tstart
+
+def main():
+    global currProfile
+
+    keyboard: core.Device
+    keyboardDev: KeyboardInterface
+    dTime: int
+
+    logging.info("searching for supported keyboard...")
+    keyboard, keyboardDev, dTime = _searchKeyboard()
+
+    logging.debug(f"time taken to find keyboard in ms: {dTime}")
 
     logging.debug("requesting USB endpoint...")
     keyboardEndpoint: core.Endpoint = keyboard\
