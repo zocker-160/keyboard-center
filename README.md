@@ -71,7 +71,7 @@ Settings are stored in a `settings.yml` file, which is located at
 - `$HOME/.config/keyboard-center`
 
 #### Current default settings
-`settings: {gamemodeDelay: 50, usbTimeout: 1000, retryCount: 5}`
+`settings: {usbTimeout: 1000, retryCount: 5}`
 
 ### Dependencies
 #### Debian / Ubuntu
