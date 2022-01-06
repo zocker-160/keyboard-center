@@ -72,8 +72,10 @@ class ConfigEntry:
 
     def toConfig(self):
         return self.genConfig(
-            self.type, self.toConfigString(), self.toConfigValue(),
             name=self.name,
+            type=self.type,
+            string=self.toConfigString(),
+            value=self.toConfigValue(),
             gamemode=self.gamemode
         )
 
@@ -95,10 +97,13 @@ class Key(ConfigEntry):
     def toConfigString(self) -> list:
         return [ self.keyString ]
 
-    def toConfig(self, entryName=""):
+    def toConfig(self):
         return self.genConfig(
-            entryName, self.type, 
-            self.toConfigString().pop(), self.toConfigValue().pop()
+            name=self.name,
+            type=self.type,
+            string=self.toConfigString().pop(),
+            value=self.toConfigValue().pop(),
+            gamemode=self.gamemode
         )
 
 class Delay(ConfigEntry):
