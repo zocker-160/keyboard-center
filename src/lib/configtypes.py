@@ -106,6 +106,9 @@ class Key(ConfigEntry):
             gamemode=self.gamemode
         )
 
+    def __str__(self):
+        return f"Key: name <{self.name}>, type <{self.type}>, string <{self.toConfigString()}>, value <{self.toConfigValue()}>"
+
 class Delay(ConfigEntry):
     def __init__(self, durationInMS: int):
         self.type = TYPE_DELAY_STR
