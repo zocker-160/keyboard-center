@@ -8,21 +8,21 @@ from usb import core
 from lib.hid import Device as HIDDevice
 
 ## Logitech, Inc. G815
-usbVendor = 0x046d
-usbProduct = 0xc33f
+#usbVendor = 0x046d
+#usbProduct = 0xc33f
 
 usbConfiguration = 0
 usbInterface = (1, 0)
 usbEndpoint = 0
 
 ## Logitech, Inc. G910 Orion Spark Mechanical Keyboard
-#usbVendor = 0x046d
-#usbProduct = 0xc335
+usbVendor = 0x046d
+usbProduct = 0xc335
 
 ## G710+
 #disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 ## G910
-#disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 def _stop(*args):
     global evLoop
@@ -59,8 +59,6 @@ async def usbListener(keyboard: core.Device,
     while True:
         await asyncio.sleep(0)
         try:
-            # hmm this could end up problematic if it blocks while
-            # running slower macros.....might need to go back to Threads
             fromKeyboard = keyboard.read(
                 keyboardEndpoint.bEndpointAddress,
                 keyboardEndpoint.wMaxPacketSize,
@@ -79,7 +77,7 @@ async def usbListener(keyboard: core.Device,
         except core.USBTimeoutError:
             pass
 
-def main(info=False):
+def main(info=False, reset=False):
     global usbInterface
     disableGKeys = None
 
@@ -99,17 +97,21 @@ def main(info=False):
                                         [usbConfiguration]\
                                         [usbInterface]\
                                         [usbEndpoint]
-
+    
     logging.debug("check and detach kernel driver if active")
     if keyboard.is_kernel_driver_active(usbInterface[0]):
         keyboard.detach_kernel_driver(usbInterface[0])
-    
+
+    if reset:
+        keyboard.attach_kernel_driver(usbInterface[0])
+
+        sys.exit()
+
     if info:
         print("###")
         print(keyboard)
         print("###")
 
-        keyboard.attach_kernel_driver(usbInterface[0])
         sys.exit()
 
     logging.info("starting service...")
@@ -126,7 +128,8 @@ if __name__ == "__main__":
     )
 
     if len(sys.argv) > 1:
-        info = "--info" == sys.argv[1]
-        main(info)
+        info = "--info" in sys.argv
+        reset = "--reset" in sys.argv
+        main(info, reset)
     else:
         main()
