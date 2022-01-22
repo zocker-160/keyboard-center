@@ -88,12 +88,13 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
     }
 
     disableGKeys = [b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
-    disableGKeysInterface = 0
+    disableGKeysInterface = 1
 
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpark(Logitech_G910_OrionSpectrum):
     devicename = "Logitech G910 Orion Spark"
     usbProduct = 0xc32b
+    disableGKeysInterface = 0
 
 @dataclass(frozen=True)
 class Logitech_G710p(KeyboardInterface):
