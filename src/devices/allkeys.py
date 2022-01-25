@@ -428,6 +428,16 @@ ALL_KNOWN_KEYS = [
     uinput.KEY_MAX
 ]
 
+NUMPAD_SCANCODES = [
+    79, 80, 81, 83, 84, 85, 87, 88, 89, 90, # numkeys from 1 to 9
+    82, # minus
+    86, # plus
+    91, # comma
+    106, # divide
+    63, # multiply
+    104, # enter
+]
+
 MACRO_1 = "MACRO_1"
 MACRO_2 = "MACRO_2"
 MACRO_3 = "MACRO_3"
