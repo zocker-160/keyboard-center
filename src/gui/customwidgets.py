@@ -27,7 +27,8 @@ class CKeySequenceEdit(QKeySequenceEdit):
 
     def keyPressEvent(self, a0: QKeyEvent) -> None:
         # only one single non modifier is allowed
-        if a0.modifiers() or len(self.tmpKeycodes) > 0:
+        if len(self.tmpKeycodes) > 0: return
+        if a0.modifiers():
             # for whatever the fuck reason, numpad keys get recognized
             #  as fucking modifiers (why????)
             # so this is a dirty workaround
