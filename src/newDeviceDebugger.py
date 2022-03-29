@@ -4,8 +4,11 @@ import sys
 import signal
 import logging
 import asyncio
+import time
 from usb import core
+from lib import hid
 from lib.hid import Device as HIDDevice
+from lib.hid import HIDException
 
 ## Logitech, Inc. G815
 #usbVendor = 0x046d
@@ -14,15 +17,69 @@ from lib.hid import Device as HIDDevice
 usbConfiguration = 0
 usbInterface = (1, 0)
 usbEndpoint = 0
+disableGKeysInterface = 1
+usbUseWrite = True
 
 ## Logitech, Inc. G910 Orion Spark Mechanical Keyboard
 usbVendor = 0x046d
 usbProduct = 0xc335
 
 ## G710+
-#disableGKeys = b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+#disableGKeys = [b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
 ## G910
-disableGKeys = b'\x11\xff\x08\x2e\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+disableGKeys = [
+#b'\x11\xff\x0fN\x00@\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f^\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x02\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f^\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x10>\x01\x03\x00\x00\x00\x00\x00\x07\xd0d\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x10\x00\xdc\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f^\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x10\x8e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x03>\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x02\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0fN\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f>\x00\x10\x00\x02\x01\x00\xcd\xff\x02\x00\xcd\xff\x00\x00\x00\x00',
+
+b'\x11\xff\x10>\x00\x04\x00\x00\x00\x00\x00\x00\xd0\x01d\x07\x00\x00\x00\x00', # keyboard reset
+
+#b'\x11\xff\x00\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x1e\x00\x009\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x02\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x02\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x04.\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x02\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x10\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x1f \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x02\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x04\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x04\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x04\x1e\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x1b\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x13\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e@\xa2\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x80`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0b\x1e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0b.\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x00\x0e\x80\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x08\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+
+b'\x11\xff\x08.\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # disable GMapping
+
+
+#b'\x11\xff\x0fN\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+#b'\x11\xff\x0f^\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # disable Key LEDs
+]
+
+TIMEOUT = 0
 
 def _stop(*args):
     global evLoop
@@ -34,48 +91,86 @@ def _stop(*args):
 
     evLoop.stop()
 
-async def disableGkeyMapping(data: bytes):
+def getHIDpaths():
+    HIDpath, HIDpath_disable = None, None
+
+    for dev in hid.enumerate(usbVendor, usbProduct):
+        if dev.get("interface_number") == usbInterface[0]:
+            HIDpath: bytes = dev.get("path")
+            logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
+
+        if dev.get("interface_number") == disableGKeysInterface:
+            HIDpath_disable: bytes = dev.get("path")
+            logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
+
+    logging.debug("Checking for HID availability...")
+    def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
+        try:
+            with HIDDevice(path=HIDpath) as _:
+                logging.debug(f"Connected to {HIDpath.decode()}")
+            return True
+        except RuntimeError:
+            if tries <= 0:
+                return False
+            else:
+                logging.warning("Could not open HID device, retrying...")
+                time.sleep(1000)
+                return __HIDavailable(HIDpath, tries-1)
+
+    numTries = 10
+    if HIDpath and not __HIDavailable(HIDpath, numTries):
+        raise RuntimeError(f"Unable to open device {HIDpath.decode()}")
+
+    return HIDpath, HIDpath_disable
+
+async def disableGkeyMapping(HIDpath: str):
     logging.debug("Connection using HIDAPI...")
-    with HIDDevice(usbVendor, usbProduct) as hdev:
+    with HIDDevice(path=HIDpath) as hdev:
         logging.debug("Sending sequence to disable G keys")
-        hdev.write(data)
+
+        if usbUseWrite:
+            for i, data in enumerate(disableGKeys):
+                print(f"{i}: {data}")
+                hdev.write(data)
+                time.sleep(TIMEOUT)
+        else:
+            for data in disableGKeys:
+                hdev.send_feature_report(data)
 
 
-async def usbListener(keyboard: core.Device,
-                keyboardEndpoint: core.Endpoint,
-                disableGKeys: bytes = None):
+async def usbListener(keyboardEndpoint: core.Endpoint,
+                HIDpath: str, HIDpathDisable: str):
 
-    _usbTimeout: int = 1000
+    _usbTimeout: int = 5000
 
     await asyncio.sleep(0)
     
     # Send the sequence to disable the G keys
     if disableGKeys:
-        await disableGkeyMapping(disableGKeys)
+        await disableGkeyMapping(HIDpathDisable)
 
     await asyncio.sleep(0)
 
-    logging.debug(f"listening to USB Interface {usbInterface}")
-    while True:
-        await asyncio.sleep(0)
-        try:
-            fromKeyboard = keyboard.read(
-                keyboardEndpoint.bEndpointAddress,
-                keyboardEndpoint.wMaxPacketSize,
-                _usbTimeout
-            )
+    logging.debug(f"listening to USB Interface {usbInterface} | {HIDpath}")
 
-            if fromKeyboard:
-                data = bytes(fromKeyboard)
-                print("got data from keyboard: ", end="")
-                print(data)
+    with HIDDevice(path=HIDpath) as hdev:
+        hdev.nonblocking = True
+        while True:
+            await asyncio.sleep(0)
 
-        # older versions of python3-usb throw USBError instead of USBTimeoutError
-        # all glory to backwards compatibility I guess....
-        except core.USBError:
-            pass        
-        except core.USBTimeoutError:
-            pass
+            try:
+                fromKeyboard = hdev.read(
+                    keyboardEndpoint.wMaxPacketSize,
+                    _usbTimeout
+                )
+
+                if len(fromKeyboard) > 0:
+                    print("got data from keyboard: ", end="")
+                    print(fromKeyboard)
+            
+            except HIDException as e:
+                print(f"HIDerrpr: {str(e)}")
+
 
 def main(info=False, reset=False):
     global usbInterface
@@ -97,14 +192,12 @@ def main(info=False, reset=False):
                                         [usbInterface]\
                                         [usbEndpoint]
     
-    logging.debug("check and detach kernel driver if active")
-    if keyboard.is_kernel_driver_active(usbInterface[0]):
-        keyboard.detach_kernel_driver(usbInterface[0])
-
-    if reset:
-        keyboard.attach_kernel_driver(usbInterface[0])
-
-        sys.exit()
+    #logging.debug("check and detach kernel driver if active")
+    #if keyboard.is_kernel_driver_active(usbInterface[0]):
+    #    keyboard.detach_kernel_driver(usbInterface[0])
+    #if reset:
+    #    keyboard.attach_kernel_driver(usbInterface[0])
+    #    sys.exit()
 
     if info:
         print("###")
@@ -113,10 +206,12 @@ def main(info=False, reset=False):
 
         sys.exit()
 
-    logging.info("starting service...")
+    HIDpath, HIDpathDisable = getHIDpaths()
+
+    logging.info("starting listener...")
     global evLoop
     evLoop = asyncio.get_event_loop()
-    evLoop.create_task(usbListener(keyboard, keyboardEndpoint, disableGKeys))
+    evLoop.create_task(usbListener(keyboardEndpoint, HIDpath, HIDpathDisable))
     evLoop.add_signal_handler(signal.SIGINT, _stop)
     evLoop.add_signal_handler(signal.SIGTERM, _stop)
     evLoop.run_forever()
