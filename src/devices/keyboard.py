@@ -228,7 +228,7 @@ class Logitech_G815(KeyboardInterface):
 
 @dataclass(frozen=True)
 class Logitech_G915(Logitech_G815):
-    devicename = "Logitech G915"
+    devicename = "Logitech G915 (wired)"
     usbProduct = 0xc33e
 
     macroKeys = {
