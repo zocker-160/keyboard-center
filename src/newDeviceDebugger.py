@@ -58,7 +58,7 @@ disableGKeys = [
 #]
 
 
-TIMEOUT = 200
+TIMEOUT = 0.2
 
 def _stop(*args):
     global evLoop
