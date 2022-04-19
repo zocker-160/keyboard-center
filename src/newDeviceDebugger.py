@@ -178,7 +178,7 @@ def main(info=False, reset=False):
 
     logging.info("starting listener...")
     global evLoop
-    evLoop = asyncio.get_event_loop()
+    evLoop = asyncio.new_event_loop()
     evLoop.create_task(usbListener(keyboardEndpoint, HIDpath, HIDpathDisable))
     evLoop.add_signal_handler(signal.SIGINT, _stop)
     evLoop.add_signal_handler(signal.SIGTERM, _stop)
