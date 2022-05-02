@@ -42,6 +42,7 @@ ICON_LOCATION = os.path.join(
 )
 
 def _stop(*args):
+    global client
     global evLoop
     global attachDriver
 
@@ -52,21 +53,28 @@ def _stop(*args):
     except NameError:
         # is not defined when using HID interface
         pass
+
+    if client: client.disconnect()
     evLoop.stop()
     virtualKeyboard.destroy()
 
 def setOpenRGBProfile(profile: str, retry: int, first: bool):
+    global client
+
     orgb = config.getOpenRGB().get(profile)
     if not orgb: return
 
     try:
         logging.debug("Setting OpenRGB profile "+orgb)
-        client = OpenRGBClient()
-        if first:
+        
+        if first or not client:
+            client = OpenRGBClient()
             client.load_profile(orgb) # we need to run this first, in case the profile does not exist
             client.clear() # we need to clear because sometimes load_profile just does not fucking work
             time.sleep(0.5) # we need to wait a moment after clear
+        
         client.load_profile(orgb)
+
     except ConnectionRefusedError:
         if retry <= 0 or not first:
             return
