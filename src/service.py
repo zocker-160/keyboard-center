@@ -26,6 +26,8 @@ from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
 
 currProfile = MEMORY_1
+client = None
+openRGBProcess = None
 
 RETRY_COUNT = 5
 RETRY_TIMEOUT = 5 # in seconds
@@ -46,6 +48,7 @@ def _stop(*args):
     global client
     global evLoop
     global attachDriver
+    global openRGBProcess
 
     logging.info("stopping...")
 
@@ -56,11 +59,17 @@ def _stop(*args):
         pass
 
     if client: client.disconnect()
+    if openRGBProcess and openRGBProcess.poll():
+        logging.info("stopping openRGB server...")
+        openRGBProcess.send_signal(signal.SIGINT)
+        openRGBProcess.wait()
+
     evLoop.stop()
     virtualKeyboard.destroy()
 
 def setOpenRGBProfile(profile: str, retry: int, first: bool):
     global client
+    global openRGBProcess
 
     orgb = config.getOpenRGB().get(profile)
     if not orgb: return
@@ -78,9 +87,10 @@ def setOpenRGBProfile(profile: str, retry: int, first: bool):
 
     except ConnectionRefusedError:
         if retry <= 0 or not first:
+            logging.debug("giving up reaching OpenRGB SDK")
             return
         if retry == RETRY_COUNT and shutil.which("openrgb"):
-            subprocess.Popen(["openrgb", "--server"], shell=False)
+            openRGBProcess = subprocess.Popen(["openrgb", "--server"], shell=False)
         logging.debug("Could not reach OpenRGB SDK, retrying...")
         time.sleep(RETRY_TIMEOUT)
         setOpenRGBProfile(profile, retry-1, first)
