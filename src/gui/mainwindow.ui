@@ -318,6 +318,23 @@ QLabel#asd:pressed {
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="disableNotifications">
+        <property name="toolTip">
+         <string>disables notifications when switching memory profiles</string>
+        </property>
+        <property name="text">
+         <string>disable profile notification</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

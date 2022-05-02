@@ -66,6 +66,13 @@ class Configparser:
             self.settings["openRGB"] = {}
             return self.settings["openRGB"]
 
+    def getShowNotifications(self) -> bool:
+        d = self.getSettings().get("showNotifications")
+        if d != None:
+            return d
+        else:
+            return True
+
     def getKey(self, profile: str, key: str) -> tuple:
         """ 
         gets the pressed key + profile and returns either the key tuple 
@@ -100,9 +107,12 @@ class Configparser:
     def saveFromGui(self, 
             profile: str, macroKey: str, 
             orgb: str,
-            data: ConfigEntry, bSavetoFile=False):
+            data: ConfigEntry,
+            notifications: bool, bSavetoFile=False):
         mapping = self.getMappings()
         openRGB = self.getOpenRGB()
+        globalSettings = self.getSettings()
+
         print(mapping)
 
         if data:
@@ -126,6 +136,8 @@ class Configparser:
             except KeyError:
                 pass
 
+        globalSettings["showNotifications"] = notifications
+
         print(self.settings)
         if bSavetoFile: self.save()
 
@@ -133,11 +145,12 @@ class Configparser:
         data: dict = self.getProfile(profile).get(macroKey)
         openRGB: dict = self.getOpenRGB().get(profile)
         openRGB = openRGB if openRGB else ""
+        notification = self.getShowNotifications()
 
         if data:
-            return ConfigEntry.fromConfig(data), openRGB
+            return ConfigEntry.fromConfig(data), openRGB, notification
         else:
-            return None, openRGB
+            return None, openRGB, notification
 
     ## load and store from config file
 

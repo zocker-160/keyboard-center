@@ -263,6 +263,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 macroKey=ALL_MACRO_KEYS[self.currMacro],
                 orgb=self.openRGBedit.text(),
                 data=data,
+                notifications= not self.disableNotifications.isChecked(),
                 bSavetoFile=saveToFile
             )
         except Exception as e:
@@ -276,7 +277,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, orgb = self.configparser.loadForGui(
+        d, orgb, n = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
@@ -305,6 +306,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.gameModeTime.setDisabled(True)
         
         self.openRGBedit.setText(orgb)
+
+        self.disableNotifications.setChecked(not n)
 
     # function overloading
     def keyPressEvent(self, a0: QKeyEvent):

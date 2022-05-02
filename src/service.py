@@ -92,7 +92,7 @@ async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
 
 def switchProfile(profile: str,
                     keyDev: KeyboardInterface, HIDpath: str=None,
-                    first=False):
+                    first=False, notify=True):
     global currProfile
     currProfile = profile
 
@@ -114,13 +114,15 @@ def switchProfile(profile: str,
     )
     #logging.debug("notification icon path " + path)
     #logging.debug("triggering notification")
+    #logging.debug(f"notify: {str(notify)}")
 
-    Notification(
-        app_name=APP_NAME,
-        title=f"Switched to profile {profile}",
-        icon_path=path,
-        urgency="normal"
-    ).send_linux() # this shit is targeted at linux only, fuck anything else
+    if notify:
+        Notification(
+            app_name=APP_NAME,
+            title=f"Switched to profile {profile}",
+            icon_path=path,
+            urgency="normal"
+        ).send_linux() # this shit is targeted at linux only, fuck anything else
 
 def executeCombo(combo: list, gamemode=0):
     if gamemode > 1:
@@ -173,7 +175,6 @@ async def handleRawData(fromKeyboard,
                     HIDpath: str=None):
 
     data = bytes(fromKeyboard)
-    #print(data)
     pressed = keyboardDev.macroKeys.get(data)
 
     if data in keyboardDev.macroKeys:
@@ -188,12 +189,16 @@ async def handleRawData(fromKeyboard,
             #logging.debug(data)
 
     elif data in keyboardDev.memoryKeys:
-        Thread(target=switchProfile, args=(keyboardDev.memoryKeys[data],keyboardDev, HIDpath), daemon=True).start()
+        Thread(
+            target=switchProfile, 
+            args=(keyboardDev.memoryKeys[data], keyboardDev, HIDpath, False, config.getShowNotifications()), 
+            daemon=True).start()
 
     elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
         Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
+
     else:
-        pass    
+        pass
 
 async def usbListener(keyboard: core.Device,
                 keyboardEndpoint: core.Endpoint,
@@ -214,7 +219,8 @@ async def usbListener(keyboard: core.Device,
             hdev.nonblocking = True
 
             # give visual feedback that application is now running
-            switchProfile(currProfile, keyboardDev, HIDpath_disable, True)
+            switchProfile(
+                currProfile, keyboardDev, HIDpath_disable, True, False)
 
             errorCount = 0
             while True:
@@ -226,7 +232,8 @@ async def usbListener(keyboard: core.Device,
                     )
 
                     if fromKeyboard:
-                        await handleRawData(fromKeyboard, keyboardDev, HIDpath_disable)
+                        await handleRawData(
+                            fromKeyboard, keyboardDev, HIDpath_disable)
                         errorCount = 0
                 except hid.HIDException as e:
                     logging.debug(f"HIDerror: probably exiting? ({str(e)})")
