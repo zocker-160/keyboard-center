@@ -10,3 +10,5 @@ linux_packaging/pkg
 linux_packaging/keyboard-center*
 linux_packaging/AUR*
 linux_packaging/MPR*
+
+testing/G510
