@@ -30,6 +30,7 @@ currProfile = MEMORY_1
 RETRY_COUNT = 5
 RETRY_TIMEOUT = 5 # in seconds
 USB_TIMEOUT = 1000 # in milliseconds
+USB_SEND_WAIT = 0.2 # in seconds
 
 APP_NAME = "Keyboard Center Service"
 
@@ -92,11 +93,12 @@ def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
     else:
         hdev.send_feature_report(data)
 
-async def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
+def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
     logging.debug("Sending sequence to disable G keys")
     with HIDDevice(path=HIDpath) as hdev:
         for data in keyDev.disableGKeys:
             _sendData(hdev, data, keyDev.disableGKeysUseWrite)
+            time.sleep(USB_SEND_WAIT)
 
 def switchProfile(profile: str,
                     keyDev: KeyboardInterface, HIDpath: str=None,
@@ -220,7 +222,7 @@ async def usbListener(keyboard: core.Device,
     
     # Send the sequence to disable the G keys
     if keyboardDev.disableGKeys:
-        await disableGkeyMapping(keyboardDev, HIDpath_disable)
+        disableGkeyMapping(keyboardDev, HIDpath_disable)
 
     if not keyboardDev.useLibUsb:
         with HIDDevice(path=HIDpath) as hdev:
