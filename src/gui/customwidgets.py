@@ -1,6 +1,6 @@
 import uinput
 
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QEvent, Qt
 from PyQt5.QtGui import QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QKeySequenceEdit, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
 
@@ -41,6 +41,16 @@ class CKeySequenceEdit(QKeySequenceEdit):
         self.tmpKeycodes.append(a0.key())
 
         return super().keyPressEvent(a0)
+
+    def event(self, a0: QEvent) -> bool:
+        # we need to filter Tab key press manually and send to
+        # keyPressEvent because otherwise tab will unfocus the
+        # KeySequenceEdit widget, which is not desired behavior
+        if a0.type() == QEvent.KeyPress and a0.key() == Qt.Key_Tab:
+            self.keyPressEvent(a0)
+            return True
+
+        return super().event(a0)
 
     def clear(self):
         self.pressedKeycode = None
