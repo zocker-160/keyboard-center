@@ -197,9 +197,9 @@ class Logitech_G815(KeyboardInterface):
         b'\x03\x04': uinput.KEY_STOP,
         b'\x03\x02': uinput.KEY_PREVIOUS,
         b'\x03\x01': uinput.KEY_NEXT,
-        b'\x03@': uinput.KEY_MUTE,
         b'\x03\x10': uinput.KEY_VOLUMEUP,
-        b'\x03 ': uinput.KEY_VOLUMEDOWN,
+        b'\x03\x20': uinput.KEY_VOLUMEDOWN,
+        b'\x03\x40': uinput.KEY_MUTE,
     }
 
     releaseEvents = {
