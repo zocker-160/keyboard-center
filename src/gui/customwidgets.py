@@ -9,8 +9,12 @@ from devices.allkeys import NUMPAD_SCANCODES
 
 class CKeySequenceEdit(QKeySequenceEdit):
 
+    onNewKeySet = pyqtSignal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self.rawEnabled = False
 
         self.pressedKeycode = None
         self.tmpKeycodes = list()
@@ -24,11 +28,21 @@ class CKeySequenceEdit(QKeySequenceEdit):
     def setKeycode(self, uinputKeycode: int) -> None:
         # We need to +8 to convert uinput keycode -> X keycode
         self.pressedKeycode = uinputKeycode + 8
+        self.onNewKeySet.emit(self.pressedKeycode)
+
+    def setKeySequence(self, keySequence: str):
+        if keySequence.startswith("0x") and self.rawEnabled:
+            keySequence = "nullkey"
+
+        return super().setKeySequence(keySequence)
 
     def keyPressEvent(self, a0: QKeyEvent) -> None:
+        #print("keypress:", a0.nativeScanCode())
+        #print("keypress:", a0.key())
+
         # only one single non modifier is allowed
         if len(self.tmpKeycodes) > 0: return
-        if a0.modifiers():
+        if a0.modifiers() and not self.rawEnabled:
             # for whatever the fuck reason, numpad keys get recognized
             #  as fucking modifiers (why????)
             # so this is a dirty workaround
@@ -39,6 +53,8 @@ class CKeySequenceEdit(QKeySequenceEdit):
 
         self.pressedKeycode = a0.nativeScanCode()
         self.tmpKeycodes.append(a0.key())
+
+        self.onNewKeySet.emit(self.pressedKeycode)
 
         return super().keyPressEvent(a0)
 
@@ -55,13 +71,28 @@ class CKeySequenceEdit(QKeySequenceEdit):
     def clear(self):
         self.pressedKeycode = None
         self.tmpKeycodes.clear()
-        print("")
         return super().clear()
 
     def finalize(self):
         self.tmpKeycodes.clear()
-        #print(self.keySequence().toString())
+
+        #print("key:", self.toString())
         #print(self.pressedKeycode)
+
+    def isSet(self):
+        return not (self.keySequence().count() == 0 and not self.pressedKeycode)
+
+    def setNull(self):
+        self.setKeySequence("0x0")
+        self.setKeycode(0)
+
+    def toString(self):
+        string = self.keySequence().toString()
+
+        if self.rawEnabled and not string:
+            return f"0x{self.pressedKeycode}"
+        else:
+            return string
 
 class CListWidgetItem(QWidget):
 
@@ -106,6 +137,11 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
 
         self.setupUi(self)
         self.customModBox.setVisible(False)
+        self.clearButton.pressed.connect(self._resetRawLabel)
+        self.setNullKeyButton.pressed.connect(self.keySequenceEdit.setNull)
+
+        self.keySequenceEdit.onNewKeySet.connect(self._setRawLabel)
+        self.keySequenceEdit.rawEnabled = True
 
         self.ctrlMod.setChecked(bCtrl)
         self.altMod.setChecked(bAlt)
@@ -123,8 +159,8 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
             self.keySequenceEdit.setKeycode(key.keycode)
 
     def getData(self) -> ConfigEntry:
-        # return nothing when there is no actual key
-        if self.keySequenceEdit.keySequence().count() == 0:
+        # raise error when there is no actual key
+        if not self.keySequenceEdit.isSet():
             raise ValueError("No key assigned!")
 
         keys = list()
@@ -147,13 +183,13 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
             else:
                 keys.append( Key(
                     self.customSequenceEdit.getUinputKeycode(),
-                    self.customSequenceEdit.keySequence().toString()
+                    self.customSequenceEdit.toString()
                     ) )
 
         # finally add the key itself
         keys.append( Key(
             self.keySequenceEdit.getUinputKeycode(),
-            self.keySequenceEdit.keySequence().toString()
+            self.keySequenceEdit.toString()
         ) )
 
         if len(keys) <= 0: return None
@@ -161,6 +197,15 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
             return keys.pop()
         else:
             return Combo(keys)
+
+    def _setRawLabel(self, number: int):
+        if number == 8: # nullkey
+            number = "nullkey"
+        
+        self.rawInputLabel.setText(str(number))
+
+    def _resetRawLabel(self):
+        self.rawInputLabel.setText("---")
 
     def __setData(self, data: list):
         """ 
