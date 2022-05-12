@@ -221,6 +221,7 @@ class Logitech_G510(KeyboardInterface):
     ]
 
     disableGKeysInterface = 1
+    disableGKeysUseWrite = False
 
 @dataclass(frozen=True)
 class Logitech_G815(KeyboardInterface):
