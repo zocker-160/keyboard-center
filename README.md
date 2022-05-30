@@ -29,6 +29,7 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - Logitech G910 Orion Spark (046d:c32b) (thanks to [@microdou](https://github.com/microdou))
 - Logitech G710+ (046d:c24d) (big thanks to [@nirenjan](https://github.com/nirenjan))
 - Logitech G815 (046d:c33f) (thanks to [@nickbuss](https://github.com/nickbuss))
+- Logitech G510 (046d:c22d) (thanks to [@Flying--Dutchman](https://github.com/Flying--Dutchman) for the help)
 
 ## Install
 
