@@ -1,0 +1,4 @@
+#! /usr/bin/env bash
+
+find /usr/lib/keyboard-center -type f -iname \*.pyc -delete
+find /usr/lib/keyboard-center -type d -iname __pycache__ -delete

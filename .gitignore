@@ -14,12 +14,12 @@ linux_packaging/DEB-keyboard-center-git/*
 !linux_packaging/DEB-keyboard-center/postinst
 !linux_packaging/DEB-keyboard-center/postrm
 !linux_packaging/DEB-keyboard-center/postupgrade
-!linux_packaging/DEB-keyboard-center/prerem
+!linux_packaging/DEB-keyboard-center/prerm
 
 !linux_packaging/DEB-keyboard-center-git/PKGBUILD
 !linux_packaging/DEB-keyboard-center-git/postinst
 !linux_packaging/DEB-keyboard-center-git/postrm
 !linux_packaging/DEB-keyboard-center-git/postupgrade
-!linux_packaging/DEB-keyboard-center-git/prerem
+!linux_packaging/DEB-keyboard-center-git/prerm
 
 testing/G510
