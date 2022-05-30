@@ -45,12 +45,17 @@ ICON_LOCATION = os.path.join(
 )
 
 def _stop(*args):
+    # YES I know using global variables like this is woeful
+    # YES I know I need to fix this and do it properly
     global client
     global evLoop
     global attachDriver
     global openRGBProcess
 
     logging.info("stopping...")
+
+    evLoop.stop()
+    virtualKeyboard.destroy()
 
     try:
         attachDriver()
@@ -63,9 +68,6 @@ def _stop(*args):
         logging.info("stopping openRGB server...")
         openRGBProcess.send_signal(signal.SIGINT)
         openRGBProcess.wait()
-
-    evLoop.stop()
-    virtualKeyboard.destroy()
 
 def setOpenRGBProfile(profile: str, retry: int, first: bool):
     global client
@@ -256,9 +258,18 @@ async def usbListener(keyboard: core.Device,
                             fromKeyboard, keyboardDev, HIDpath_disable)
                         errorCount = 0
                 except hid.HIDException as e:
-                    logging.debug(f"HIDerror: probably exiting? ({str(e)})")
-                    if errorCount > 10:
-                        sys.exit(1)
+                    # if SIGINT / SIGTERM is being received and is causing this HIDException
+                    # then we need to wait so _stop() can be called
+                    # after _stop() is being called, anything below this await will not execute anymore
+                    # when I don't do this, hdev.read() would be called before _stop()
+                    # and that would suck
+                    await asyncio.sleep(1)
+
+                    logging.debug(f"HIDerror: ({e})")
+
+                    if errorCount > 5:
+                        logging.error("Keyboard disconnected - exiting...")
+                        _stop()
                     else:
                         errorCount += 1
     else:
