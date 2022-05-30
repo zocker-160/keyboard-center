@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+python3 -m compileall /usr/lib/keyboard-center
+    
+# force load uinput kernel module
+modprobe uinput
+    
+# force reload udev rules
+udevadm control --reload-rules
+udevadm trigger
