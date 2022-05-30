@@ -13,21 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    
+    - name: checkout repository
+      uses: actions/checkout@v3
+    
     - name: setup makedeb
       run: |
-        wget -qO - 'https://proget.hunterwittenborn.com/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg &> /dev/null
-        echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.hunterwittenborn.com/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list
+        wget -qO - 'https://proget.makedeb.org/debian-feeds/makedeb.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/makedeb-archive-keyring.gpg 1> /dev/null
+        echo 'deb [signed-by=/usr/share/keyrings/makedeb-archive-keyring.gpg arch=all] https://proget.makedeb.org/ makedeb main' | sudo tee /etc/apt/sources.list.d/makedeb.list
         sudo apt-get update
-        sudo apt-get install -y makedeb git
-        
-    - name: clone MPR-git repo
-      run: git clone https://mpr.hunterwittenborn.com/keyboard-center-git.git
-        
-    - name: build deb package (git)
-      run: cd ./keyboard-center-git && makedeb -s
+        sudo apt-get install -y makedeb=11.0.1-1
+
+    - name: build deb package
+      run: cd ./linux_packaging/DEB-keyboard-center-git/ && makedeb -s
 
     - name: save deb file
       uses: actions/upload-artifact@master
       with:
-        name: keyboard-center-git
-        path: ./keyboard-center-git/*.deb
+        name: keyboard-center
+        path: ./linux_packaging/DEB-keyboard-center-git/*.deb
