@@ -18,8 +18,8 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - [x] Mapping of keys, combos and macros
 - [x] Ablity to add delays to macros
 - [x] libhidraw backend and libusb as backup if needed
-- [X] Support for switching LEDs of profile keys
-- [ ] Import and export of the configuration
+- [x] Support for switching LEDs of profile keys
+- [x] Import and export of the configuration (added ability to open configuration folder instead)
 - [ ] Profiles for specific applications *(currently impossible on wayland)*
 - [x] openRGB integration - linking of macro profiles with openRGB profiles
 
