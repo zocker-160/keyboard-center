@@ -2,6 +2,7 @@
 *.code-workspace
 
 __pycache*
+.qt_*
 
 .vscode
 venv
