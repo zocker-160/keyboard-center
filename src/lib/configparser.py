@@ -6,11 +6,13 @@ TYPE_CLICK = 0x01
 TYPE_PRESSDOWN = 0x02
 TYPE_PRESSUP = 0x03
 TYPE_DELAY = 0x04
+TYPE_COMMAND = 0x05
 
 TYPE_KEY = "key"
 TYPE_COMBO = "combo"
 TYPE_MACRO = "macro"
 TYPE_DELAY_STR = "delay"
+TYPE_COMMAND_STR = "command"
 
 MOD_CTRL = "Ctrl"
 MOD_ALT = "Alt"
@@ -89,6 +91,9 @@ class Configparser:
         if macro:
             if macro["type"] == TYPE_KEY:
                 return TYPE_KEY, tuple(macro["value"]), macro.get("gamemode")
+
+            if macro["type"] == TYPE_COMMAND_STR:
+                return TYPE_COMMAND, macro["value"][1], None
 
             elif macro["type"] == TYPE_COMBO:
                 return TYPE_COMBO, [ tuple(x) for x in macro["value"] ], macro.get("gamemode")

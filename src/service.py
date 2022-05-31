@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import shlex
 import signal
 import logging
 import asyncio
@@ -146,6 +147,21 @@ def switchProfile(profile: str,
             urgency="normal"
         ).send_linux() # this shit is targeted at linux only, fuck anything else
 
+def executeCommand(command: str):
+    if not command: return
+
+    try:
+        subprocess.Popen(shlex.split(command), shell=False, start_new_session=True)
+    except Exception as e:
+        logging.error(str(e))
+        Notification(
+            app_name=APP_NAME,
+            title="Command executor",
+            icon_path=ICON_LOCATION,
+            urgency="critical",
+            description=str(e)
+        ).send_linux()
+
 def executeCombo(combo: list, gamemode=0):
     if gamemode > 1:
         for i, c in enumerate(combo):
@@ -161,9 +177,13 @@ def executeMacro(macro: list):
         if len(action) == 1:
             if action[0][0] == TYPE_CLICK:
                 virtualKeyboard.emit_click(action[0])
+
             elif action[0][0] == TYPE_DELAY:
                 time.sleep(action[0][1] / 1000)
             
+            elif action[0][0] == TYPE_COMMAND:
+                executeCommand(action[0][1])
+
         elif all([ x[0] == TYPE_CLICK for x in action ]):
             virtualKeyboard.emit_combo(action)
         else:
@@ -178,19 +198,23 @@ def emitKeys(profile, key, uinput=False):
     logging.debug(f"{key} pressed")
 
     if uinput:
-        type, macro, gamemode = TYPE_KEY, key, False
+        type, data, gamemode = TYPE_KEY, key, False
     else:
-        type, macro, gamemode = config.getKey(profile, key)
+        type, data, gamemode = config.getKey(profile, key)
 
-    if type == TYPE_KEY and macro:
-        virtualKeyboard.emit_click(macro)
+    if type == TYPE_KEY and data:
+        virtualKeyboard.emit_click(data)
 
-    elif type == TYPE_COMBO and macro:
-        executeCombo(macro, gamemode)
+    elif type == TYPE_COMMAND and data:
+        executeCommand(data)
 
-    elif type == TYPE_MACRO and macro:
-        print(macro)
-        executeMacro(macro)
+    elif type == TYPE_COMBO and data:
+        executeCombo(data, gamemode)
+
+    elif type == TYPE_MACRO and data:
+        print(data)
+        # TODO: macros are ignoring game mode??
+        executeMacro(data)
 
 async def handleRawData(fromKeyboard, 
                     keyboardDev: KeyboardInterface,
