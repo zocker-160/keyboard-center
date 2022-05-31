@@ -375,8 +375,7 @@ QLabel#asd:pressed {
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionImport_config"/>
-    <addaction name="actionExport_config"/>
+    <addaction name="actionOpenConfigFolder"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -435,13 +434,13 @@ QLabel#asd:pressed {
     <string>Export config...(soon)</string>
    </property>
   </action>
-  <action name="actionImport_config">
+  <action name="actionOpenConfigFolder">
    <property name="icon">
     <iconset theme="document-open">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Import config...(soon)</string>
+    <string>Open config folder...</string>
    </property>
   </action>
   <action name="actionExit">

@@ -166,6 +166,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 sys.exit()
 
     def setupSlots(self):
+        self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
 
@@ -325,6 +326,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return super().closeEvent(a0)
 
     ### menu actions
+    def openConfigFolder(self):
+        subprocess.Popen(["xdg-open", self.configparser.configFolder], shell=False)
+
     def showGitHub(self):
         webbrowser.open("https://github.com/zocker-160/keyboard-center")
 

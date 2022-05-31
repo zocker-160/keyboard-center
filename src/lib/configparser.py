@@ -22,7 +22,8 @@ from lib.configtypes import ConfigEntry
 class Configparser:
 
     def __init__(self, locConfTemplate: str, *args, silent=True):
-        self.configFile = self._getConfigLocation(locConfTemplate, args)
+        self.configFile, self.configFolder = \
+            self._getConfigLocation(locConfTemplate, args)
 
         self.configYAML = YAML(typ='safe')
         self.load(silent)
@@ -46,7 +47,7 @@ class Configparser:
         if not os.path.isfile(confLoc):
             self._copyConfig(confTemplate, confLoc)
 
-        return confLoc
+        return confLoc, confFolder
 
     def getSettings(self) -> dict:
         return self.settings["settings"]
