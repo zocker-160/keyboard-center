@@ -226,7 +226,13 @@ class Ui_MainWindow(object):
         icon = QtGui.QIcon.fromTheme("application-exit")
         self.actionExit.setIcon(icon)
         self.actionExit.setObjectName("actionExit")
+        self.actionCheck_service_status = QtWidgets.QAction(MainWindow)
+        icon = QtGui.QIcon.fromTheme("system-help")
+        self.actionCheck_service_status.setIcon(icon)
+        self.actionCheck_service_status.setObjectName("actionCheck_service_status")
         self.menuFile.addAction(self.actionOpenConfigFolder)
+        self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionCheck_service_status)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
         self.menuAbout.addAction(self.actionGitHub)
@@ -270,5 +276,7 @@ class Ui_MainWindow(object):
         self.actionOpenConfigFolder.setText(_translate("MainWindow", "Open config folder..."))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionExit.setShortcut(_translate("MainWindow", "Ctrl+Q"))
+        self.actionCheck_service_status.setText(_translate("MainWindow", "Check service status..."))
+        self.actionCheck_service_status.setToolTip(_translate("MainWindow", "check status of the background service"))
 from gui.customwidgets import CListWidgetContent
 from . import ressources_rc

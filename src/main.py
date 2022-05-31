@@ -175,6 +175,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def setupSlots(self):
         self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
+        self.actionCheck_service_status.triggered.connect(self.checkServiceStatus)
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
 
