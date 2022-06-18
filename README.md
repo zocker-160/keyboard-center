@@ -16,12 +16,13 @@ Keyboard Center is an application attempting to create an easy way for users to 
 ## Features
 
 - [x] Mapping of keys, combos and macros
+- [x] Ability to map commands to keys
 - [x] Ablity to add delays to macros
-- [x] libhidraw backend and libusb as backup if needed
+- [x] libhidraw backend ~and libusb as backup if needed~ (libusb only < 0.2.0)
 - [x] Support for switching LEDs of profile keys
 - [x] Import and export of the configuration (added ability to open configuration folder instead)
-- [ ] Profiles for specific applications *(currently impossible on wayland)*
 - [x] openRGB integration - linking of macro profiles with openRGB profiles
+- [ ] Profiles for specific applications *(currently impossible on wayland)*
 
 ## Supported Keyboards
 
@@ -50,14 +51,11 @@ available in the AUR: [[AUR] keyboard-center](https://aur.archlinux.org/packages
 
 ![OpenRGBkeyboardcenter](images/OpenRGBkeyboardc.png)
 
-**note:** if you install OpenRGB after Keyboard Center, you will need to restart the background service.
+**note:** if you install OpenRGB after Keyboard Center, you will need to restart it.
 
 ## Manage Background Service
 
-Keyboard Center does install a background service, which runs with user rights.
-
-You can manage it using:\
-`systemctl --user status|start|stop|restart|enable|disable keyboard-center.service`
+Keyboard Center places itself into the system tray.
 
 ## Settings
 
