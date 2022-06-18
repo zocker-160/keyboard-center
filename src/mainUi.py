@@ -145,8 +145,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi()
         self.setupSlots()
 
-        if not self.configparser.getMinimizeOnStart():
-            self.show()
+        # this might sound weird, but it fixes a weird graphical bug
+        # on older KDE versions (< 5.18)
+        self.show()
+        if self.configparser.getMinimizeOnStart():
+            self.hide()
 
     def setupUi(self):
         self.logger.debug("setting up GUI...")
