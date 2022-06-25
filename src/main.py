@@ -13,7 +13,7 @@ from lib.configparser import Configparser
 from service import BackgroundService
 
 APP_NAME = "Keyboard Center"
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
