@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Keyboard Center</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="ressources.qrc">
-    <normaloff>:/icons/assets/input-keyboard-virtual.png</normaloff>:/icons/assets/input-keyboard-virtual.png</iconset>
-  </property>
   <property name="styleSheet">
    <string notr="true">QLabel#asd {
 	image: url(:/icons/MEMORY_1.png);
@@ -268,6 +264,13 @@ QLabel#asd:pressed {
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="addCommand">
+            <property name="text">
+             <string>Add Command</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="clearAllButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
@@ -335,6 +338,13 @@ QLabel#asd:pressed {
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="minimizeOnStart">
+        <property name="text">
+         <string>minimize on start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -346,6 +356,17 @@ QLabel#asd:pressed {
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="toTrayButton">
+        <property name="text">
+         <string>To Tray</string>
+        </property>
+        <property name="icon">
+         <iconset theme="go-bottom">
+          <normaloff>.</normaloff>.</iconset>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="saveButton">
@@ -376,6 +397,7 @@ QLabel#asd:pressed {
      <string>File</string>
     </property>
     <addaction name="actionOpenConfigFolder"/>
+    <addaction name="actionOpenLogfile"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_service_status"/>
     <addaction name="separator"/>
@@ -414,6 +436,9 @@ QLabel#asd:pressed {
    </property>
   </action>
   <action name="actionAbout_Qt">
+   <property name="icon">
+    <iconset theme="help-about"/>
+   </property>
    <property name="text">
     <string>About Qt</string>
    </property>
@@ -442,7 +467,7 @@ QLabel#asd:pressed {
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Open config folder...</string>
+    <string>Open config folder</string>
    </property>
   </action>
   <action name="actionExit">
@@ -458,14 +483,27 @@ QLabel#asd:pressed {
    </property>
   </action>
   <action name="actionCheck_service_status">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
-    <iconset theme="system-help"/>
+    <iconset theme="system-help">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Check service status...</string>
    </property>
    <property name="toolTip">
     <string>check status of the background service</string>
+   </property>
+  </action>
+  <action name="actionOpenLogfile">
+   <property name="icon">
+    <iconset theme="text">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Open log file</string>
    </property>
   </action>
  </widget>

@@ -2,6 +2,8 @@ import logging
 
 from lib.configparser import (
     TYPE_CLICK,
+    TYPE_COMMAND,
+    TYPE_COMMAND_STR,
     TYPE_DELAY,
     TYPE_DELAY_STR,
     TYPE_KEY,
@@ -42,6 +44,9 @@ class ConfigEntry:
         elif type == TYPE_DELAY_STR:
             result = Delay(value[0][1])
 
+        elif type == TYPE_COMMAND_STR:
+            result = Command(value[1])
+
         elif type == TYPE_COMBO:
             keylist = list()
             for i, entry in enumerate(string):
@@ -54,6 +59,8 @@ class ConfigEntry:
                 if len(entry) == 1:
                     if entry[0] == TYPE_DELAY_STR:
                         comboKeylist.append( Delay(value[i][0][1]) )
+                    elif entry[0] == TYPE_COMMAND_STR:
+                        comboKeylist.append( Command(value[i][0][1]) )
                     else:
                         comboKeylist.append( Key(value[i][0][1], entry[0]) )
                 else:
@@ -120,6 +127,26 @@ class Delay(ConfigEntry):
 
     def toConfigString(self):
         return [ self.keyString ]
+
+class Command(ConfigEntry):
+    def __init__(self, command: str):
+        self.type = TYPE_COMMAND_STR
+        self.command = command
+
+    def toConfigValue(self):
+        return [ (TYPE_COMMAND, self.command) ]
+    
+    def toConfigString(self):
+        return [ TYPE_COMMAND_STR ]
+
+    def toConfig(self):
+        return self.genConfig(
+            name=self.name,
+            type=self.type,
+            string=self.toConfigString().pop(),
+            value=self.toConfigValue().pop(),
+            gamemode=self.gamemode
+        )
 
 class Combo(ConfigEntry):
     def __init__(self, keylist: list):

@@ -29,7 +29,6 @@ class KeyboardInterface:
 
     ## optional
     memoryKeysLEDs = dict() # dict[str, bytes]
-    useLibUsb: bool = field(default=False) # will use libhidraw if False
 
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpectrum(KeyboardInterface):

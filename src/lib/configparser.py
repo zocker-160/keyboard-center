@@ -1,16 +1,19 @@
 import os
-from ruamel.yaml import YAML
 import logging
+
+from ruamel.yaml import YAML
 
 TYPE_CLICK = 0x01
 TYPE_PRESSDOWN = 0x02
 TYPE_PRESSUP = 0x03
 TYPE_DELAY = 0x04
+TYPE_COMMAND = 0x05
 
 TYPE_KEY = "key"
 TYPE_COMBO = "combo"
 TYPE_MACRO = "macro"
 TYPE_DELAY_STR = "delay"
+TYPE_COMMAND_STR = "command"
 
 MOD_CTRL = "Ctrl"
 MOD_ALT = "Alt"
@@ -21,33 +24,47 @@ from lib.configtypes import ConfigEntry
 
 class Configparser:
 
-    def __init__(self, locConfTemplate: str, *args, silent=True):
+    @staticmethod
+    def getLogfile():
+        folder = os.path.join(
+            os.environ["HOME"], ".var", "log")
+
+        if not os.path.isdir(folder):
+            os.mkdir(folder)
+
+        return os.path.join(folder, "keyboardCenter.log")
+
+    def __init__(self, locConfTemplate: str, silent=True):
+        self.log = logging.getLogger("Configparser")
+
         self.configFile, self.configFolder = \
-            self._getConfigLocation(locConfTemplate, args)
+            self._getConfigLocation(locConfTemplate)
 
         self.configYAML = YAML(typ='safe')
         self.load(silent)
 
-    def _getConfigLocation(self, confTemplate: str, *args):
-        xdg_home = os.environ.get("XDG_CONFIG_HOME")
+    def _getConfigLocation(self, confTemplate: str):
+        xdg_home = os.environ.get("XDG_CONFIG_HOME") # XDG_DATA_HOME
 
         if not xdg_home:
-            home = os.environ.get("HOME") or args[1]
+            home = os.environ.get("HOME")
             xdg_home = os.path.join(home, ".config")
         
         confFolder = os.path.join(xdg_home, "keyboard-center")
         confLoc = os.path.join(confFolder, "settings.yml")
 
-        logging.debug("Config file location: "+confLoc)
+        self.log.debug("Config file location: "+confLoc)
 
         # check if file and folder exists
         if not os.path.isdir(confFolder):
-            logging.debug("creating confFolder "+confFolder)
+            self.log.debug("creating confFolder "+confFolder)
             os.mkdir(confFolder)
         if not os.path.isfile(confLoc):
             self._copyConfig(confTemplate, confLoc)
 
         return confLoc, confFolder
+
+    ## getter
 
     def getSettings(self) -> dict:
         return self.settings["settings"]
@@ -59,6 +76,9 @@ class Configparser:
         d = self.getMappings().get(profile)
         return d if d else {}
 
+    def getDeviceID(self):
+        return self.getSettings()["usbDeviceID"]
+
     def getOpenRGB(self) -> dict:
         d = self.settings.get("openRGB")
         if d:
@@ -69,6 +89,13 @@ class Configparser:
 
     def getShowNotifications(self) -> bool:
         d = self.getSettings().get("showNotifications")
+        if d != None:
+            return d
+        else:
+            return True
+
+    def getMinimizeOnStart(self) -> bool:
+        d = self.getSettings().get("minOnStart")
         if d != None:
             return d
         else:
@@ -90,6 +117,9 @@ class Configparser:
             if macro["type"] == TYPE_KEY:
                 return TYPE_KEY, tuple(macro["value"]), macro.get("gamemode")
 
+            if macro["type"] == TYPE_COMMAND_STR:
+                return TYPE_COMMAND, macro["value"][1], None
+
             elif macro["type"] == TYPE_COMBO:
                 return TYPE_COMBO, [ tuple(x) for x in macro["value"] ], macro.get("gamemode")
 
@@ -99,25 +129,36 @@ class Configparser:
                     res.append([ tuple(x) for x in combo ])
                 return TYPE_MACRO, res, macro.get("gamemode")
         else:
-            logging.info(f"key {key} does not have any mapping for {profile}")
+            self.log.debug(
+                f"(ignoring) key {key} does not have any mapping for {profile}")
 
             return TYPE_KEY, None, None
     
+    ## setter
+
+    def setAndSaveDeviceID(self, id):
+        self.log.debug("setting deviceID to "+str(id))
+
+        if self.getDeviceID() != id:
+            self.getSettings()["usbDeviceID"] = id
+            self.save()
+
     ## load and store from GUI
 
     def saveFromGui(self, 
             profile: str, macroKey: str, 
             orgb: str,
             data: ConfigEntry,
-            notifications: bool, bSavetoFile=False):
+            notifications: bool,
+            minOnStart: bool, bSavetoFile=False):
         mapping = self.getMappings()
         openRGB = self.getOpenRGB()
         globalSettings = self.getSettings()
 
-        print(mapping)
+        self.log.debug(mapping)
 
         if data:
-            print(data.toConfig())
+            self.log.debug(data.toConfig())
 
             if not mapping.get(profile):
                 mapping[profile] = dict()
@@ -138,8 +179,9 @@ class Configparser:
                 pass
 
         globalSettings["showNotifications"] = notifications
+        globalSettings["minOnStart"] = minOnStart
 
-        print(self.settings)
+        self.log.debug("config from GUI: "+str(self.settings))
         if bSavetoFile: self.save()
 
     def loadForGui(self, profile: str, macroKey: str):
@@ -147,20 +189,21 @@ class Configparser:
         openRGB: dict = self.getOpenRGB().get(profile)
         openRGB = openRGB if openRGB else ""
         notification = self.getShowNotifications()
+        minOnStart = self.getMinimizeOnStart()
 
         if data:
-            return ConfigEntry.fromConfig(data), openRGB, notification
+            return ConfigEntry.fromConfig(data), openRGB, notification, minOnStart
         else:
-            return None, openRGB, notification
+            return None, openRGB, notification, minOnStart
 
     ## load and store from config file
 
     def load(self, silent=True) -> dict:
         try:
-            logging.debug("loading config file " + self.configFile)
+            self.log.debug("loading config file " + self.configFile)
             with open(self.configFile, "r") as yaml:
                 data = self.configYAML.load(yaml)
-            logging.debug("config loaded: " + str(data))
+            self.log.debug("config loaded: " + str(data))
 
             self.settings: dict = data
 
@@ -168,39 +211,39 @@ class Configparser:
             return True
 
         except FileNotFoundError:
-            logging.critical("config file not found")
+            self.log.critical("config file not found")
             raise
         except TypeError as e:
             # from _configIntegrityCheck
-            logging.exception(e)
-            logging.critical("config file is missing important fields")
+            self.log.exception(e)
+            self.log.critical("config file is missing important fields")
             raise
         except AssertionError as e:
             # from _configIntegrityCheck
-            logging.exception(e)
-            logging.critical("config file integrity check failed")
+            self.log.exception(e)
+            self.log.critical("config file integrity check failed")
             raise
         except Exception as e:
-            logging.exception(e)
+            self.log.exception(e)
             if not silent: raise
 
     def save(self, silent=True):
         try:
-            logging.debug("saving into config file " + self.configFile)
+            self.log.debug("saving into config file " + self.configFile)
             with open(self.configFile, "w") as yaml:
                 self.configYAML.dump(self.settings, yaml)
 
         except FileNotFoundError:
-            logging.critical("config file not found")
+            self.log.critical("config file not found")
             if not silent: raise
         except Exception as e:
-            logging.exception(e)
+            self.log.exception(e)
             if not silent: raise
 
     def _copyConfig(self, src: str, dest: str):
-        logging.info("copying template config file")
-        logging.debug("source: "+src)
-        logging.debug("destinatin: "+dest)
+        self.log.info("copying template config file")
+        self.log.debug("source: "+src)
+        self.log.debug("destinatin: "+dest)
 
         with open(src, "r") as s:
             with open(dest, "w") as d:

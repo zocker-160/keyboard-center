@@ -1,3 +1,4 @@
+import shlex
 import uinput
 
 from PyQt5.QtCore import pyqtSignal, QEvent, Qt
@@ -125,8 +126,8 @@ class CListWidgetItem(QWidget):
     def _moveDown(self):
         self.onMoveDown.emit(self)
 
+from lib.configtypes import *
 from gui.Ui_keypressWidget import Ui_KeyPressWidget
-from lib.configtypes import Key, Delay, Combo, Macro, ConfigEntry
 
 class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
     def __init__(self, parent=None,
@@ -243,6 +244,23 @@ class DelayWidget(CListWidgetItem, Ui_DelayWidget):
     def getData(self):
         return Delay(self.spinBox.value())
 
+from gui.Ui_commandWidget import Ui_CommandWidget
+
+class CommandWidget(CListWidgetItem, Ui_CommandWidget):
+    def __init__(self, parent=None, command: str = ""):
+        super().__init__(parent=parent)
+
+        self.setupUi(self)
+
+        if command: self.commandEdit.setText(command)
+
+    def getData(self):
+        if command := self.commandEdit.text():
+            shlex.split(command)
+            return Command(command)
+        else:
+            raise ValueError("No command specified!")
+
 class CListWidgetContent(QWidget):
 
     def __init__(self, parent=None):
@@ -284,7 +302,7 @@ class CListWidgetContent(QWidget):
         data = list()
         for item in self.getEntries():
             d = item.getData()    
-            if type(d) in [Key, Delay, Combo]:
+            if type(d) in [Key, Delay, Combo, Command]:
                 data.append(d)
                 
         if len(data) == 0:
@@ -302,6 +320,9 @@ class CListWidgetContent(QWidget):
 
         elif type(data) == Delay:
             self.addWidget( DelayWidget(delay=data.duration) )
+
+        elif type(data) == Command:
+            self.addWidget( CommandWidget(command=data.command) )
 
         elif type(data) == Combo:
             bCtrl, bShift, bAlt, bMeta, bCustom = [False]*5

@@ -3,13 +3,16 @@
 import os
 import sys
 import time
+import shlex
 import signal
-import logging
 import asyncio
 import shutil
 import subprocess
 
-from threading import Thread
+import logging
+from logging import handlers
+
+from threading import Event, Thread
 
 import uinput
 from usb import core
@@ -24,6 +27,7 @@ from lib.openrgb.orgb import OpenRGBClient
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import *
+from lib.servicehelper import executeCommand
 
 currProfile = MEMORY_1
 client = None
@@ -44,454 +48,346 @@ ICON_LOCATION = os.path.join(
     PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
 )
 
-def _stop(*args):
-    # YES I know using global variables like this is woeful
-    # YES I know I need to fix this and do it properly
-    global client
-    global evLoop
-    global attachDriver
-    global openRGBProcess
+from PyQt5.QtCore import QThread, pyqtSignal
 
-    logging.info("stopping...")
+class NoKeyboardException(Exception):
+    pass
+class NoEndpointException(Exception):
+    pass
 
-    evLoop.stop()
-    virtualKeyboard.destroy()
-
-    try:
-        attachDriver()
-    except NameError:
-        # is not defined when using HID interface
-        pass
-
-    if client: client.disconnect()
-    if openRGBProcess and openRGBProcess.poll():
-        logging.info("stopping openRGB server...")
-        openRGBProcess.send_signal(signal.SIGINT)
-        openRGBProcess.wait()
-
-def setOpenRGBProfile(profile: str, retry: int, first: bool):
-    global client
-    global openRGBProcess
-
-    orgb = config.getOpenRGB().get(profile)
-    if not orgb: return
-
-    try:
-        logging.debug("Setting OpenRGB profile "+orgb)
-        
-        if first or not client:
-            client = OpenRGBClient()
-            client.load_profile(orgb) # we need to run this first, in case the profile does not exist
-            client.clear() # we need to clear because sometimes load_profile just does not fucking work
-            time.sleep(0.5) # we need to wait a moment after clear
-        
-        client.load_profile(orgb)
-
-    except ConnectionRefusedError:
-        if retry <= 0 or not first:
-            logging.debug("giving up reaching OpenRGB SDK")
-            return
-        if retry == RETRY_COUNT and shutil.which("openrgb"):
-            openRGBProcess = subprocess.Popen(["openrgb", "--server"], shell=False)
-        logging.debug("Could not reach OpenRGB SDK, retrying...")
-        time.sleep(RETRY_TIMEOUT)
-        setOpenRGBProfile(profile, retry-1, first)
-    except ValueError as e:
-        logging.error(str(e))
-
-def _sendData(hdev: HIDDevice, data: bytes, useWrite: bool=True):
-    if useWrite:
-        hdev.write(data)
-    else:
-        hdev.send_feature_report(data)
-
-def disableGkeyMapping(keyDev: KeyboardInterface, HIDpath: str):
-    logging.debug("Sending sequence to disable G keys")
-    with HIDDevice(path=HIDpath) as hdev:
-        for data in keyDev.disableGKeys:
-            _sendData(hdev, data, keyDev.disableGKeysUseWrite)
-            time.sleep(USB_SEND_WAIT)
-
-def switchProfile(profile: str,
-                    keyDev: KeyboardInterface, HIDpath: str=None,
-                    first=False, notify=True):
-    global currProfile
-    currProfile = profile
-
-    # switch Mkey LED
-    if HIDpath and not keyDev.useLibUsb and keyDev.memoryKeysLEDs:
-        with HIDDevice(path=HIDpath) as hdev:
-            hdev.nonblocking = True
-            _sendData(hdev,
-                keyDev.memoryKeysLEDs[profile],
-                keyDev.disableGKeysUseWrite
-            )
-
-    # set openRGB profile
-    Thread(target=setOpenRGBProfile, args=(profile, RETRY_COUNT, first), daemon=True).start()
-
-    path = os.path.join(
-        PARENT_LOCATION,
-        "assets", f"{profile}.png"
-    )
-    #logging.debug("notification icon path " + path)
-    #logging.debug("triggering notification")
-    #logging.debug(f"notify: {str(notify)}")
-
-    if notify:
-        Notification(
-            app_name=APP_NAME,
-            title=f"Switched to profile {profile}",
-            icon_path=path,
-            urgency="normal"
-        ).send_linux() # this shit is targeted at linux only, fuck anything else
-
-def executeCombo(combo: list, gamemode=0):
-    if gamemode > 1:
-        for i, c in enumerate(combo):
-            virtualKeyboard.emit(c, 1, i == len(combo)-1)
-        time.sleep(gamemode / 1000)
-        for i, c in enumerate(combo):
-            virtualKeyboard.emit(c, 0, i == len(combo)-1)
-    else:
-        virtualKeyboard.emit_combo(combo)
-
-def executeMacro(macro: list):
-    for action in macro:
-        if len(action) == 1:
-            if action[0][0] == TYPE_CLICK:
-                virtualKeyboard.emit_click(action[0])
-            elif action[0][0] == TYPE_DELAY:
-                time.sleep(action[0][1] / 1000)
-            
-        elif all([ x[0] == TYPE_CLICK for x in action ]):
-            virtualKeyboard.emit_combo(action)
-        else:
-            logging.error("unknown keyboard action...."+str(action))
-
-def emitKeys(profile, key, uinput=False):
-    """ 
-    Function that emits the requested keys
-
-    this function can be blocking
-    """
-    logging.debug(f"{key} pressed")
-
-    if uinput:
-        type, macro, gamemode = TYPE_KEY, key, False
-    else:
-        type, macro, gamemode = config.getKey(profile, key)
-
-    if type == TYPE_KEY and macro:
-        virtualKeyboard.emit_click(macro)
-
-    elif type == TYPE_COMBO and macro:
-        executeCombo(macro, gamemode)
-
-    elif type == TYPE_MACRO and macro:
-        print(macro)
-        executeMacro(macro)
-
-async def handleRawData(fromKeyboard, 
-                    keyboardDev: KeyboardInterface,
-                    HIDpath: str=None):
-
-    data = bytes(fromKeyboard)
-    pressed = keyboardDev.macroKeys.get(data)
-
-    if data in keyboardDev.macroKeys:
-        if pressed:
-            if isinstance(pressed, str):
-                Thread(target=emitKeys, args=(currProfile,pressed), daemon=True).start()
-            else: # uinput key
-                Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
-        else:
-            pass
-            #logging.debug("recieved data could not get mapped to a macro key")
-            #logging.debug(data)
-
-    elif data in keyboardDev.memoryKeys:
-        Thread(
-            target=switchProfile, 
-            args=(keyboardDev.memoryKeys[data], keyboardDev, HIDpath, False, config.getShowNotifications()), 
-            daemon=True).start()
-
-    elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
-        Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
-
-    else:
-        pass
-
-async def usbListener(keyboard: core.Device,
-                keyboardEndpoint: core.Endpoint,
-                keyboardDev: KeyboardInterface,
-                HIDpath: str=None,
-                HIDpath_disable: str=None):
-
-    _usbTimeout: int = config.getSettings().get("usbTimeout") or USB_TIMEOUT
-
-    await asyncio.sleep(0)
-    
-    # Send the sequence to disable the G keys
-    if keyboardDev.disableGKeys:
-        disableGkeyMapping(keyboardDev, HIDpath_disable)
-
-    if not keyboardDev.useLibUsb:
-        with HIDDevice(path=HIDpath) as hdev:
-            hdev.nonblocking = True
-
-            # give visual feedback that application is now running
-            switchProfile(
-                currProfile, keyboardDev, HIDpath_disable, True, False)
-
-            errorCount = 0
-            while True:
-                await asyncio.sleep(0)
-                try:
-                    fromKeyboard = hdev.read(
-                        keyboardEndpoint.wMaxPacketSize,
-                        _usbTimeout
-                    )
-
-                    if fromKeyboard:
-                        await handleRawData(
-                            fromKeyboard, keyboardDev, HIDpath_disable)
-                        errorCount = 0
-                except hid.HIDException as e:
-                    # if SIGINT / SIGTERM is being received and is causing this HIDException
-                    # then we need to wait so _stop() can be called
-                    # after _stop() is being called, anything below this await will not execute anymore
-                    # when I don't do this, hdev.read() would be called before _stop()
-                    # and that would suck
-                    await asyncio.sleep(1)
-
-                    logging.debug(f"HIDerror: ({e})")
-
-                    if errorCount > 5:
-                        logging.error("Keyboard disconnected - exiting...")
-                        _stop()
-                    else:
-                        errorCount += 1
-    else:
-        logging.debug("Using libusb backend...")
-        while True:
-            await asyncio.sleep(0)
-            try:
-                # hmm this could end up problematic if it blocks while
-                # running slower macros.....might need to go back to Threads
-                fromKeyboard = keyboard.read(
-                    keyboardEndpoint.bEndpointAddress,
-                    keyboardEndpoint.wMaxPacketSize,
-                    _usbTimeout
-                )
-
-                if fromKeyboard:
-                    await handleRawData(fromKeyboard, keyboardDev)
-            
-            # older versions of python3-usb throw USBError instead of USBTimeoutError
-            # all glory to backwards compatibility I guess....
-            except core.USBError:
-                pass
-            except core.USBTimeoutError:
-                pass
-
-def inotifyReader(inotify: INotify):
-    for _ in inotify.read():
-        # reload configuration
-        logging.info("config changed - reloading...")
-        if config.load():
-            Notification(
-                app_name=APP_NAME,
-                title="Configuration changed",
-                description="new config loaded!",
-                icon_path=ICON_LOCATION,
-                urgency="normal"
-            ).send_linux()
-
-def _getHIDpaths(keyboardDev: KeyboardInterface):
-    HIDpath, HIDpath_disable = None, None
-
-    for dev in hid.enumerate(keyboardDev.usbVendor, keyboardDev.usbProduct):
-        if dev.get("interface_number") == keyboardDev.usbInterface[0]:
-            HIDpath: bytes = dev.get("path")
-            logging.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
-
-        if dev.get("interface_number") == keyboardDev.disableGKeysInterface:
-            HIDpath_disable: bytes = dev.get("path")
-            logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
-
-    logging.debug("Checking for HID availability...")
-    def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
-        try:
-            with HIDDevice(path=HIDpath) as _:
-                logging.debug(f"Connected to {HIDpath.decode()}")
-            return True
-        except HIDFailedToOpenException:
-            if tries <= 0:
-                return False
-            else:
-                logging.warning("Could not open HID device, retrying...")
-                time.sleep(RETRY_TIMEOUT)
-                return __HIDavailable(HIDpath, tries-1)
-
-    numTries = config.getSettings().get("retryCount") or RETRY_COUNT
-    if HIDpath and not __HIDavailable(HIDpath, numTries):
-        raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
-
-    return HIDpath, HIDpath_disable
-
-def _searchKeyboard(retry=RETRY_COUNT):
-    if retry <= 0:
-        Notification(
-            app_name=APP_NAME,
-            title="Keyboard Search",
-            description="no supported keyboard found!",
-            icon_path=ICON_LOCATION,
-            urgency="critical"
-        ).send_linux()
-
-        sys.exit(1)
-
-    tstart = time.time()
-    for i, device in enumerate(SUPPORTED_DEVICES):
-        keyboard: core.Device = core.find(
-            idVendor=device.usbVendor, idProduct=device.usbProduct
-        )
-
-        if keyboard:
-            logging.info("keyboard found: " + device.devicename)
-            Notification(
-                app_name=APP_NAME,
-                title="Keyboard Search",
-                description="keyboard found: " + device.devicename,
-                icon_path=ICON_LOCATION,
-                urgency="low"
-            ).send_linux()
-
-            logging.info("saving deviceID into config")
-            config.settings["settings"]["usbDeviceID"] = i
-            config.save()
-
-            keyboardDev = device
-            break
-
-    if not keyboard:
-        logging.critical("no supported keyboard found, retrying...")
-        config.settings["settings"]["usbDeviceID"] = "None"
-        config.save()
-
-        time.sleep(5)
-        return _searchKeyboard(retry-1)
-    
-    tend = time.time()
-
-    return keyboard, keyboardDev, tend-tstart
-
-def main():
-    global currProfile
+class BackgroundService(QThread):
 
     keyboard: core.Device
     keyboardDev: KeyboardInterface
-    dTime: int
+    keyboardEndpoint: core.Endpoint
 
-    logging.info("searching for supported keyboard...")
-    keyboard, keyboardDev, dTime = _searchKeyboard()
+    virtualKeyboard: uinput.Device
 
-    logging.debug(f"time taken to find keyboard in ms: {dTime}")
+    rgbClient: OpenRGBClient = None
+    openRGBProcess: subprocess.Popen = None
 
-    logging.debug("requesting USB endpoint...")
-    keyboardEndpoint: core.Endpoint = keyboard\
-                                        [keyboardDev.usbConfiguration]\
-                                        [keyboardDev.usbInterface]\
-                                        [keyboardDev.usbEndpoint]
+    HIDpath: bytes
+    HIDpath_write: bytes
 
-    logging.debug("Searching for HIDraw endpoint...")
-    HIDpath, HIDpath_disable = _getHIDpaths(keyboardDev)
-    
-    if not HIDpath or not HIDpath_disable:
-        if keyboardDev.useLibUsb:
-            logging.warning("HIDraw endpoint could not be found!\n\
-                switching to libusb as backup")
+    notificationEvent = pyqtSignal(str, str, bool) # title, message, urgent
+    notificationIconEvent = pyqtSignal(str, str, str) # title, message, iconPath
+    waitingForKeyboardEvent = pyqtSignal()
+    quitTriggered = pyqtSignal()
+
+    stopEvent = Event()
+
+    def __init__(self, config: Configparser):
+        super().__init__()
+        self.logger = logging.getLogger("BGService")
+        self.rgbLogger = logging.getLogger("RGB Thread")
+
+        self.config = config
+        self.currProfile = MEMORY_1
+
+        self.logger.info("setting up service...")
+        self.logger.info("searching for supported keyboard...")
+        self._initKeyboard()
+
+    def _initKeyboard(self, retry=RETRY_COUNT):
+        if retry <= 0:
+            raise NoKeyboardException()
+
+        tStart = time.time()
+        for i, device in enumerate(SUPPORTED_DEVICES):
+            keyboard: core.Device = core.find(
+                idVendor=device.usbVendor, idProduct=device.usbProduct)
+
+            if keyboard:
+                self.logger.info("keyboard found: "+device.devicename)
+
+                self.config.setAndSaveDeviceID(i)
+
+                self.keyboardDev = device
+                break
+
+        if not keyboard:
+            self.logger.critical("no supported keyboard found, retrying...")
+            self.config.setAndSaveDeviceID("None")
+
+            if retry == RETRY_COUNT:
+                self.waitingForKeyboardEvent.emit()
+
+            time.sleep(1)
+            return self._initKeyboard(retry-1)
+
+        self.keyboard = keyboard
+
+        tEnd = time.time()
+        self.logger.debug(f"time taken to find keyboard in ms: {(tEnd-tStart)*1000}")
+
+        self.logger.debug("requesting USB endpoint...")
+        self.keyboardEndpoint: core.Endpoint = self.keyboard\
+                                            [self.keyboardDev.usbConfiguration]\
+                                            [self.keyboardDev.usbInterface]\
+                                            [self.keyboardDev.usbEndpoint]
+
+        self.logger.debug("searching HIDpaths...")
+        try:
+            self._getHIDpaths()
+        except:
+            raise
         
-            logging.debug("check and detach kernel driver if active")
+        self.logger.debug("creating uinput device")
+        self.virtualKeyboard = uinput.Device(
+            ALL_KNOWN_KEYS,
+            name=self.keyboardDev.devicename+" (keyboard-center)",
+            vendor=self.keyboardDev.usbVendor
+        )
+
+    def _getHIDpaths(self):
+        self.HIDpath, self.HIDpath_write = None, None
+
+        for dev in hid.enumerate(self.keyboardDev.usbVendor, self.keyboardDev.usbProduct):
+
+            if dev.get("interface_number") == self.keyboardDev.usbInterface[0]:
+                HIDpath: bytes = dev.get("path")
+                self.logger.debug(f"HIDraw read endpoint found: {HIDpath.decode()}")
+
+            if dev.get("interface_number") == self.keyboardDev.disableGKeysInterface:
+                HIDpath_disable: bytes = dev.get("path")
+                self.logger.debug(f"HIDraw write endpoint found: {HIDpath_disable.decode()}")
+
+        self.logger.debug("Checking for HID availability...")
+        def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
             try:
-                if keyboard.is_kernel_driver_active(keyboardDev.usbInterface[0]):
-                    keyboard.detach_kernel_driver(keyboardDev.usbInterface[0])
-                    global attachDriver
-                    attachDriver = lambda: keyboard.attach_kernel_driver(
-                        keyboardDev.usbInterface[0]
-                    )
+                with HIDDevice(path=HIDpath) as _:
+                    self.logger.debug(f"Connected to {HIDpath.decode()}")
+                return True
+            except HIDFailedToOpenException:
+                if tries <= 0:
+                    return False
+                else:
+                    self.logger.warning("Could not open HID device, retrying...")
+                    time.sleep(RETRY_TIMEOUT)
+                    return __HIDavailable(HIDpath, tries-1)
 
-            except core.USBError as e:
-                print("AAA")
-                Notification(
-                    app_name=APP_NAME,
-                    title="Kernel driver init",
-                    description=str(e),
-                    icon_path=ICON_LOCATION,
-                    urgency="critical"
-                ).send_linux()
+        numTries = self.config.getSettings().get("retryCount") or RETRY_COUNT
+        
+        if HIDpath and not __HIDavailable(HIDpath, numTries):
+            raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
 
-                Notification(
-                    app_name=APP_NAME,
-                    title="Kernel driver init",
-                    description="Please plug your keyboard out and in again\n\
-                        or a restart could solve this issue.",
-                    icon_path=ICON_LOCATION,
-                    urgency="critical"
-                ).send_linux()
-                sys.exit(1)
+        if not HIDpath or not HIDpath_disable:
+            raise NoEndpointException()
+
+        self.HIDpath = HIDpath
+        self.HIDpath_write = HIDpath_disable
+
+    ##
+
+    def _setOpenRGBProfile(self, retry: int, first: bool):
+        orgb = self.config.getOpenRGB().get(self.currProfile)
+        if not orgb: return
+
+        try:
+            self.rgbLogger.debug("Setting OpenRGB profile "+orgb)
+
+            if first and not self.rgbClient:
+                self.rgbClient = OpenRGBClient()
+                self.rgbClient.load_profile(orgb) # we need to run this first, in case the profile does not exist
+                self.rgbClient.clear() # we need to clear because sometimes load_profile just does not fucking work
+                time.sleep(0.5) # we need to wait a moment after clear
+
+            self.rgbClient.load_profile(orgb)
+
+        except ConnectionRefusedError:
+            if retry <= 0 or not first:
+                self.rgbLogger.debug("giving up reaching OpenRGB SDK")
+                return
+
+            if retry == RETRY_COUNT and shutil.which("openrgb"):
+                self.openRGBProcess = subprocess.Popen(["openrgb", "--server"], shell=False)
+
+            self.rgbLogger.debug("could not reach OpenRGB SDK, retrying...")
+            time.sleep(RETRY_TIMEOUT)
+            self._setOpenRGBProfile(retry-1, first)
+
+        except ValueError as e:
+            self.rgbLogger.exception(e)
+
+    def _switchProfile(self, profile: str, first=False):
+        self.currProfile = profile
+
+        # switch Mkey LED
+        if self.keyboardDev.memoryKeysLEDs:
+            with HIDDevice(path=self.HIDpath_write) as hdev:
+                hdev.nonblocking = True
+                self._sendData(
+                    hdev, self.keyboardDev.memoryKeysLEDs[profile])
+
+        # set openRGB profile
+        Thread(
+            target=self._setOpenRGBProfile,
+            args=(RETRY_COUNT, first), daemon=True
+        ).start()
+
+        path = os.path.join(
+            PARENT_LOCATION, "assets", f"{profile}.png")
+
+        self.notificationIconEvent.emit(
+            f"Switched to profile {profile}", "", path)
+
+    def _sendData(self, hdev: HIDDevice, data: bytes):
+        if self.keyboardDev.disableGKeysUseWrite:
+            hdev.write(data)
         else:
-            logging.error("HIDraw endpoint could not be found!")
-            sys.exit(1)
+            hdev.send_feature_report(data)
 
-    logging.debug("creating uinput device...")
-    global virtualKeyboard
-    virtualKeyboard = uinput.Device(
-        ALL_KNOWN_KEYS,
-        name=keyboardDev.devicename+" (keyboard-center)",
-        vendor=keyboardDev.usbVendor
-    )
+    def _disableGkeyMapping(self):
+        self.logger.debug("Sending sequence to disable G keys")
+        with HIDDevice(path=self.HIDpath_write) as hdev:
+            for data in self.keyboardDev.disableGKeys:
+                self._sendData(hdev, data)
+                time.sleep(USB_SEND_WAIT)
 
-    logging.info("starting service...")
-    global evLoop
-    evLoop = asyncio.get_event_loop()
-    evLoop.create_task(usbListener(
-        keyboard, keyboardEndpoint, keyboardDev, HIDpath, HIDpath_disable))
+    def _emitKeys(self, key, uinput=False):
+        """ 
+        Function that emits the requested keys
 
-    try:
-        inotify = INotify()
-        inotify.add_watch(config.configFile, flags.MODIFY)
-        evLoop.add_reader(inotify, lambda: inotifyReader(inotify))
-    except Exception as e:
-        # TODO: switch to polling (not great, but better than nothing)
-        logging.critical("Failed to init inotify :(..."+str(e))
+        this function can be blocking
+        """
+        self.logger.debug(f"{key} pressed")
 
-        Notification(
-            app_name=APP_NAME,
-            title="Inotify Init",
-            description="Failed to init inotify! :(\n"+str(e),
-            icon_path=ICON_LOCATION,
-            urgency="critical"
-        ).send_linux()
+        if uinput:
+            type, data, gamemode = TYPE_KEY, key, False
+        else:
+            type, data, gamemode = self.config.getKey(self.currProfile, key)
 
-    evLoop.add_signal_handler(signal.SIGINT, _stop)
-    evLoop.add_signal_handler(signal.SIGTERM, _stop)
-    evLoop.run_forever()
+        if type == TYPE_KEY and data:
+            self.virtualKeyboard.emit_click(data)
 
-if __name__ == "__main__":
-    #logging.basicConfig(
-    #    filename="",
-    #    format='%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-    #    level=logging.DEBUG
-    #)
+        elif type == TYPE_COMMAND and data:
+            executeCommand(data)
 
-    logging.basicConfig(
-        format="%(levelname)s: %(message)s", level=logging.DEBUG
-    )
+        elif type == TYPE_COMBO and data:
+            self._executeCombo(data, gamemode)
 
-    global config
-    logging.info("------------ starting -------------")
-    config = Configparser(TEMPLATE_LOCATION, sys.argv) # TODO: catch possible errors
+        elif type == TYPE_MACRO and data:
+            print(data)
+            # TODO: macros are ignoring game mode??
+            self._executeMacro(data)
 
-    main()
+    def _executeCombo(self, combo: list, gamemode=0):
+        if gamemode > 1:
+            for i, c in enumerate(combo):
+                self.virtualKeyboard.emit(c, 1, i == len(combo)-1)
+            time.sleep(gamemode / 1000)
+            for i, c in enumerate(combo):
+                self.virtualKeyboard.emit(c, 0, i == len(combo)-1)
+        else:
+            self.virtualKeyboard.emit_combo(combo)
+
+    def _executeMacro(self, macro: list):
+        for action in macro:
+            if len(action) == 1:
+                if action[0][0] == TYPE_CLICK:
+                    self.virtualKeyboard.emit_click(action[0])
+
+                elif action[0][0] == TYPE_DELAY:
+                    time.sleep(action[0][1] / 1000)
+                
+                elif action[0][0] == TYPE_COMMAND:
+                    executeCommand(action[0][1])
+
+            elif all([ x[0] == TYPE_CLICK for x in action ]):
+                self.virtualKeyboard.emit_combo(action)
+            else:
+                self.logger.error("unknown keyboard action...."+str(action))
+
+    def _handleRawData(self, fromKeyboard):
+
+        data = bytes(fromKeyboard)
+        pressed = self.keyboardDev.macroKeys.get(data)
+
+        if data in self.keyboardDev.macroKeys:
+            if pressed:
+                if isinstance(pressed, str):
+                    Thread(
+                        target=self._emitKeys,
+                        args=(pressed,), daemon=True
+                    ).start()
+                
+                else: # uinput key
+                    Thread(
+                        target=self._emitKeys,
+                        args=(pressed,True), daemon=True
+                    ).start()
+            
+            else:
+                pass
+                #logging.debug("recieved data could not get mapped to a macro key")
+                #logging.debug(data)
+
+        elif data in self.keyboardDev.memoryKeys:
+            Thread(
+                target=self._switchProfile, 
+                args=(self.keyboardDev.memoryKeys[data],), daemon=True
+            ).start()
+
+        #elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
+        #    Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
+
+        else:
+            pass
+
+    ##
+
+    def run(self):
+        self.logger.info("starting service loop...")
+        self.stopEvent.clear()
+        
+        _usbTimeout: int = self.config.getSettings().get("usbTimeout") or USB_TIMEOUT
+
+        if self.keyboardDev.disableGKeys:
+            self._disableGkeyMapping()
+
+        with HIDDevice(path=self.HIDpath) as hdev:
+            hdev.nonblocking = True
+
+            self._switchProfile(self.currProfile, True)
+
+            errorCount = 0
+            while not self.stopEvent.isSet():
+                try:
+                    fromKeyboard = hdev.read(
+                        self.keyboardEndpoint.wMaxPacketSize, _usbTimeout)
+
+                    if fromKeyboard:
+                        self._handleRawData(fromKeyboard)
+                        errorCount = 0
+
+                except hid.HIDException as e:
+                    self.logger.error(f"HIDerror: ({e})")
+
+                    if errorCount > 5:
+                        self.logger.error("keyboard disconnected...")
+                        self.quit()
+                    else:
+                        errorCount += 1
+            else:
+                self.logger.debug("left runloop")
+
+    def quit(self, error=True):
+        self.logger.info("thread stop triggered...")
+        self.stopEvent.set()
+
+        try:
+            self.virtualKeyboard.destroy()
+        except OSError:
+            # this gets thrown when keyboard is unplugged
+            pass
+
+        if self.rgbClient: self.rgbClient.disconnect()
+        if self.openRGBProcess and self.openRGBProcess.poll():
+            self.logger.info("stopping openRGB server...")
+
+            self.openRGBProcess.send_signal(signal.SIGINT)
+            self.openRGBProcess.wait()
+
+        if error: self.quitTriggered.emit()
+
+        return super().quit()
