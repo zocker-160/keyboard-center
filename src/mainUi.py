@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import os
 import sys
 import logging
 
@@ -8,25 +7,16 @@ from PyQt5.QtGui import (
     QCloseEvent,
     QKeyEvent,
     QIcon,
-    QPixmap
 )
 from PyQt5.QtCore import (
     QTimer,
-    Qt,
-    pyqtSignal
 )
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
     QMainWindow,
     QMessageBox,
-    QSizePolicy,
-    QSpacerItem,
     QVBoxLayout,
-    QWidget,
-    QSystemTrayIcon,
-    QAction,
-    QMenu
 )
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface

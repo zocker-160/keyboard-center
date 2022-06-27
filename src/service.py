@@ -1,26 +1,19 @@
 #! /usr/bin/env python3
 
 import os
-import sys
 import time
-import shlex
 import signal
-import asyncio
 import shutil
 import subprocess
 
 import logging
-from logging import handlers
 
 from threading import Event, Thread
 
 import uinput
 from usb import core
-from lib import openrgb
 
 from lib.configparser import *
-from lib.pynotifier import Notification
-from lib.inotify_simple import INotify, flags
 from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 import lib.hid as hid
 
