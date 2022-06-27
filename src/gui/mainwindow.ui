@@ -340,7 +340,7 @@ QLabel#asd:pressed {
       <item>
        <widget class="QCheckBox" name="minimizeOnStart">
         <property name="text">
-         <string>minimize on start</string>
+         <string>minimize to tray on start</string>
         </property>
        </widget>
       </item>
@@ -437,7 +437,8 @@ QLabel#asd:pressed {
   </action>
   <action name="actionAbout_Qt">
    <property name="icon">
-    <iconset theme="help-about"/>
+    <iconset theme="help-about">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>About Qt</string>

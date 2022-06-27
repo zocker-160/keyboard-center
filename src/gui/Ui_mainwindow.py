@@ -282,7 +282,7 @@ class Ui_MainWindow(object):
         self.resetButton.setText(_translate("MainWindow", "Reset"))
         self.disableNotifications.setToolTip(_translate("MainWindow", "disables notifications when switching memory profiles"))
         self.disableNotifications.setText(_translate("MainWindow", "disable profile notification"))
-        self.minimizeOnStart.setText(_translate("MainWindow", "minimize on start"))
+        self.minimizeOnStart.setText(_translate("MainWindow", "minimize to tray on start"))
         self.toTrayButton.setText(_translate("MainWindow", "To Tray"))
         self.saveButton.setText(_translate("MainWindow", "Save"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
