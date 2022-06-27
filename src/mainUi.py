@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import sys
 import logging
 
 from PyQt5.QtGui import (
@@ -29,7 +28,6 @@ from gui.CEntryButton import CEntryButton
 from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_aboutWindow
-from gui.Ui_serviceWindow import Ui_serviceWindow
 
 from constants import *
 from service import BackgroundService, NoKeyboardException
@@ -44,72 +42,6 @@ class AboutWindow(QDialog, Ui_aboutWindow):
         self.about_maintext.setText(
             self.about_maintext.text().replace(PLACEHOLDER_STR, version)
         )
-
-class ServiceWindow(QDialog, Ui_serviceWindow):
-    def __init__(self, parent=None, slowMode=False):
-        super().__init__(parent)
-        self.returnState = 0 # 0: ignore / OK; 1: retry; 2: cancel
-        self.waitTimer = 1000 if slowMode else 50
-
-        self.setupUi(self)
-        self.setWindowTitle("Service Status Checker")
-        self.mainText.setText("checking background service status:")
-        self.informativeText.setText("")
-
-        self.ignoreButton.clicked.connect(lambda: self._setReturnState(0))
-        self.retryButton.clicked.connect(lambda: self._setReturnState(1))
-        self.cancelButton.clicked.connect(lambda: self._setReturnState(2))
-
-        self.checkService()
-
-    def checkService(self):
-        QTimer.singleShot(0, self._checkServiceEnabled)
-
-    def setInformativeText(self, text: str):
-        print(text)
-        self.informativeText.setText(text)
-
-    def _checkServiceEnabled(self):
-        self.setInformativeText("service enabled?")
-        if not isServiceEnabled():
-            self.setInformativeText("enabling service...")
-            if not enableService():
-                self._errorState("failed to enable service!")
-                return
-
-        QTimer.singleShot(self.waitTimer, self._checkServiceRunning)
-
-    def _checkServiceRunning(self):
-        self.setInformativeText("service running?")
-        if not isServiceRunning():
-            self.setInformativeText("starting service...")
-            if not startService():
-                self._errorState("failed to start service!")
-                return
-
-        QTimer.singleShot(self.waitTimer, self._checkServiceReload)
-
-    def _checkServiceReload(self):
-        self.setInformativeText("service needs reload?")
-        if needsReload():
-            self.setInformativeText("reloading service...")
-            if not reloadService():
-                self._errorState("failed to reload service!")
-                return
-
-        QTimer.singleShot(self.waitTimer, self.ignoreButton.click)
-
-    def _setReturnState(self, state: int):
-        self.returnState = state
-        self.close()
-
-    def _errorState(self, msg: str):
-        self.setInformativeText("ERROR: "+msg)
-        self.retryButton.setEnabled(True)
-
-    def exec_(self) -> int:
-        super().exec_()
-        return self.returnState
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -183,17 +115,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tray.hideshowAction.triggered.connect(
             lambda: self.setHidden(not self.isHidden()))
         self.tray.exitAction.triggered.connect(self.close)
-
-    def checkServiceStatus(self, *_, manual=True):
-        msg = ServiceWindow(slowMode=manual)
-        ret = msg.exec_()
-
-        if ret == 0: # ignore / OK
-            pass
-        elif ret == 1: # retry
-            self.checkServiceStatus(manual=manual)
-        elif ret == 2: # cancel
-            if not manual: sys.exit()
 
     def getConfiguration(self):
         try:
