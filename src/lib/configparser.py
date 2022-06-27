@@ -73,8 +73,7 @@ class Configparser:
         return self.settings["mappings"]
 
     def getProfile(self, profile) -> dict:
-        d = self.getMappings().get(profile)
-        return d if d else {}
+        self.getMappings().get(profile, dict())
 
     def getDeviceID(self):
         return self.getSettings().get("usbDeviceID")
@@ -88,18 +87,10 @@ class Configparser:
             return self.settings["openRGB"]
 
     def getShowNotifications(self) -> bool:
-        d = self.getSettings().get("showNotifications")
-        if d != None:
-            return d
-        else:
-            return True
+        return self.getSettings().get("showNotifications", True)
 
     def getMinimizeOnStart(self) -> bool:
-        d = self.getSettings().get("minOnStart")
-        if d != None:
-            return d
-        else:
-            return True
+        return self.getSettings().get("minOnStart", True)
 
     def getKey(self, profile: str, key: str) -> tuple:
         """ 
