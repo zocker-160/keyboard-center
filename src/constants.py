@@ -3,7 +3,7 @@
 import os
 
 APP_NAME = "Keyboard Center"
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
