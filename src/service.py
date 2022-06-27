@@ -192,11 +192,11 @@ class BackgroundService(QThread):
             self.rgbClient.load_profile(orgb)
 
         except ConnectionRefusedError:
-            if retry <= 0 or not first:
+            if retry <= 0 or not first or not shutil.which("openrgb"):
                 self.rgbLogger.debug("giving up reaching OpenRGB SDK")
                 return
 
-            if retry == RETRY_COUNT and shutil.which("openrgb"):
+            if retry == RETRY_COUNT:
                 self.openRGBProcess = subprocess.Popen(["openrgb", "--server"], shell=False)
 
             self.rgbLogger.debug("could not reach OpenRGB SDK, retrying...")
