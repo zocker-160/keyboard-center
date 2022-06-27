@@ -40,12 +40,9 @@ from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_aboutWindow
 from gui.Ui_serviceWindow import Ui_serviceWindow
-from service import BackgroundService, NoKeyboardException
 
-PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(
-    PARENT_LOCATION, "config", "testconfig.yaml.example"
-)
+from constants import *
+from service import BackgroundService, NoKeyboardException
 
 PLACEHOLDER_STR = "$$$"
 
@@ -131,7 +128,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, app: QApplication, devmode=False):
         super().__init__()
         self.app = app
+        self.devmode = devmode
         self.logger = logging.getLogger("QT")
+
         self.healthCheck = QTimer(self)
         self.healthCheck.timeout.connect(self._serviceHealthCheck)
 

@@ -1,27 +1,14 @@
 #! /usr/bin/env python3
 
-import os
 import sys
 import logging
 
 from PyQt5.QtWidgets import QApplication
 
-import mainUi
-
 from mainUi import MainWindow
+from constants import *
 from lib.configparser import Configparser
-from service import BackgroundService
 
-APP_NAME = "Keyboard Center"
-VERSION = "0.2.1"
-
-PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(
-    PARENT_LOCATION, "config", "testconfig-example.yaml"
-)
-ICON_LOCATION = os.path.join(
-    PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
-)
 
 if __name__ == "__main__":
     logHandlers = [
