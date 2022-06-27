@@ -77,7 +77,7 @@ class Configparser:
         return d if d else {}
 
     def getDeviceID(self):
-        return self.getSettings()["usbDeviceID"]
+        return self.getSettings().get("usbDeviceID")
 
     def getOpenRGB(self) -> dict:
         d = self.settings.get("openRGB")
