@@ -137,7 +137,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.service = None
 
         try:
-            service = BackgroundService(self.configparser, self.devmode)
+            service = BackgroundService(self.configparser, not self.devmode)
             self.service = service
             self.service.notificationEvent.connect(self.showNotification)
             self.service.notificationIconEvent.connect(self.showNotificationIcon)
