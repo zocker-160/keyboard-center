@@ -243,7 +243,7 @@ class Configparser:
     def _copyConfig(self, src: str, dest: str):
         self.log.info("copying template config file")
         self.log.debug("source: "+src)
-        self.log.debug("destinatin: "+dest)
+        self.log.debug("destination: "+dest)
 
         with open(src, "r") as s:
             with open(dest, "w") as d:
