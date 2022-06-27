@@ -16,6 +16,7 @@ from threading import Event, Thread
 
 import uinput
 from usb import core
+from lib import openrgb
 
 from lib.configparser import *
 from lib.pynotifier import Notification
@@ -76,13 +77,14 @@ class BackgroundService(QThread):
 
     stopEvent = Event()
 
-    def __init__(self, config: Configparser):
+    def __init__(self, config: Configparser, useOpenRGB=True):
         super().__init__()
         self.logger = logging.getLogger("BGService")
         self.rgbLogger = logging.getLogger("RGB Thread")
 
         self.config = config
         self.currProfile = MEMORY_1
+        self.useOpenRGB = useOpenRGB
 
         self.logger.info("setting up service...")
         self.logger.info("searching for supported keyboard...")
@@ -180,6 +182,8 @@ class BackgroundService(QThread):
     ##
 
     def _setOpenRGBProfile(self, retry: int, first: bool):
+        if not self.useOpenRGB: return
+
         orgb = self.config.getOpenRGB().get(self.currProfile)
         if not orgb: return
 

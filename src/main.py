@@ -24,6 +24,7 @@ if __name__ == "__main__":
         level=logging.DEBUG
     )
 
+    # devmode disables openRGB integration
     devmode = "--dev" in sys.argv
     if devmode: logging.info("Entered DEVMODE")
 
