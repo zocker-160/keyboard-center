@@ -73,7 +73,7 @@ class Configparser:
         return self.settings["mappings"]
 
     def getProfile(self, profile) -> dict:
-        self.getMappings().get(profile, dict())
+        return self.getMappings().get(profile, dict())
 
     def getDeviceID(self):
         return self.getSettings().get("usbDeviceID")
