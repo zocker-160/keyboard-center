@@ -2,6 +2,8 @@
 
 import logging
 
+from packaging import version
+
 from PyQt5.QtGui import (
     QCloseEvent,
     QKeyEvent,
@@ -9,6 +11,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtCore import (
     QTimer,
+    QT_VERSION_STR,
 )
 from PyQt5.QtWidgets import (
     QApplication,
@@ -67,10 +70,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupSlots()
 
         # this might sound weird, but it fixes a weird graphical bug
-        # on older KDE versions (< 5.18)
-        self.show()
-        if self.configparser.getMinimizeOnStart():
-            self.hide()
+        # on older KDE versions (< 5.18) and QT < 5.15
+        # sadly it introduces a graphical bug on some tiling WMs
+        if version.parse(QT_VERSION_STR) < version.parse("5.15"):
+            self.show()
+            if self.configparser.getMinimizeOnStart():
+                self.hide()
+        else:
+            if not self.configparser.getMinimizeOnStart():
+                self.show()
 
     def setupUi(self):
         self.logger.debug("setting up GUI...")
