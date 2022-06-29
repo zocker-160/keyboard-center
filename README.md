@@ -55,13 +55,21 @@ available in the AUR: [[AUR] keyboard-center](https://aur.archlinux.org/packages
 
 ## Manage Background Service
 
-Keyboard Center places itself into the system tray.
+Keyboard Center places itself into the system tray (unless disabled see [CLI options](#cli-options)).
+
+If you try to open a secondary instance, it ~will~ should reactivate the primary one if minimized or hidden.
 
 ## Settings
 
 Settings are stored in a `settings.yml` file, which is located at
 - `$XDG_CONFIG_HOME/keyboard-center` **or** if not defined
 - `$HOME/.config/keyboard-center`
+
+## CLI options
+
+- `-v` `--version`: prints version (duh)
+- `--background-mode`: hides tray icon
+- `--dev`: meant for development purposes only
 
 #### Current default settings
 `settings: {usbTimeout: 1000, retryCount: 5}`

@@ -14,7 +14,6 @@ from PyQt5.QtCore import (
     QT_VERSION_STR,
 )
 from PyQt5.QtWidgets import (
-    QApplication,
     QDialog,
     QMainWindow,
     QMessageBox,
@@ -23,6 +22,7 @@ from PyQt5.QtWidgets import (
 
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
+from lib.QSingleApplication import QSingleApplication
 from lib.configparser import Configparser
 from lib.servicehelper import *
 
@@ -50,11 +50,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     service: BackgroundService = None
 
-    def __init__(self, app: QApplication, devmode=False):
+    def __init__(self, 
+            app: QSingleApplication, 
+            devmode=False, trayVisible=True):
         super().__init__()
         self.app = app
         self.devmode = devmode
         self.logger = logging.getLogger("QT")
+
+        self.app.onActivate.connect(self.activateTrigger)
 
         self.healthCheck = QTimer(self)
         self.healthCheck.timeout.connect(self._serviceHealthCheck)
@@ -64,7 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initBackgroundService()
 
         self.icon = QIcon(":/icons/assets/input-keyboard-virtual.png")
-        self.tray = TrayIcon(self, self.icon)
+        self.tray = TrayIcon(self, self.icon, trayVisible)
 
         self.setupUi()
         self.setupSlots()
@@ -341,7 +345,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.disableNotifications.setChecked(not n)
         self.minimizeOnStart.setChecked(m)
 
-    # function overloading
+    ### function overloading
     def keyPressEvent(self, a0: QKeyEvent):
         print(a0.nativeScanCode())
         return super().keyPressEvent(a0)
@@ -435,3 +439,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         qr.moveCenter(
             self.app.primaryScreen().availableGeometry().center())
         self.move(qr.topLeft())
+
+    def activateTrigger(self):
+        self.logger.debug("window activation from secondary instance triggered")
+
+        self.show()
+        self.showNormal()
+        self.activateWindow()
