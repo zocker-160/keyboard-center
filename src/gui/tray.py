@@ -10,11 +10,11 @@ from PyQt5.QtWidgets import (
 
 class TrayIcon(QSystemTrayIcon):
 
-    def __init__(self, parent, icon: QIcon):
+    def __init__(self, parent, icon: QIcon, visible=True):
         super().__init__(icon, parent)
 
         self.setupUi()
-        self.show()
+        if visible: self.show()
 
         self.activated.connect(self._activated)
 

@@ -50,7 +50,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     service: BackgroundService = None
 
-    def __init__(self, app: QSingleApplication, devmode=False):
+    def __init__(self, 
+            app: QSingleApplication, 
+            devmode=False, trayVisible=True):
         super().__init__()
         self.app = app
         self.devmode = devmode
@@ -66,7 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initBackgroundService()
 
         self.icon = QIcon(":/icons/assets/input-keyboard-virtual.png")
-        self.tray = TrayIcon(self, self.icon)
+        self.tray = TrayIcon(self, self.icon, trayVisible)
 
         self.setupUi()
         self.setupSlots()

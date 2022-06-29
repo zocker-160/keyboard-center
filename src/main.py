@@ -42,10 +42,14 @@ if __name__ == "__main__":
     devmode = "--dev" in sys.argv
     if devmode: logging.info("Entered DEVMODE")
 
+    # CLI option to disable tray icon (aka background mode)
+    bgmode = "--background-mode" in sys.argv
+    if bgmode: logging.info("Running in background mode")
+
     logging.info("------------ starting -------------")
 
     try:
-        window = MainWindow(app, devmode)
+        window = MainWindow(app, devmode, not bgmode)
         window.center()
     except Exception as e:
         logging.exception(e)
