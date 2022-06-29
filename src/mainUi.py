@@ -441,7 +441,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.move(qr.topLeft())
 
     def activateTrigger(self):
-        self.logger.debug("window activate triggered")
+        self.logger.debug("window activation from secondary instance triggered")
 
         self.show()
         self.activateWindow()
