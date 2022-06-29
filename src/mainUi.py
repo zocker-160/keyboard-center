@@ -444,4 +444,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logger.debug("window activation from secondary instance triggered")
 
         self.show()
+        self.showNormal()
         self.activateWindow()
