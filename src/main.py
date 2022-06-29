@@ -3,7 +3,7 @@
 import sys
 import logging
 
-from PyQt5.QtWidgets import QApplication
+from lib.QSingleApplication import QSingleApplication
 
 from mainUi import MainWindow
 from constants import *
@@ -11,6 +11,20 @@ from lib.configparser import Configparser
 
 
 if __name__ == "__main__":
+
+    if "--version" in sys.argv or "-v" in sys.argv:
+        print("version:", VERSION)
+        sys.exit()
+
+    app = QSingleApplication(APPUUID, sys.argv)
+    app.setApplicationName(APP_NAME)
+    app.setApplicationDisplayName(APP_NAME)
+    app.setApplicationVersion(VERSION)
+
+    if app.isRunning:
+        print("Other instance already running - exiting")
+        sys.exit()
+
     logHandlers = [
         logging.FileHandler(Configparser.getLogfile(), "w"),
         logging.StreamHandler(sys.stdout)
@@ -28,16 +42,7 @@ if __name__ == "__main__":
     devmode = "--dev" in sys.argv
     if devmode: logging.info("Entered DEVMODE")
 
-    if "--version" in sys.argv or "-v" in sys.argv:
-        print("version:", VERSION)
-        sys.exit()
-
     logging.info("------------ starting -------------")
-
-    app = QApplication(sys.argv)
-    app.setApplicationName(APP_NAME)
-    app.setApplicationDisplayName(APP_NAME)
-    app.setApplicationVersion(VERSION)
 
     try:
         window = MainWindow(app, devmode)

@@ -5,6 +5,8 @@ import os
 APP_NAME = "Keyboard Center"
 VERSION = "0.2.4"
 
+APPUUID = "0eBJVKjwTanGP7aenveagSRi1c9poja2"
+
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_LOCATION = os.path.join(
     PARENT_LOCATION, "config", "testconfig-example.yml")
