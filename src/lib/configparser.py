@@ -34,7 +34,13 @@ class Configparser:
 
         return os.path.join(folder, "keyboardCenter.log")
 
+    @staticmethod
+    def getPrivatePath(path: str):
+        return path.replace(os.environ.get("USER"), "XXXX")
+
     def __init__(self, locConfTemplate: str, silent=True):
+        self._pp = lambda x: Configparser.getPrivatePath(x)
+
         self.log = logging.getLogger("Configparser")
 
         self.configFile, self.configFolder = \
@@ -53,11 +59,11 @@ class Configparser:
         confFolder = os.path.join(xdg_home, "keyboard-center")
         confLoc = os.path.join(confFolder, "settings.yml")
 
-        self.log.debug("Config file location: "+confLoc)
+        self.log.debug("Config file location: "+self._pp(confLoc))
 
         # check if file and folder exists
         if not os.path.isdir(confFolder):
-            self.log.debug("creating confFolder "+confFolder)
+            self.log.debug("creating confFolder "+self._pp(confFolder))
             os.mkdir(confFolder)
         if not os.path.isfile(confLoc):
             self._copyConfig(confTemplate, confLoc)
@@ -191,7 +197,7 @@ class Configparser:
 
     def load(self, silent=True) -> dict:
         try:
-            self.log.debug("loading config file " + self.configFile)
+            self.log.debug("loading config file "+self._pp(self.configFile))
             with open(self.configFile, "r") as yaml:
                 data = self.configYAML.load(yaml)
             self.log.debug("config loaded: " + str(data))
@@ -220,7 +226,7 @@ class Configparser:
 
     def save(self, silent=True):
         try:
-            self.log.debug("saving into config file " + self.configFile)
+            self.log.debug("saving into config file "+self._pp(self.configFile))
             with open(self.configFile, "w") as yaml:
                 self.configYAML.dump(self.settings, yaml)
 
@@ -233,8 +239,8 @@ class Configparser:
 
     def _copyConfig(self, src: str, dest: str):
         self.log.info("copying template config file")
-        self.log.debug("source: "+src)
-        self.log.debug("destination: "+dest)
+        self.log.debug("source: "+self._pp(src))
+        self.log.debug("destination: "+self._pp(dest))
 
         with open(src, "r") as s:
             with open(dest, "w") as d:
