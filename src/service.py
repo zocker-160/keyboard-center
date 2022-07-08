@@ -101,10 +101,9 @@ class BackgroundService(QThread):
                 break
 
         if not keyboard:
-            self.logger.critical("no supported keyboard found, retrying...")
-            self.config.setAndSaveDeviceID("None")
-
             if retry == RETRY_COUNT:
+                self.logger.critical("no supported keyboard found, retrying...")
+                self.config.setAndSaveDeviceID("None")
                 self.waitingForKeyboardEvent.emit()
 
             time.sleep(1)
