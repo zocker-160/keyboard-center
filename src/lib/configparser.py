@@ -30,7 +30,7 @@ class Configparser:
             os.environ["HOME"], ".var", "log")
 
         if not os.path.isdir(folder):
-            os.mkdir(folder)
+            os.makedirs(folder, exist_ok=True)
 
         return os.path.join(folder, "keyboardCenter.log")
 
@@ -64,7 +64,8 @@ class Configparser:
         # check if file and folder exists
         if not os.path.isdir(confFolder):
             self.log.debug("creating confFolder "+self._pp(confFolder))
-            os.mkdir(confFolder)
+            os.makedirs(confFolder, exist_ok=True)
+        
         if not os.path.isfile(confLoc):
             self._copyConfig(confTemplate, confLoc)
 
