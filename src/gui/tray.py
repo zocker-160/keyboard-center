@@ -20,8 +20,11 @@ class TrayIcon(QSystemTrayIcon):
 
     def setupUi(self):
         self.hideshowAction = QAction("Hide / Show", self)
+        self.hideshowAction.setIcon(QIcon.fromTheme("view-restore"))
+
         self.restartAction = QAction("Force Restart", self)
         self.restartAction.setIcon(QIcon.fromTheme("view-refresh"))
+
         self.exitAction = QAction("Exit", self)
         self.exitAction.setIcon(QIcon.fromTheme("application-exit"))
 
