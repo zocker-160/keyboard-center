@@ -399,7 +399,7 @@ QLabel#asd:pressed {
     <addaction name="actionOpenConfigFolder"/>
     <addaction name="actionOpenLogfile"/>
     <addaction name="separator"/>
-    <addaction name="actionCheck_service_status"/>
+    <addaction name="actionRestartService"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -483,16 +483,12 @@ QLabel#asd:pressed {
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionCheck_service_status">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <action name="actionRestartService">
    <property name="icon">
-    <iconset theme="system-help">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="view-refresh"/>
    </property>
    <property name="text">
-    <string>Check service status...</string>
+    <string>Force restart driver</string>
    </property>
    <property name="toolTip">
     <string>check status of the background service</string>

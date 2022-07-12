@@ -20,6 +20,8 @@ class TrayIcon(QSystemTrayIcon):
 
     def setupUi(self):
         self.hideshowAction = QAction("Hide / Show", self)
+        self.restartAction = QAction("Force Restart", self)
+        self.restartAction.setIcon(QIcon.fromTheme("view-refresh"))
         self.exitAction = QAction("Exit", self)
         self.exitAction.setIcon(QIcon.fromTheme("application-exit"))
 
@@ -27,6 +29,7 @@ class TrayIcon(QSystemTrayIcon):
         trayMenu.addAction(self.hideshowAction)
         trayMenu.addSeparator()
         trayMenu.addSeparator()
+        trayMenu.addAction(self.restartAction)
         trayMenu.addAction(self.exitAction)
 
         self.setContextMenu(trayMenu)

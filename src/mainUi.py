@@ -104,7 +104,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def setupSlots(self):
         self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
         self.actionOpenLogfile.triggered.connect(self.openLogfile)
-        #self.actionCheck_service_status.triggered.connect(self.checkServiceStatus)
+        self.actionRestartService.triggered.connect(self.forceRestart)
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
 
@@ -126,6 +126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # trayicon actions
         self.tray.hideshowAction.triggered.connect(
             lambda: self.setHidden(not self.isHidden()))
+        self.tray.restartAction.triggered.connect(self.forceRestart)
         self.tray.exitAction.triggered.connect(self.close)
 
     def getConfiguration(self):
@@ -152,7 +153,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.service = BackgroundService(self.configparser, not self.devmode)
             self.service.notificationEvent.connect(self.showNotification)
             self.service.notificationIconEvent.connect(self.showNotificationIcon)
-            self.service.quitTriggered.connect(self._serviceHealthCheck)
+            self.service.quitTriggered.connect(self._forcedHealthCheck)
             self.service.start()
 
         except NoKeyboardException:
@@ -167,12 +168,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logger.debug("start health check...")
         self.healthCheck.start(1000 * 10) # every 10 seconds
 
+    def _forcedHealthCheck(self):
+        try:
+            self.service.wait()
+        except:
+            pass
+
+        self._serviceHealthCheck()
+
     def _serviceHealthCheck(self):
         if not self.service or not self.service.isRunning():
             self.healthCheck.stop()
 
             self.logger.debug("restarting service...")
             self.initBackgroundService()
+            self.resetProfileButtons()
             self.loadConfiguration()
 
     def loadConfiguration(self):
@@ -181,7 +191,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             _did = self.configparser.getDeviceID()
             self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[_did]
         except TypeError:
-            self.resetProfileButtons()
             return
         except Exception as e:
             self.showErrorMSG(
@@ -393,6 +402,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.disableNotifications.isChecked(): return
 
         self.tray.showInfoIcon(title, msg, iconPath)
+
+    def forceRestart(self):
+        try:
+            self.logger.debug("force restarting service")
+            self.service.quit(True)
+        except:
+            pass
 
     ### popup messages
     @staticmethod
