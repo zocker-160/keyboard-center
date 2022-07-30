@@ -17,6 +17,7 @@ TYPE_COMMAND_STR = "command"
 
 MOD_CTRL = "Ctrl"
 MOD_ALT = "Alt"
+MOD_ALTGR = "AltGr"
 MOD_SHIFT = "Shift"
 MOD_META = "Meta"
 

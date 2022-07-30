@@ -5,7 +5,7 @@ from PyQt5.QtCore import pyqtSignal, QEvent, Qt
 from PyQt5.QtGui import QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QKeySequenceEdit, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
 
-from lib.configparser import MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META, TYPE_DELAY, TYPE_DELAY_STR
+from lib.configparser import MOD_ALTGR, MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META, TYPE_DELAY, TYPE_DELAY_STR
 from devices.allkeys import NUMPAD_SCANCODES
 
 class CKeySequenceEdit(QKeySequenceEdit):
@@ -131,7 +131,7 @@ from gui.Ui_keypressWidget import Ui_KeyPressWidget
 
 class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
     def __init__(self, parent=None,
-            bCtrl=False, bAlt=False, bShift=False, bMeta=False, 
+            bCtrl=False, bAlt=False, bShift=False, bMeta=False, bAltGr=False,
             bCustom=False, customKey: Key=None,
             key: Key=None):
         super().__init__(parent)
@@ -146,6 +146,7 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
 
         self.ctrlMod.setChecked(bCtrl)
         self.altMod.setChecked(bAlt)
+        self.altGrMod.setChecked(bAltGr)
         self.shiftMod.setChecked(bShift)
         self.metaMod.setChecked(bMeta)
 
@@ -171,6 +172,9 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
 
         if self.altMod.isChecked():
             keys.append( Key(uinput.KEY_LEFTALT[1], MOD_ALT) )
+
+        if self.altGrMod.isChecked():
+            keys.append( Key(uinput.KEY_RIGHTALT[1], MOD_ALTGR) )
 
         if self.shiftMod.isChecked():
             keys.append( Key(uinput.KEY_LEFTSHIFT[1], MOD_SHIFT) )
@@ -325,18 +329,19 @@ class CListWidgetContent(QWidget):
             self.addWidget( CommandWidget(command=data.command) )
 
         elif type(data) == Combo:
-            bCtrl, bShift, bAlt, bMeta, bCustom = [False]*5
+            bCtrl, bShift, bAlt, bAltGr, bMeta, bCustom = [False]*6
             customKey: Key = None
             for key in data.keylist:
-                if key.keyString in [MOD_CTRL, MOD_SHIFT, MOD_ALT, MOD_META]:
+                if key.keyString in [MOD_CTRL, MOD_SHIFT, MOD_ALT, MOD_ALTGR, MOD_META]:
                     bCtrl = key.keyString == MOD_CTRL or bCtrl
                     bShift = key.keyString == MOD_SHIFT or bShift
                     bAlt = key.keyString == MOD_ALT or bAlt
+                    bAltGr = key.keyString == MOD_ALTGR or bAltGr
                     bMeta = key.keyString == MOD_META or bMeta
                 
                 elif key is data.keylist[-1]:
                     self.addWidget( KeyPressWidget(
-                        bCtrl=bCtrl, bShift=bShift, bAlt=bAlt, bMeta=bMeta,
+                        bCtrl=bCtrl, bShift=bShift, bAlt=bAlt, bAltGr=bAltGr, bMeta=bMeta,
                         bCustom=bCustom, customKey=customKey,
                         key=key
                     ) )
@@ -367,4 +372,3 @@ class CListWidgetContent(QWidget):
         entries = self.getEntries()
         for i, item in enumerate(entries):
             item.setCurrPos(i)
-    
