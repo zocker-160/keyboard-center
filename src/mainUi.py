@@ -330,6 +330,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except TypeError:
             self.bottomStatusBar.showMessage("loading failed: ignoring...")
         except Exception as e:
+            self.logger.exception(e)
             self.showErrorMSG(str(e))
         
         if d:
