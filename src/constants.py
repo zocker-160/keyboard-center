@@ -3,7 +3,7 @@
 import os
 
 APP_NAME = "Keyboard Center"
-VERSION = "0.2.7"
+VERSION = "0.2.8"
 
 APPUUID = "0eBJVKjwTanGP7aenveagSRi1c9poja2"
 
