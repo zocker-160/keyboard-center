@@ -98,7 +98,7 @@ class Configparser:
         return self.getSettings().get("showNotifications", True)
 
     def getMinimizeOnStart(self) -> bool:
-        return self.getSettings().get("minOnStart", True)
+        return self.getSettings().get("minOnStart", False)
 
     def getKey(self, profile: str, key: str) -> tuple:
         """ 
