@@ -94,7 +94,7 @@ class BackgroundService(QThread):
                 idVendor=device.usbVendor, idProduct=device.usbProduct)
 
             if keyboard:
-                self.logger.info("keyboard found: "+device.devicename)
+                self.logger.info(f"keyboard found: {device.devicename}")
 
                 self.config.setAndSaveDeviceID(i)
 
@@ -181,7 +181,7 @@ class BackgroundService(QThread):
         if not orgb: return
 
         try:
-            self.rgbLogger.debug("Setting OpenRGB profile "+orgb)
+            self.rgbLogger.debug(f"Setting OpenRGB profile {orgb}")
 
             if first and not self.rgbClient:
                 self.rgbClient = OpenRGBClient()
@@ -305,7 +305,7 @@ class BackgroundService(QThread):
             elif all([ x[0] == TYPE_CLICK for x in action ]):
                 self.virtualKeyboard.emit_combo(action)
             else:
-                self.logger.error("unknown keyboard action...."+str(action))
+                self.logger.error(f"unknown keyboard action....{action}")
 
     def _handleRawData(self, fromKeyboard: bytes):
 
