@@ -22,10 +22,7 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - [x] openRGB integration - linking of macro profiles with openRGB profiles
 - [ ] Application specific profiles *(on hold until there is a common way to do this on Wayland[^1])*
 
-[^1]: For more information see:
-  - https://github.com/flatpak/xdg-desktop-portal/issues/304
-  - https://unix.stackexchange.com/questions/399753/how-to-get-a-list-of-active-windows-when-using-wayland
-  - https://askubuntu.com/questions/1414320/how-to-get-current-active-window-in-ubuntu-22-04
+[^1]: For more information see [this](https://github.com/flatpak/xdg-desktop-portal/issues/304) and [this](https://unix.stackexchange.com/questions/399753/how-to-get-a-list-of-active-windows-when-using-wayland) and [this](https://askubuntu.com/questions/1414320/how-to-get-current-active-window-in-ubuntu-22-04)
 
 ## Supported Keyboards
 
