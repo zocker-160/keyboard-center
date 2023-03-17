@@ -1,6 +1,4 @@
-# ![](images/g910-icon.png) Keyboard Center (WiP)
-
-**(work in progress)**
+# ![keyboard-center](images/g910-icon.png) Keyboard Center
 
 [![DEB builder](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder.yml/badge.svg)](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder.yml)
 [![DEB builder git](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder-git.yml/badge.svg)](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder-git.yml)
@@ -22,7 +20,12 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - [x] Support for switching LEDs of profile keys
 - [x] Import and export of the configuration (added ability to open configuration folder instead)
 - [x] openRGB integration - linking of macro profiles with openRGB profiles
-- [ ] Profiles for specific applications *(currently impossible on wayland)*
+- [ ] Application specific profiles *(on hold until there is a common way to do this on Wayland[^1])*
+
+[^1]: For more information see:
+  - https://github.com/flatpak/xdg-desktop-portal/issues/304
+  - https://unix.stackexchange.com/questions/399753/how-to-get-a-list-of-active-windows-when-using-wayland
+  - https://askubuntu.com/questions/1414320/how-to-get-current-active-window-in-ubuntu-22-04
 
 ## Supported Keyboards
 
