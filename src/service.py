@@ -69,6 +69,7 @@ class BackgroundService(QThread):
     quitTriggered = pyqtSignal()
 
     stopEvent = Event()
+    keyReleasedEvent = Event()
 
     def __init__(self, config: Configparser, useOpenRGB=True):
         super().__init__()
@@ -240,7 +241,7 @@ class BackgroundService(QThread):
                 self._sendData(hdev, data)
                 time.sleep(USB_SEND_WAIT)
 
-    def _emitKeys(self, key, uinput=False):
+    def _emitKeys(self, key):
         """ 
         Function that emits the requested keys
 
@@ -248,13 +249,18 @@ class BackgroundService(QThread):
         """
         self.logger.debug(f"{key} pressed")
 
-        if uinput:
-            type, data, gamemode = TYPE_KEY, key, False
-        else:
+        if isinstance(key, str):
             type, data, gamemode = self.config.getKey(self.currProfile, key)
+        else: # key is uinput
+            type, data, gamemode = TYPE_KEY, key, False
 
         if type == TYPE_KEY and data:
-            self.virtualKeyboard.emit_click(data)
+            self.virtualKeyboard.emit(data, 1)
+
+            self.keyReleasedEvent.wait()
+            self.keyReleasedEvent.clear()
+
+            self.virtualKeyboard.emit(data, 0)
 
         elif type == TYPE_COMMAND and data:
             executeCommand(data)
@@ -264,18 +270,25 @@ class BackgroundService(QThread):
 
         elif type == TYPE_MACRO and data:
             print(data)
-            # TODO: macros are ignoring game mode??
+            # Macros are ignoring gamemode and key release events
+            # since users can specify their own delay, so it should just
+            # "play" whatever keys the user wants independent from
+            # any other input or delay
+            # anything else would not make sense RIGHT????
             self._executeMacro(data)
 
     def _executeCombo(self, combo: list, gamemode=0):
+        for i, c in enumerate(combo):
+            self.virtualKeyboard.emit(c, 1, i == len(combo)-1)
+
         if gamemode > 1:
-            for i, c in enumerate(combo):
-                self.virtualKeyboard.emit(c, 1, i == len(combo)-1)
             time.sleep(gamemode / 1000)
-            for i, c in enumerate(combo):
-                self.virtualKeyboard.emit(c, 0, i == len(combo)-1)
         else:
-            self.virtualKeyboard.emit_combo(combo)
+            self.keyReleasedEvent.wait()
+            self.keyReleasedEvent.clear()
+
+        for i, c in enumerate(combo):
+            self.virtualKeyboard.emit(c, 0, i == len(combo)-1)
 
     def _executeMacro(self, macro: list):
         for action in macro:
@@ -294,38 +307,27 @@ class BackgroundService(QThread):
             else:
                 self.logger.error("unknown keyboard action...."+str(action))
 
-    def _handleRawData(self, fromKeyboard):
+    def _handleRawData(self, fromKeyboard: bytes):
 
-        data = bytes(fromKeyboard)
-        pressed = self.keyboardDev.macroKeys.get(data)
+        self.keyReleasedEvent.clear()
 
-        if data in self.keyboardDev.macroKeys:
-            if pressed:
-                if isinstance(pressed, str):
-                    Thread(
-                        target=self._emitKeys,
-                        args=(pressed,), daemon=True
-                    ).start()
-                
-                else: # uinput key
-                    Thread(
-                        target=self._emitKeys,
-                        args=(pressed,True), daemon=True
-                    ).start()
-            
-            else:
-                pass
-                #logging.debug("recieved data could not get mapped to a macro key")
-                #logging.debug(data)
-
-        elif data in self.keyboardDev.memoryKeys:
+        if fromKeyboard in self.keyboardDev.macroKeys:
+            pressed = self.keyboardDev.macroKeys[fromKeyboard]
             Thread(
-                target=self._switchProfile, 
-                args=(self.keyboardDev.memoryKeys[data],), daemon=True
+                target=self._emitKeys,
+                args=(pressed,), daemon=True
             ).start()
 
-        #elif keyboardDev.useLibUsb and data in keyboardDev.mediaKeys:
-        #    Thread(target=emitKeys, args=(currProfile,pressed,True), daemon=True).start()
+        elif fromKeyboard in self.keyboardDev.memoryKeys:
+            pressed = self.keyboardDev.memoryKeys[fromKeyboard]
+            Thread(
+                target=self._switchProfile,
+                args=(pressed,), daemon=True
+            ).start()
+
+        elif fromKeyboard in self.keyboardDev.releaseEvents:
+            self.logger.debug("release event")
+            self.keyReleasedEvent.set()
 
         else:
             pass
@@ -353,7 +355,7 @@ class BackgroundService(QThread):
                         self.keyboardEndpoint.wMaxPacketSize, _usbTimeout)
 
                     if fromKeyboard:
-                        self._handleRawData(fromKeyboard)
+                        self._handleRawData(bytes(fromKeyboard))
                         errorCount = 0
 
                 except hid.HIDException as e:
