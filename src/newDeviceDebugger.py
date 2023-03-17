@@ -21,23 +21,23 @@ usbUseWrite = True
 #usbProduct = 0xc335
 
 ## Logitech, Inc. G815
-#usbVendor = 0x046d
-#usbProduct = 0xc33f
+usbVendor = 0x046d
+usbProduct = 0xc33f
 
 ## Logitech, Inc. G915
 #usbVendor = 0x046d
 #usbProduct = 0xc33e
 
 ## Logitech, Inc. G510
-usbVendor = 0x046d
-usbProduct = 0xc22d
+#usbVendor = 0x046d
+#usbProduct = 0xc22d
 
 ## G510
-disableGKeys = [
-    bytes([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
-    bytes([7, 3, 0]),
-    bytes([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
-]
+#disableGKeys = [
+#    bytes([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+#    bytes([7, 3, 0]),
+#    bytes([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),
+#]
 
 ## G710+
 #disableGKeys = [b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
@@ -47,6 +47,15 @@ disableGKeys = [
 #    b'\x11\xff\x10>\x00\x04\x00\x00\x00\x00\x00\x00\xd0\x01d\x07\x00\x00\x00\x00', # keyboard reset
 #    b'\x11\xff\x08.\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # disable GMapping
 #]
+
+## G815
+disableGKeys = [
+    b'\x11\xff\x11\x1a\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 
+    b'\x11\xff\n*\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    b'\x11\xff\x0fZ\x01\x03\x07\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    b'\x11\xff\x0f\x1a\x00\x02\x00\x00\x00\x00\x00\x084d\x00\x00\x01\x00\x00\x00',
+    b'\x11\xff\x0f\x1a\x01\x04\x00\x00\x00\x00\x00\x004\x01d\x08\x01\x00\x00\x00',
+]
 
 ## G915
 #disableGKeys = [
