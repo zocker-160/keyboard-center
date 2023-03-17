@@ -63,7 +63,7 @@
      <item>
       <widget class="QLabel" name="about_maintext">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Keyboard Center - $$$&lt;/p&gt;&lt;p&gt;made by zocker_160&lt;/p&gt;&lt;p&gt;licensed under GPLv3 | 2021 - 2022&lt;/p&gt;&lt;p&gt;source code: &lt;a href=&quot;https://github.com/zocker-160/keyboard-center&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;https://github.com/zocker-160/keyboard-center&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Keyboard Center - v$$$&lt;/p&gt;&lt;p&gt;made by zocker_160&lt;/p&gt;&lt;p&gt;licensed under GPLv3 | 2021 - 2023&lt;/p&gt;&lt;p&gt;source code: &lt;a href=&quot;https://github.com/zocker-160/keyboard-center&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;https://github.com/zocker-160/keyboard-center&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
