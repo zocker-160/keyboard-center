@@ -3,7 +3,7 @@
 import sys
 import logging
 
-from lib.QSingleApplication import QSingleApplication
+from lib.QSingleApplication import QSingleApplication, QSingleApplicationTCP
 
 from mainUi import MainWindow
 from constants import *
@@ -16,7 +16,7 @@ if __name__ == "__main__":
         print("version:", VERSION)
         sys.exit()
 
-    app = QSingleApplication(APPUUID, sys.argv)
+    app = QSingleApplicationTCP(APPUUID, sys.argv)
     app.setApplicationName(APP_NAME)
     app.setApplicationDisplayName(APP_NAME)
     app.setApplicationVersion(VERSION)
