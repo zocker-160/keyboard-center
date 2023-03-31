@@ -335,7 +335,7 @@ class BackgroundService(QThread):
     ##
 
     def run(self):
-        self.logger.info("starting service loop...")
+        self.logger.info("Starting service loop")
         self.stopEvent.clear()
         
         _usbTimeout: int = self.config.getSettings().get("usbTimeout") or USB_TIMEOUT
@@ -362,15 +362,15 @@ class BackgroundService(QThread):
                     self.logger.error(f"HIDerror: ({e})")
 
                     if errorCount > 5:
-                        self.logger.error("keyboard disconnected...")
+                        self.logger.error("Keyboard disconnected...")
                         self.quit()
                     else:
                         errorCount += 1
             else:
-                self.logger.debug("left runloop")
+                self.logger.debug("Left runloop")
 
     def quit(self, error=True):
-        self.logger.info("thread stop triggered...")
+        self.logger.debug("Thread stop triggered")
         self.stopEvent.set()
 
         try:
