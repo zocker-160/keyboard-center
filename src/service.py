@@ -380,11 +380,22 @@ class BackgroundService(QThread):
             pass
 
         if self.rgbClient: self.rgbClient.disconnect()
-        if self.openRGBProcess and self.openRGBProcess.poll():
-            self.logger.info("stopping openRGB server...")
+        if self.openRGBProcess:
+            self.rgbLogger.info("Stopping openRGB server")
 
-            self.openRGBProcess.send_signal(signal.SIGINT)
-            self.openRGBProcess.wait()
+            if self.openRGBProcess.poll() is None: # no exit code = process running
+                #self.openRGBProcess.send_signal(signal.SIGINT)
+                #self.openRGBProcess.send_signal(signal.SIGTERM)
+                self.openRGBProcess.terminate()
+
+                self.rgbLogger.info("Waiting for openRGB server to stop...")
+                retcode = self.openRGBProcess.wait()
+
+                self.rgbLogger.debug(
+                    f"openRGB server stopped with ({retcode})")
+
+            else:
+                self.rgbLogger.debug("openRGB server is not running")
 
         if error: self.quitTriggered.emit()
 
