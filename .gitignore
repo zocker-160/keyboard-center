@@ -7,9 +7,8 @@ __pycache*
 .vscode
 venv
 linux_packaging/keyboard-center*
-linux_packaging/AUR*
-linux_packaging/DEB-keyboard-center/*
-linux_packaging/DEB-keyboard-center-git/*
+linux_packaging/AUR-*
+linux_packaging/DEB-*
 
 !linux_packaging/DEB-keyboard-center/PKGBUILD
 !linux_packaging/DEB-keyboard-center/postinst
@@ -17,10 +16,6 @@ linux_packaging/DEB-keyboard-center-git/*
 !linux_packaging/DEB-keyboard-center/postupgrade
 !linux_packaging/DEB-keyboard-center/prerm
 
-!linux_packaging/DEB-keyboard-center-git/PKGBUILD
-!linux_packaging/DEB-keyboard-center-git/postinst
-!linux_packaging/DEB-keyboard-center-git/postrm
-!linux_packaging/DEB-keyboard-center-git/postupgrade
-!linux_packaging/DEB-keyboard-center-git/prerm
+!linux_packaging/DEB-python3-uinput/PKGBUILD
 
 testing/G510
