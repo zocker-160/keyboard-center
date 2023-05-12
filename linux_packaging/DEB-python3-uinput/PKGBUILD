@@ -1,0 +1,35 @@
+# Maintainer: johnjq <dev [at] johnjq (dot) com>
+# Co-maintainer: Ewout van Mansom <ewout@vanmansom.name>
+## shamelessly stolen from AUR
+
+pkgname=python3-uinput
+_pkgver=0.11.2
+pkgver=${_pkgver}~zocker1
+pkgrel=1
+pkgdesc='Pythonic API to Linux uinput kernel module (patched to work with Python3.11)'
+arch=('x86_64' 'aarch64')
+url='https://github.com/tuomasjjrasanen/python-uinput'
+license=('GPL')
+depends=('python3')
+makedepends=('python3-setuptools' 'python3-setuptools-whl' 'python3-build' 'python3-installer')
+options=('!emptydirs')
+source=("${pkgname}-${pkgver}::git+https://github.com/tuomasjjrasanen/python-uinput.git#tag=${_pkgver}"
+        "pr41.patch::https://patch-diff.githubusercontent.com/raw/tuomasjjrasanen/python-uinput/pull/41.patch")
+sha512sums=('SKIP'
+            'a53b925d1314e24a13703f598eec4774452bfa33046d0d15a04aa70d2ddfe77ab08c6fb46e8b947adce9f3a9e8d27d0e923233e8cac66f6ab46a0d9e9a5d02ec')
+
+prepare() {
+    cd "${pkgname}-${pkgver}"
+    patch --forward --strip=1 --input="${srcdir}/pr41.patch"
+}
+
+build() {
+   cd "${pkgname}-${pkgver}"
+   python3 -m build --wheel --no-isolation
+}
+
+package() {
+    cd "${pkgname}-${pkgver}"
+    python3 -m installer --destdir="$pkgdir" dist/*.whl
+    install -m 644 -D COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
