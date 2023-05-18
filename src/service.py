@@ -136,6 +136,7 @@ class BackgroundService(QThread):
 
     def _getHIDpaths(self):
         self.HIDpath, self.HIDpath_write = None, None
+        HIDpath, HIDpath_disable = None, None
 
         for dev in hid.enumerate(self.keyboardDev.usbVendor, self.keyboardDev.usbProduct):
 
