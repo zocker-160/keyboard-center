@@ -33,7 +33,7 @@ from gui.Ui_mainwindow import Ui_MainWindow
 from gui.Ui_aboutWindow import Ui_aboutWindow
 
 from constants import *
-from service import BackgroundService, NoKeyboardException
+from service import BackgroundService, NoKeyboardException, NoEndpointException
 
 PLACEHOLDER_STR = "$$$"
 
@@ -158,11 +158,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         except NoKeyboardException:
             pass
+        except NoEndpointException:
+            self.showErrorMSG(
+                "Failed to load keyboard endpoint!",
+                detailText=str(e),
+                title_msg="FATAL ERROR"
+            )
+            raise
+        # TODO HIDFailedToOpenException
         except Exception as e:
             self.showErrorMSG(
-                f"Error during init of keyboard!",
+                "Error during init of keyboard!",
                 detailText=str(e),
-                title_msg="FATAL ERROR")
+                title_msg="FATAL ERROR"
+            )
             raise
 
         self.logger.debug("start health check...")
