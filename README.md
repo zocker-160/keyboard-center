@@ -75,24 +75,21 @@ Settings are stored in a `settings.yml` file, which is located at
 
 ### Dependencies
 #### Debian / Ubuntu
-- python3
-- python3-pip (<= 0.1.4)
-- python3-pyqt5
+- python3 >= 3.9
+- python3-pyqt5 >= 5.15
 - python3-usb
 - python3-uinput
 - python3-ruamel.yaml
-- libhidapi-hidraw0 | libhidapi-libusb0 (>= 0.1.9)
+- libhidapi-hidraw0
 - libnotify-bin
 
 #### Arch / Manjaro
-- python >= 3.8
-- python-pyqt5 >= 5.14
-- python-pip >= 20 (<= 0.1.4)
+- python >= 3.9
+- python-pyqt5 >= 5.15
 - python-uinput >= 0.11.2
 - python-ruamel-yaml >= 0.15
 - python-pyusb >= 1.0.2
-- hidapi>=0.10 (>= 0.1.9)
-- python-inotify-simple >= 1.3 (<= 0.1.4)
+- hidapi >= 0.10
 - libnotify >= 0.7.9
 
 ### Contribute New Keyboard
