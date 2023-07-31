@@ -330,7 +330,7 @@ class Logitech_G915(Logitech_G815):
     ]
 
 @dataclass(frozen=True)
-class Logitech_Ǵ935(KeyboardInterface):
+class Logitech_G935(KeyboardInterface):
     devicename = "Logitech G935"
 
     usbVendor = 0x046d
@@ -397,5 +397,5 @@ SUPPORTED_DEVICES = [
     Logitech_G915,
     Logitech_G510,
 
-    Logitech_Ǵ935
+    Logitech_G935
 ]
