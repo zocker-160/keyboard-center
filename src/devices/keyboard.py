@@ -329,11 +329,73 @@ class Logitech_G915(Logitech_G815):
         b'\x11\x01\x0f\x1a\x01\x04\x00\x00\x00\x00\x00\x004\x01d\x08\x01\x00\x00\x00',
     ]
 
+@dataclass(frozen=True)
+class Logitech_Ǵ935(KeyboardInterface):
+    devicename = "Logitech G935"
+
+    usbVendor = 0x046d
+    usbProduct = 0x0a87
+
+    usbConfiguration = 0
+    usbInterface = (3, 0)
+    usbEndpoint = 0
+
+    disableGKeysInterface = 3
+    usbUseWrite = True
+
+    numMacroKeys = 3
+    numMemoryKeys = 1 # does not have any, so we set it to 1, because we need at least 1 button in the UI
+
+    macroKeys = {
+        b'\x11\xff\x05\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_1,
+        b'\x11\xff\x05\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_2,
+        b'\x11\xff\x05\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_3,
+    }
+
+    memoryKeys = {} # headset has no memory keys
+    memoryKeysLEDs = {} # headset has no memory keys, so it also does not have any LED
+
+    mediaKeys = {
+        b'\x08\x01': uinput.KEY_MUTE,
+        b'\x08\x10': uinput.KEY_MICMUTE,
+        b'\x08 ': uinput.KEY_MICMUTE, # is actually "unmute", so could cause issues later
+    }
+
+    releaseEvents = {
+        b'\x11\xff\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # G release
+        b'\x08\x00', # media key release - just a guess based on the data from "mediaKeys"
+    }
+
+    disableGKeys = [
+        b'\x11\xff\x05\x2a\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    ]
+
+    #flick up microphone (mute)
+    #got data from keyboard: b'\x08\x10'
+    
+    #flick down microphone (unmute)
+    #got data from keyboard: b'\x08 '
+
+    ## other data unused for now:
+
+    # headset connected
+    # b'\x11\xff\x08\x00\x0ec\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    # b'\x01\x00\x00\x00\x00'
+    # b'\x01\x00\x00\x00\x00'
+
+    # lost connection to headset (turned off)
+    # b'\x11\xff\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+
+
+
+
 SUPPORTED_DEVICES = [
     Logitech_G910_OrionSpectrum,
     Logitech_G710p,
     Logitech_G910_OrionSpark,
     Logitech_G815,
     Logitech_G915,
-    Logitech_G510
+    Logitech_G510,
+
+    Logitech_Ǵ935
 ]
