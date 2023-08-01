@@ -350,20 +350,21 @@ class Logitech_G935(KeyboardInterface):
         b'\x11\xff\x05\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_1,
         b'\x11\xff\x05\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_2,
         b'\x11\xff\x05\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MACRO_3,
+        b'\x08\x01': key.MACRO_4, # kernel driver does not handle mute button, so we make it remappable by setting it as "G4"
+        # TODO: this button does not have a release event, so it would be "stuck" all the time ._.
     }
 
     memoryKeys = {} # headset has no memory keys
     memoryKeysLEDs = {} # headset has no memory keys, so it also does not have any LED
 
     mediaKeys = {
-        b'\x08\x01': uinput.KEY_MUTE,
+        # b'\x08\x01': uinput.KEY_MUTE, # moved this to "macroKeys" to make that button remappable
         b'\x08\x10': uinput.KEY_MICMUTE,
         b'\x08 ': uinput.KEY_MICMUTE, # is actually "unmute", so could cause issues later
     }
 
     releaseEvents = {
         b'\x11\xff\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # G release
-        b'\x08\x00', # media key release - just a guess based on the data from "mediaKeys"
     }
 
     disableGKeys = [
