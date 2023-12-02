@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-python3 /usr/lib/keyboard-center/main.py "$@"
+python3 /opt/keyboard-center/main.py "$@"
