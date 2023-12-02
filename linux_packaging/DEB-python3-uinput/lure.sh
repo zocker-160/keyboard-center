@@ -14,7 +14,7 @@ architectures=('all')
 licenses=('GPLv3')
 
 deps=('python3')
-#build_deps=('python3-setuptools' 'python3-setuptools-whl' 'python3-build' 'python3-installer')
+build_deps=('python3-setuptools' 'python3-setuptools-whl' 'python3-build' 'python3-installer')
 
 sources=(
     "git+https://github.com/tuomasjjrasanen/python-uinput.git?~rev=$_version"
