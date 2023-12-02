@@ -167,6 +167,9 @@
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;aka the Windows key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>Meta/Super</string>
           </property>
@@ -334,7 +337,7 @@
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="toolTip">
-           <string>set NULLKEY</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;set NULL key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -371,6 +374,9 @@
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move up&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="icon">
       <iconset theme="go-up">
        <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
@@ -381,6 +387,9 @@
     <widget class="QPushButton" name="moveDown">
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move down&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="icon">
       <iconset theme="go-down">
@@ -399,6 +408,9 @@
     <widget class="QPushButton" name="delButton">
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;remove entry&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="icon">
       <iconset theme="list-remove">
