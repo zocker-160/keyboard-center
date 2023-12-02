@@ -71,6 +71,12 @@
        <layout class="QHBoxLayout" name="modBoxButtons">
         <item>
          <widget class="QPushButton" name="ctrlMod">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
@@ -89,6 +95,12 @@
         </item>
         <item>
          <widget class="QPushButton" name="shiftMod">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
@@ -110,7 +122,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>30</width>
             <height>0</height>
            </size>
           </property>
@@ -148,7 +160,7 @@
          <widget class="QPushButton" name="metaMod">
           <property name="minimumSize">
            <size>
-            <width>50</width>
+            <width>100</width>
             <height>0</height>
            </size>
           </property>
@@ -156,7 +168,7 @@
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
-           <string>Meta</string>
+           <string>Meta/Super</string>
           </property>
           <property name="checkable">
            <bool>true</bool>
