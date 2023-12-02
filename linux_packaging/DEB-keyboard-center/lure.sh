@@ -2,7 +2,7 @@ maintainer="zocker_160 <zocker1600 at posteo dot net>"
 
 name=keyboard-center
 version=1.0.6
-release=2
+release=3
 desc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 homepage="https://github.com/zocker-160/keyboard-center"
 architectures=('amd64')
@@ -50,6 +50,6 @@ package() {
   install -D -m644 linux_packaging/assets/keyboard-center.png -t "$pkgdir/usr/share/icons/hicolor/512x512/apps"
 
   install-binary linux_packaging/assets/keyboard-center.sh $name
-  install-license LICENSE
+  install-license LICENSE $name/LICENSE
   install-desktop linux_packaging/assets/keyboard-center.desktop
 }

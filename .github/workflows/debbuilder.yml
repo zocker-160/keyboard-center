@@ -18,7 +18,7 @@ jobs:
     - name: install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl
+        sudo apt-get install -y curl git
         curl -fsSL lure.sh/install | bash
 
     - name: build deb package
@@ -41,7 +41,7 @@ jobs:
     - name: install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl
+        sudo apt-get install -y curl git
         curl -fsSL lure.sh/install | bash
 
     - name: build deb package
