@@ -70,7 +70,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi()
         self.setupSlots()
 
-        if not self.configparser.getMinimizeOnStart():
+        if not self.configparser.getMinimizeOnStart() or self.devmode:
             self.show()
 
     def setupUi(self):
