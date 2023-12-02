@@ -105,7 +105,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
         self.addCommand.clicked.connect(self.addBlankCommandWidget)
-        self.saveButton.clicked.connect(lambda: self.saveData(True))
+        self.saveButton.clicked.connect(lambda: self.saveData(False))
         self.toTrayButton.clicked.connect(self.hide)
         self.clearAllButton.clicked.connect(
             self.keyListWidgetContents.clearAllEntries)
