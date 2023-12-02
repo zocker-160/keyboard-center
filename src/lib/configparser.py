@@ -213,12 +213,10 @@ class Configparser:
             self.log.critical("config file not found")
             raise
         except TypeError as e:
-            # from _configIntegrityCheck
             self.log.exception(e)
             self.log.critical("config file is missing important fields")
             raise
         except AssertionError as e:
-            # from _configIntegrityCheck
             self.log.exception(e)
             self.log.critical("config file integrity check failed")
             raise
@@ -227,6 +225,16 @@ class Configparser:
             if not silent: raise
 
     def save(self, silent=True):
+        # load current config file as backup in case saving fails
+        try:
+            self.log.debug("loading config file as backup")
+            with open(self.configFile, "r") as yaml:
+                data: dict = self.configYAML.load(yaml)
+
+        except Exception as e:
+            self.log.exception(e)
+            raise
+
         try:
             self.log.debug("saving into config file "+self._pp(self.configFile))
             with open(self.configFile, "w") as yaml:
@@ -237,6 +245,13 @@ class Configparser:
             if not silent: raise
         except Exception as e:
             self.log.exception(e)
+            self.log.warning("saving failed, attempting to save backup config")
+            try:
+                with open(self.configFile, "w") as yaml:
+                    self.configYAML.dump(data, yaml)
+            except Exception as e:
+                self.log.exception(e)
+
             if not silent: raise
 
     def _copyConfig(self, src: str, dest: str):
@@ -244,9 +259,8 @@ class Configparser:
         self.log.debug("source: "+self._pp(src))
         self.log.debug("destination: "+self._pp(dest))
 
-        with open(src, "r") as s:
-            with open(dest, "w") as d:
-                d.write(s.read())
+        with open(src, "r") as s, open(dest, "w") as d:
+            d.write(s.read())
 
     def _configIntegrityCheck(self):
         settings = self.getSettings()
