@@ -1,0 +1,54 @@
+name: DEB builder
+
+on:
+  push:
+    tags:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  keyboard-center:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: checkout repository
+      uses: actions/checkout@v3
+
+    - name: install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+        curl -fsSL lure.sh/install | bash
+
+    - name: build deb package
+      run: cd ./linux_packaging/DEB-keyboard-center/ && lure build -c
+
+    - name: save deb file
+      uses: actions/upload-artifact@master
+      with:
+        name: keyboard-center
+        path: ./linux_packaging/DEB-keyboard-center/*.deb
+
+  python3-uinput:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: checkout repository
+      uses: actions/checkout@v3
+
+    - name: install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+        curl -fsSL lure.sh/install | bash
+
+    - name: build deb package
+      run: cd ./linux_packaging/DEB-python3-uinput/ && lure build -c
+
+    - name: save deb file
+      uses: actions/upload-artifact@master
+      with:
+        name: python3-uinput
+        path: ./linux_packaging/DEB-python3-uinput/*.deb
