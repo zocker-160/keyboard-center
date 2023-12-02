@@ -1,21 +1,13 @@
 *.directory
 *.code-workspace
+*.deb
 
 __pycache*
 .qt_*
 
 .vscode
-venv
+venv/
 linux_packaging/keyboard-center*
 linux_packaging/AUR-*
-linux_packaging/DEB-*
-
-!linux_packaging/DEB-keyboard-center/PKGBUILD
-!linux_packaging/DEB-keyboard-center/postinst
-!linux_packaging/DEB-keyboard-center/postrm
-!linux_packaging/DEB-keyboard-center/postupgrade
-!linux_packaging/DEB-keyboard-center/prerm
-
-!linux_packaging/DEB-python3-uinput/PKGBUILD
 
 testing/G510
