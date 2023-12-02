@@ -438,6 +438,16 @@ NUMPAD_SCANCODES = [
     104, # enter
 ]
 
+MODIFIER_SCANCODES = [
+    37, 105, # L_STR, R_STR
+    50, 62, # L_SHIFT, R_SHIFT
+    66, # CAPS LOCK
+    64, # L_ALT
+    108, # R_ALT_GR
+    135, # MENU
+    133, 134, # L_META, R_META
+]
+
 MACRO_1 = "MACRO_1"
 MACRO_2 = "MACRO_2"
 MACRO_3 = "MACRO_3"

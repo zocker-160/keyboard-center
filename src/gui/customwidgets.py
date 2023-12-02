@@ -2,11 +2,24 @@ import shlex
 import uinput
 
 from PyQt5.QtCore import pyqtSignal, QEvent, Qt
-from PyQt5.QtGui import QKeyEvent, QKeySequence
-from PyQt5.QtWidgets import QKeySequenceEdit, QVBoxLayout, QWidget, QHBoxLayout, QLabel, QPushButton
+from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtWidgets import (
+    QKeySequenceEdit, 
+    QVBoxLayout, 
+    QWidget, 
+    QLabel
+)
 
-from lib.configparser import MOD_ALTGR, MOD_CTRL, MOD_ALT, MOD_SHIFT, MOD_META, TYPE_DELAY, TYPE_DELAY_STR
-from devices.allkeys import NUMPAD_SCANCODES
+from lib.configparser import (
+    MOD_ALTGR, 
+    MOD_CTRL, 
+    MOD_ALT, 
+    MOD_SHIFT, 
+    MOD_META, 
+    TYPE_DELAY, 
+    TYPE_DELAY_STR
+)
+from devices.allkeys import MODIFIER_SCANCODES
 
 class CKeySequenceEdit(QKeySequenceEdit):
 
@@ -43,16 +56,12 @@ class CKeySequenceEdit(QKeySequenceEdit):
 
         # only one single non modifier is allowed
         if len(self.tmpKeycodes) > 0: return
-        if a0.modifiers() and not self.rawEnabled:
-            # for whatever the fuck reason, numpad keys get recognized
-            #  as fucking modifiers (why????)
-            # so this is a dirty workaround
-            if a0.nativeScanCode() in NUMPAD_SCANCODES:
-                print("NUMPAD key detected - engaging workaround!")
-            else:
-                return
 
-        self.pressedKeycode = a0.nativeScanCode()
+        keycode = a0.nativeScanCode()
+        if keycode in MODIFIER_SCANCODES and not self.rawEnabled:
+            return
+
+        self.pressedKeycode = keycode
         self.tmpKeycodes.append(a0.key())
 
         self.onNewKeySet.emit(self.pressedKeycode)
