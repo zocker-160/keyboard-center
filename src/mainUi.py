@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def setupSlots(self):
         self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
-        self.actionOpenLogfile.triggered.connect(self.openLogfile)
+        self.actionOpenLogFolder.triggered.connect(self.openLogFolder)
         self.actionRestartService.triggered.connect(self.forceRestart)
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
@@ -379,8 +379,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def openConfigFolder(self):
         openUrl(self.configparser.configFolder)
 
-    def openLogfile(self):
-        openUrl(Configparser.getLogfile())
+    def openLogFolder(self):
+        openUrl(Configparser.getLogFolder())
 
     def showGitHub(self):
         openUrl("https://github.com/zocker-160/keyboard-center")

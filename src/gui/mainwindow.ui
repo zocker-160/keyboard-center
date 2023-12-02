@@ -400,7 +400,7 @@ QLabel#asd:pressed {
      <string>File</string>
     </property>
     <addaction name="actionOpenConfigFolder"/>
-    <addaction name="actionOpenLogfile"/>
+    <addaction name="actionOpenLogFolder"/>
     <addaction name="separator"/>
     <addaction name="actionRestartService"/>
     <addaction name="separator"/>
@@ -498,13 +498,13 @@ QLabel#asd:pressed {
     <string>check status of the background service</string>
    </property>
   </action>
-  <action name="actionOpenLogfile">
+  <action name="actionOpenLogFolder">
    <property name="icon">
     <iconset theme="text">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Open log file</string>
+    <string>Open log folder</string>
    </property>
   </action>
  </widget>

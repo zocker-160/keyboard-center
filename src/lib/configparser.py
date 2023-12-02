@@ -27,13 +27,17 @@ class Configparser:
 
     @staticmethod
     def getLogfile():
-        folder = os.path.join(
-            os.environ["HOME"], ".var", "log")
+        folder = Configparser.getLogFolder()
+        return os.path.join(folder, "keyboardCenter.log")
+
+    @staticmethod
+    def getLogFolder():
+        folder = os.path.join(os.environ["HOME"], ".var", "log")
 
         if not os.path.isdir(folder):
             os.makedirs(folder, exist_ok=True)
 
-        return os.path.join(folder, "keyboardCenter.log")
+        return folder
 
     @staticmethod
     def getPrivatePath(path: str):
