@@ -1,6 +1,5 @@
 # ![keyboard-center](images/g910-icon.png) Keyboard Center
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y4JIQ4Z)
 [![DEB builder](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder.yml/badge.svg)](https://github.com/zocker-160/keyboard-center/actions/workflows/debbuilder.yml)
 
 Keyboard Center is an application attempting to create an easy way for users to map their macro keys of their >100$ keyboard to useful actions, because Logitech does not give a fuck.
@@ -75,7 +74,16 @@ Settings are stored in a `settings.yml` file, which is located at
 #### Current default settings
 `settings: {usbTimeout: 1000, retryCount: 5}`
 
-### Dependencies
+## Known issues
+### Icons on buttons and in the menu not visible
+
+Keyboard-center relies on icons provided by the desktop environment. Some DEs (like i3) don't seem to provide those, so in that case you can manually overwrite the used icon them by setting `XDG_SESSION_DESKTOP` and `XDG_CURRENT_DESKTOP` ENV variables.
+
+Two known good values are `KDE` (recommended) and `GNOME`.
+
+Thanks to [@scott-carrion](https://github.com/scott-carrion) for this info.
+
+## Dependencies
 #### Debian / Ubuntu
 - python3 >= 3.9
 - python3-pyqt5 >= 5.15
@@ -94,7 +102,7 @@ Settings are stored in a `settings.yml` file, which is located at
 - hidapi >= 0.10
 - libnotify >= 0.7.9
 
-### Contribute New Keyboard
+## Contribute New Keyboard
 
 - make sure all required dependencies are installed + `git`
 - `git clone https://github.com/zocker-160/keyboard-center`
@@ -110,3 +118,6 @@ Settings are stored in a `settings.yml` file, which is located at
 **overall it should look something like this:**
 
 ![addKeyAnim](images/KeyboardCenter_add.gif)
+
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y4JIQ4Z)
