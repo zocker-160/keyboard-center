@@ -229,36 +229,6 @@ class Logitech_G510n(Logitech_G510):
 
     usbProduct = 0xc22e
 
-    macroKeys = {
-        b'\x03\x10\x00\x00\x00': key.MACRO_1,
-        b'\x03\x20\x00\x00\x00': key.MACRO_2,
-        b'\x03\x40\x00\x00\x00': key.MACRO_3,
-        b'\x03\x80\x00\x00\x00': key.MACRO_4,
-        b'\x03\x00\x01\x00\x00': key.MACRO_5,
-        b'\x03\x00\x02\x00\x00': key.MACRO_6,
-        b'\x03\x00\x04\x00\x00': key.MACRO_7,
-        b'\x03\x00\x08\x00\x00': key.MACRO_8,
-        b'\x03\x00\x10\x00\x00': key.MACRO_9,
-        b'\x03\x00\x20\x00\x00': key.MACRO_10,
-        b'\x03\x00\x40\x00\x00': key.MACRO_11,
-        b'\x03\x00\x80\x00\x00': key.MACRO_12,
-        b'\x03\x00\x00\x01\x00': key.MACRO_13,
-        b'\x03\x00\x00\x02\x00': key.MACRO_14,
-        b'\x03\x00\x00\x04\x00': key.MACRO_15,
-        b'\x03\x00\x00\x08\x00': key.MACRO_16,
-        b'\x03\x00\x00\x10\x00': key.MACRO_17,
-        b'\x03\x00\x00\x20\x00': key.MACRO_18,
-
-        b'\x03\x08\x00\x00\x00': key.MEMORY_RECORD
-    }
-
-    memoryKeys = {
-        b'\x03\x01\x00\x00\x00': key.MEMORY_1,
-        b'\x03\x02\x00\x00\x00': key.MEMORY_2,
-        b'\x03\x04\x00\x00\x00': key.MEMORY_3,
-    }
-
-
 @dataclass(frozen=True)
 class Logitech_G815(KeyboardInterface):
 
