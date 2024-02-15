@@ -70,8 +70,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi()
         self.setupSlots()
 
-        if not self.configparser.getMinimizeOnStart() or self.devmode:
-            self.show()
+        # workaround for weird KDE bug where spinner keeps running
+        # in task bar despite app being long started
+        # by calling show() we make sure the spinner stops
+        # and then we hide() afterwards when needed
+        self.show()
+        self.center()
+        if not self.devmode and self.configparser.getMinimizeOnStart():
+            self.hide()
 
     def setupUi(self):
         self.logger.debug("setting up GUI...")

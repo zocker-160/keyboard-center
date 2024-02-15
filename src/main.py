@@ -50,7 +50,6 @@ if __name__ == "__main__":
 
     try:
         window = MainWindow(app, devmode, not bgmode)
-        window.center()
     except Exception as e:
         logging.exception(e)
         raise
