@@ -91,6 +91,11 @@ def getHIDpaths():
             HIDpath_disable: bytes = dev.get("path")
             logging.debug(f"HIDraw disable endpoint found: {HIDpath_disable.decode()}")
 
+    if not HIDpath:
+        raise RuntimeError("Failed to find HIDpath (does other app have exclusive access?)")
+    if not HIDpath_disable:
+        raise RuntimeError("Failed to find HIDpath_disable (does other app have exclusive access?)")
+
     logging.debug("Checking for HID availability...")
     def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
         try:
@@ -108,6 +113,8 @@ def getHIDpaths():
     numTries = 10
     if HIDpath and not __HIDavailable(HIDpath, numTries):
         raise RuntimeError(f"Unable to open device {HIDpath.decode()}")
+    if HIDpath_disable and not __HIDavailable(HIDpath_disable, numTries):
+        raise RuntimeError(f"Unable to open device {HIDpath_disable.decode()}")
 
     return HIDpath, HIDpath_disable
 
