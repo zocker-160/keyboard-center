@@ -396,13 +396,14 @@ class Logitech_G935(KeyboardInterface):
 
 
 
-SUPPORTED_DEVICES = [
+SUPPORTED_DEVICES: list[KeyboardInterface] = [
     Logitech_G910_OrionSpectrum,
     Logitech_G710p,
     Logitech_G910_OrionSpark,
     Logitech_G815,
     Logitech_G915,
     Logitech_G510,
+    Logitech_G510n,
 
     Logitech_G935
 ]
