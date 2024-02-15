@@ -121,11 +121,8 @@ class BackgroundService(QThread):
                                             [self.keyboardDev.usbInterface]\
                                             [self.keyboardDev.usbEndpoint]
 
-        self.logger.debug("searching HIDpaths...")
-        try:
-            self._getHIDpaths()
-        except:
-            raise
+        self.logger.debug("Searching for HID endpoints...")
+        self._getHIDpaths()
         
         self.logger.debug("creating uinput device")
         self.virtualKeyboard = uinput.Device(
@@ -148,7 +145,9 @@ class BackgroundService(QThread):
                 HIDpath_disable: bytes = dev.get("path")
                 self.logger.debug(f"HIDraw write endpoint found: {HIDpath_disable.decode()}")
 
-        self.logger.debug("Checking for HID availability...")
+            if HIDpath and HIDpath_disable:
+                break
+
         def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
             try:
                 with HIDDevice(path=HIDpath) as _:
@@ -162,13 +161,16 @@ class BackgroundService(QThread):
                     time.sleep(RETRY_TIMEOUT)
                     return __HIDavailable(HIDpath, tries-1)
 
-        numTries = self.config.getSettings().get("retryCount") or RETRY_COUNT
-        
-        if HIDpath and not __HIDavailable(HIDpath, numTries):
-            raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
-
         if not HIDpath or not HIDpath_disable:
             raise NoEndpointException()
+
+        self.logger.debug("Checking for HID availability...")
+        numTries = self.config.getSettings().get("retryCount") or RETRY_COUNT
+        
+        if not __HIDavailable(HIDpath, numTries):
+            raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
+        if HIDpath != HIDpath_disable and not __HIDavailable(HIDpath_disable, numTries):
+            raise HIDFailedToOpenException(f"Unable to open device {HIDpath_disable.decode()}")
 
         self.HIDpath = HIDpath
         self.HIDpath_write = HIDpath_disable
