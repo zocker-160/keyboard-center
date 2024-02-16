@@ -30,6 +30,7 @@ Keyboard Center is an application attempting to create an easy way for users to 
 - Logitech G710+ (046d:c24d) (big thanks to [@nirenjan](https://github.com/nirenjan))
 - Logitech G815 (046d:c33f) (thanks to [@nickbuss](https://github.com/nickbuss))
 - Logitech G510 (046d:c22d) (thanks to [@Flying--Dutchman](https://github.com/Flying--Dutchman))
+- Logitech G510 (046d:c22e) (thanks to [@JoZ3](https://github.com/JoZ3))
 - Logitech G935 (046d:0a87) _(partial support)_ (thanks to [@coxaka](https://github.com/coxaka))
 
 ## Install
