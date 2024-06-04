@@ -338,7 +338,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.showErrorMSG(str(e))
         
         if d:
-            print("AAAAA", d, d.name, orgb)
+            #print("AAAAA", d, d.name, orgb)
             self.macroNameEdit.setText(d.name)
 
             if d.gamemode > 1:
