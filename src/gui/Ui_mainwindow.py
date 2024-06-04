@@ -184,6 +184,9 @@ class Ui_MainWindow(object):
         self.minimizeOnStart = QtWidgets.QCheckBox(self.centralwidget)
         self.minimizeOnStart.setObjectName("minimizeOnStart")
         self.horizontalLayout_3.addWidget(self.minimizeOnStart)
+        self.useOpenRGB = QtWidgets.QCheckBox(self.centralwidget)
+        self.useOpenRGB.setObjectName("useOpenRGB")
+        self.horizontalLayout_3.addWidget(self.useOpenRGB)
         spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem2)
         self.toTrayButton = QtWidgets.QPushButton(self.centralwidget)
@@ -261,6 +264,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.gameMode.clicked['bool'].connect(self.gameModeTime.setEnabled) # type: ignore
+        self.useOpenRGB.clicked['bool'].connect(self.frame.setEnabled) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -284,6 +288,8 @@ class Ui_MainWindow(object):
         self.disableNotifications.setToolTip(_translate("MainWindow", "disables notifications when switching memory profiles"))
         self.disableNotifications.setText(_translate("MainWindow", "disable profile notification"))
         self.minimizeOnStart.setText(_translate("MainWindow", "minimize to tray on start"))
+        self.useOpenRGB.setToolTip(_translate("MainWindow", "enable / disable OpenRGB integration"))
+        self.useOpenRGB.setText(_translate("MainWindow", "OpenRGB"))
         self.toTrayButton.setText(_translate("MainWindow", "To Tray"))
         self.saveButton.setText(_translate("MainWindow", "Save"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
@@ -300,3 +306,4 @@ class Ui_MainWindow(object):
         self.actionRestartService.setToolTip(_translate("MainWindow", "check status of the background service"))
         self.actionOpenLogFolder.setText(_translate("MainWindow", "Open log folder"))
 from gui.customwidgets import CListWidgetContent
+from . import ressources_rc

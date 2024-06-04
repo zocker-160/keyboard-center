@@ -348,6 +348,16 @@ QLabel#asd:pressed {
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="useOpenRGB">
+        <property name="toolTip">
+         <string>enable / disable OpenRGB integration</string>
+        </property>
+        <property name="text">
+         <string>OpenRGB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -533,6 +543,22 @@ QLabel#asd:pressed {
     <hint type="destinationlabel">
      <x>480</x>
      <y>136</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useOpenRGB</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>572</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>644</x>
+     <y>87</y>
     </hint>
    </hints>
   </connection>

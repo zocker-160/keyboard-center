@@ -135,7 +135,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.service = None
 
         try:
-            self.service = BackgroundService(self.configparser, not self.devmode)
+            useOpenRGB = self.configparser.getUseOpenRGB()
+            if self.devmode:
+                useOpenRGB = False
+
+            self.service = BackgroundService(self.configparser, useOpenRGB)
             self.service.notificationEvent.connect(self.showNotification)
             self.service.notificationIconEvent.connect(self.showNotificationIcon)
             self.service.quitTriggered.connect(self._forcedHealthCheck)
@@ -301,6 +305,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 data=data,
                 notifications= not self.disableNotifications.isChecked(),
                 minOnStart=self.minimizeOnStart.isChecked(),
+                useOpenRGB=self.useOpenRGB.isChecked(),
                 bSavetoFile=saveToFile
             )
         except Exception as e:
@@ -314,7 +319,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def loadData(self):
         print("loading", self.currMemory, self.currMacro)
-        d, orgb, n, m = self.configparser.loadForGui(
+        d, orgb = self.configparser.loadForGui(
             ALL_MEMORY_KEYS[self.currMemory],
             ALL_MACRO_KEYS[self.currMacro]
         )
@@ -345,8 +350,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
         self.openRGBedit.setText(orgb)
 
-        self.disableNotifications.setChecked(not n)
-        self.minimizeOnStart.setChecked(m)
+        self.disableNotifications.setChecked(not self.configparser.getShowNotifications())
+        self.minimizeOnStart.setChecked(self.configparser.getMinimizeOnStart())
+
+        orgb = self.configparser.getUseOpenRGB()
+        self.useOpenRGB.setChecked(orgb)
+        self.frame.setEnabled(orgb)
 
     ### function overloading
     def keyPressEvent(self, a0: QKeyEvent):

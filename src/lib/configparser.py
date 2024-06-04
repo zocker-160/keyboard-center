@@ -104,6 +104,9 @@ class Configparser:
     def getMinimizeOnStart(self) -> bool:
         return self.getSettings().get("minOnStart", False)
 
+    def getUseOpenRGB(self) -> bool:
+        return self.getSettings().get("useOpenRGB", True)
+
     def getKey(self, profile: str, key: str) -> tuple:
         """ 
         gets the pressed key + profile and returns either the key tuple 
@@ -153,7 +156,9 @@ class Configparser:
             orgb: str,
             data: ConfigEntry,
             notifications: bool,
-            minOnStart: bool, bSavetoFile=False):
+            minOnStart: bool,
+            useOpenRGB: bool,
+            bSavetoFile=False):
         mapping = self.getMappings()
         openRGB = self.getOpenRGB()
         globalSettings = self.getSettings()
@@ -183,21 +188,19 @@ class Configparser:
 
         globalSettings["showNotifications"] = notifications
         globalSettings["minOnStart"] = minOnStart
+        globalSettings["useOpenRGB"] = useOpenRGB
 
         self.log.debug("config from GUI: "+str(self.settings))
         if bSavetoFile: self.save()
 
     def loadForGui(self, profile: str, macroKey: str):
         data: dict = self.getProfile(profile).get(macroKey)
-        openRGB: dict = self.getOpenRGB().get(profile)
-        openRGB = openRGB if openRGB else ""
-        notification = self.getShowNotifications()
-        minOnStart = self.getMinimizeOnStart()
+        openRGB: dict = self.getOpenRGB().get(profile, "")
 
         if data:
-            return ConfigEntry.fromConfig(data), openRGB, notification, minOnStart
+            return ConfigEntry.fromConfig(data), openRGB
         else:
-            return None, openRGB, notification, minOnStart
+            return None, openRGB
 
     ## load and store from config file
 
