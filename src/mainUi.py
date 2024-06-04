@@ -27,21 +27,11 @@ from gui.tray import TrayIcon
 from gui.CEntryButton import CEntryButton
 from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
-from gui.Ui_aboutWindow import Ui_aboutWindow
 
 from constants import *
 from service import BackgroundService, NoKeyboardException, NoEndpointException
 
 PLACEHOLDER_STR = "$$$"
-
-class AboutWindow(QDialog, Ui_aboutWindow):
-    def __init__(self, parent, version: str):
-        super().__init__(parent)
-
-        self.setupUi(self)
-        self.about_maintext.setText(
-            self.about_maintext.text().replace(PLACEHOLDER_STR, version)
-        )
 
 class MainWindow(QMainWindow, Ui_MainWindow):
 
@@ -450,8 +440,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     ### secondary windows
     def showAbout(self):
-        about = AboutWindow(self, self.app.applicationVersion())
-        about.show()
+        about = f"""
+        <h4>{APP_NAME}</h4>
+        Version v{VERSION}
+        <br>
+        (c) 2021 - 2024 zocker_160
+        <br>
+        GPLv3
+        <br><br>
+        <a href="https://github.com/zocker-160/keyboard-center">https://github.com/zocker-160/keyboard-center</a>
+        """
+
+        QMessageBox.about(
+            self,
+            f"About {APP_NAME}",
+            about
+        )
+
+    def showSettings(self):
+        # TODO
+        pass
 
     ### other ui stuff
     def center(self):
