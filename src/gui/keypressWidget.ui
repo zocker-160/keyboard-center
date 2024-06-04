@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>814</width>
+    <width>807</width>
     <height>100</height>
    </rect>
   </property>
@@ -370,32 +370,39 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="moveUp">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <property name="spacing">
+      <number>0</number>
      </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move up&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="icon">
-      <iconset theme="go-up">
-       <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="moveDown">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move down&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="icon">
-      <iconset theme="go-down">
-       <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
-     </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="moveUp">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move up&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="icon">
+        <iconset theme="go-up">
+         <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="moveDown">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;move down&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="icon">
+        <iconset theme="go-down">
+         <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="Line" name="line">

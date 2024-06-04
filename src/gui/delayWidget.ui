@@ -113,20 +113,27 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="moveUp">
-     <property name="icon">
-      <iconset theme="go-up">
-       <normaloff>.</normaloff>.</iconset>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="moveDown">
-     <property name="icon">
-      <iconset theme="go-down">
-       <normaloff>.</normaloff>.</iconset>
-     </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="moveUp">
+       <property name="icon">
+        <iconset theme="go-up">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="moveDown">
+       <property name="icon">
+        <iconset theme="go-down">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="Line" name="line">

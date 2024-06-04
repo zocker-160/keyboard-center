@@ -92,26 +92,33 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="moveUp">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
      </property>
-     <property name="icon">
-      <iconset theme="go-up">
-       <normaloff>.</normaloff>.</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="moveDown">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="icon">
-      <iconset theme="go-down">
-       <normaloff>.</normaloff>.</iconset>
-     </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="moveUp">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="icon">
+        <iconset theme="go-up">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="moveDown">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="icon">
+        <iconset theme="go-down">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="Line" name="line">
