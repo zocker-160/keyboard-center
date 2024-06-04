@@ -46,7 +46,7 @@ if __name__ == "__main__":
     bgmode = "--background-mode" in sys.argv
     if bgmode: logging.info("Running in background mode")
 
-    logging.info("------------ starting -------------")
+    logging.info(f"------------ starting {VERSION} -------------")
 
     try:
         window = MainWindow(app, devmode, not bgmode)
