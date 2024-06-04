@@ -111,7 +111,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
         self.addCommand.clicked.connect(self.addBlankCommandWidget)
-        self.saveButton.clicked.connect(lambda: self.saveData(False))
+        self.saveButton.clicked.connect(lambda: self.saveData(saveToFile=True))
         self.toTrayButton.clicked.connect(self.hide)
         self.clearAllButton.clicked.connect(
             self.keyListWidgetContents.clearAllEntries)
@@ -318,7 +318,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
         if saveToFile:
             self.bottomStatusBar.showMessage(
-                "Configuration saved to file!", 2000
+                "Configuration saved to file", 2000
             )
         return True
 
@@ -371,7 +371,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 event.ignore()
                 return
             if r == QMessageBox.Yes:
-                self.saveData(True)
+                self.saveData(saveToFile=True)
 
         self.service.quit(False)
         self.service.wait()
