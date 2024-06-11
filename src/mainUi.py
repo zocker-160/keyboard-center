@@ -147,7 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         except NoKeyboardException:
             pass
-        except NoEndpointException:
+        except NoEndpointException as e:
             self.showErrorMSG(
                 "Failed to load keyboard endpoint!",
                 detailText=str(e),
