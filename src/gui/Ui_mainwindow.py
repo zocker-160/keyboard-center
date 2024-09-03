@@ -271,7 +271,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Keyboard Center"))
         self.supportedDevice.setText(_translate("MainWindow", "no supported device found :("))
         self.label_2.setText(_translate("MainWindow", "OpenRGB Profile:"))
         self.openRGBhelp.setToolTip(_translate("MainWindow", "just freaking click it!"))
