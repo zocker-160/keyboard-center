@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import logging
 
 from PyQt5.QtGui import (
@@ -11,10 +9,9 @@ from PyQt5.QtCore import (
     QTimer,
 )
 from PyQt5.QtWidgets import (
-    QDialog,
     QMainWindow,
     QMessageBox,
-    QVBoxLayout,
+    QDialog
 )
 
 from lib.QSingleApplication import QSingleApplication
@@ -23,6 +20,7 @@ from lib import utils
 from gui.tray import TrayIcon
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
+from gui.settingswindow import SettingsWindow
 
 from config import config
 from config.constants import *
@@ -123,6 +121,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def initSlots(self):
         self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
         self.actionOpenLogFolder.triggered.connect(self.openLogFolder)
+        self.actionSettings.triggered.connect(self.showSettings)
         self.actionRestartService.triggered.connect(self.forceRestart)
         self.actionAbout_Qt.triggered.connect(self.app.aboutQt)
         self.actionAbout.triggered.connect(self.showAbout)
@@ -169,16 +168,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.service = None
 
         try:
-            useOpenRGB = self.config.data.settings.useOpenRGB
-            if self.devmode:
-                useOpenRGB = False
-
-            # TODO
-            self.service = BackgroundService(self.config, useOpenRGB)
+            self.service = BackgroundService(self.config, self.devmode)
             self.service.notificationEvent.connect(self.showNotification)
             self.service.notificationIconEvent.connect(self.showNotificationIcon)
             self.service.quitTriggered.connect(self._forcedHealthCheck)
-            #self.service.start()
+            self.service.start()
 
         except NoKeyboardException:
             # TODO
@@ -300,9 +294,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
 
     def loadData(self):
-        self.logger.debug(f"loading {self.currMkey}/{self.currGkey}")
+        self.logger.debug(f"loading {self.currMkey.name} / {self.currGkey.name}")
 
-        self.frame.setEnabled(self.config.data.settings.useOpenRGB)
+        #self.frame.setEnabled(self.config.data.settings.useOpenRGB)
         self.openRGBedit.setText(self.config.data.getRGBprofile(self.currMkey))
 
         self.keyListWidgetContents.clearAllEntries()
@@ -373,9 +367,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tray.showInfo(title, msg)
 
     def showNotificationIcon(self, title: str, msg: str, iconPath: str):
-        if self.disableNotifications.isChecked(): return
-
-        self.tray.showInfoIcon(title, msg, iconPath)
+        if self.config.data.settings.showNotifications:
+            self.tray.showInfoIcon(title, msg, iconPath)
 
     def forceRestart(self):
         try:
@@ -437,8 +430,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
 
     def showSettings(self):
-        # TODO
-        pass
+        settings = SettingsWindow(self, self.config)
+        if settings.exec() == 1:
+            self.config.save()
+
 
     ### other ui stuff
     def activateTrigger(self):

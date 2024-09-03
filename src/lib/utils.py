@@ -7,12 +7,15 @@ from enum import Enum
 
 logger = logging.getLogger("Utils")
 
-def executeCommand(command: str):
+def executeCommand(command: str | list[str]):
     if not command: return
+
+    if isinstance(command, str):
+        command = shlex.split(command)
 
     try:
         subprocess.Popen(
-            shlex.split(command), shell=False, start_new_session=True)
+            command, shell=False, start_new_session=True)
     except Exception as e:
         logger.exception(e)
 

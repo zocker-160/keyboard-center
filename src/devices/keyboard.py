@@ -11,24 +11,24 @@ class KeyboardInterface:
     usbVendor: int
     usbProduct: int
     usbConfiguration: int
-    usbInterface: tuple # tuple[int, int] | (index of interface, index of alternate setting)
+    usbInterface: tuple[int, int] #  (index of interface, index of alternate setting)
     usbEndpoint: int
 
     numMacroKeys: int
     numMemoryKeys: int # number of memory / profile keys
 
-    macroKeys: dict # dict[bytes, str]
-    memoryKeys: dict # dict[bytes, str]
-    mediaKeys: dict # dict[bytes, str] | only in use when in libUSB mode (kernel driver unloaded)
-    releaseEvents: str # str[bytes]
+    macroKeys: dict[bytes, key.Gkey]
+    memoryKeys: dict[bytes, key.Mkey]
+    mediaKeys: dict[bytes, str] # only in use when in libUSB mode (kernel driver unloaded)
+    releaseEvents: list[bytes]
 
     # Following is sent to disable the default G keys mapping
     disableGKeysInterface: int
-    disableGKeys = list() # list[bytes]
+    disableGKeys: list[bytes] = field(default_factory=list)
     disableGKeysUseWrite: bool = field(default=True)
 
     ## optional
-    memoryKeysLEDs = dict() # dict[str, bytes]
+    memoryKeysLEDs: dict[key.Mkey, bytes] = field(default_factory=dict)
 
 @dataclass(frozen=True)
 class Logitech_G910_OrionSpectrum(KeyboardInterface):
@@ -54,7 +54,7 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x11\xff\x08\x00@\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G7,
         b'\x11\xff\x08\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G8,
         b'\x11\xff\x08\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G9,
-        b'\x11\xff\n\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
+        #b'\x11\xff\n\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
     }
 
     memoryKeys = {
@@ -79,12 +79,12 @@ class Logitech_G910_OrionSpectrum(KeyboardInterface):
         b'\x02 ': uinput.KEY_VOLUMEDOWN,
     }
 
-    releaseEvents = {
+    releaseEvents = [
         b'\x11\xff\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # G release
         b'\x02\x00', # media key release
         b'\x11\xff\t\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M release
         b'\x11\xff\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
-    }
+    ]
 
     disableGKeys = [
         b'\x11\xff\x10>\x00\x04\x00\x00\x00\x00\x00\x00\xd0\x01d\x07\x00\x00\x00\x00', # keyboard reset
@@ -120,7 +120,7 @@ class Logitech_G710p(KeyboardInterface):
         b'\x03\x08\x00\x00': key.Gkey.G4,
         b'\x03\x10\x00\x00': key.Gkey.G5,
         b'\x03\x20\x00\x00': key.Gkey.G6,
-        b'\x03\x00\x80\x00': key.MediaKeys.MEMORY_RECORD,
+        #b'\x03\x00\x80\x00': key.MediaKeys.MEMORY_RECORD,
     }
 
     memoryKeys = {
@@ -145,12 +145,12 @@ class Logitech_G710p(KeyboardInterface):
         b'\x02\x20': uinput.KEY_VOLUMEDOWN,
     }
 
-    releaseEvents = {
+    releaseEvents = [
         b'\x03\x00\x00\x00', # G release
         b'\x02\x00', # media key release
         b'\x03\x00\x00\x00', # M release
         b'\x03\x00\x00\x00', # MR release
-    }
+    ]
 
     disableGKeys = [b'\x09\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00']
     disableGKeysInterface = 1
@@ -189,7 +189,7 @@ class Logitech_G510(KeyboardInterface):
         b'\x03\x00\x80\x00\x00': key.Gkey.G16,
         b'\x03\x00\x00\x01\x00': key.Gkey.G17,
         b'\x03\x00\x00\x02\x00': key.Gkey.G18,
-        b'\x03\x00\x00\x80\x00': key.MediaKeys.MEMORY_RECORD
+        #b'\x03\x00\x00\x80\x00': key.MediaKeys.MEMORY_RECORD
     }
 
     memoryKeys = {
@@ -249,7 +249,7 @@ class Logitech_G815(KeyboardInterface):
         b'\x11\xff\n\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G3,
         b'\x11\xff\n\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G4,
         b'\x11\xff\n\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G5,
-        b'\x11\xff\x0c\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
+        #b'\x11\xff\x0c\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
     }
 
     memoryKeys = {
@@ -274,12 +274,12 @@ class Logitech_G815(KeyboardInterface):
         b'\x03\x40': uinput.KEY_MUTE,
     }
 
-    releaseEvents = {
+    releaseEvents = [
         b'\x11\xff\n\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # G release
         b'\x03\x00', # media key release
         b'\x11\xff\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M release
         b'\x11\xff\x0c\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # MR release
-    }
+    ]
 
     disableGKeys = [
         # switch from keyboard memory mode to client mode - disables everything but the "normal" keys
@@ -309,7 +309,7 @@ class Logitech_G915(Logitech_G815):
         b'\x02\x04\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G3,
         b'\x02\x08\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G4,
         b'\x02\x10\x00\x00\x00\x00\x00\x00\x00': key.Gkey.G5,
-        b'\x11\x01\x0c\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
+        #b'\x11\x01\x0c\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00': key.MediaKeys.MEMORY_RECORD,
     }
 
     memoryKeys = {
@@ -324,9 +324,9 @@ class Logitech_G915(Logitech_G815):
         key.Mkey.M3: b'\x11\x01\x0b\x1a\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # M3 LED
     }
 
-    releaseEvents = {
+    releaseEvents = [
         b'\x02\x00\x00\x00\x00\x00\x00\x00\x00', # G release
-    }
+    ]
 
     disableGKeys = [
         b'\x11\x01\x11\x1a\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 
@@ -368,10 +368,10 @@ class Logitech_G935(KeyboardInterface):
         b'\x08 ': uinput.KEY_MICMUTE, # is actually "unmute", so could cause issues later
     }
 
-    releaseEvents = {
+    releaseEvents = [
         b'\x11\xff\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', # G release
         b'\x08\x00', # media key release - just a guess based on the data from "mediaKeys"
-    }
+    ]
 
     disableGKeys = [
         b'\x11\xff\x05\x2a\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',

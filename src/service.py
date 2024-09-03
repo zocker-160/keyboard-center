@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import os
 import time
 import signal
@@ -13,31 +11,20 @@ from threading import Event, Thread
 import uinput
 from usb import core
 
-from lib.configparser import *
-from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 import lib.hid as hid
-
+from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 from lib.openrgb.orgb import OpenRGBClient
 
+from lib import utils
+from config import config
+
+from devices.allkeys import ALL_KNOWN_KEYS, Mkey, Gkey
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
-from devices.allkeys import *
-from lib.servicehelper import executeCommand
 
-currProfile = MEMORY_1
-client = None
-openRGBProcess = None
 
-RETRY_COUNT = 5
-RETRY_TIMEOUT = 5 # in seconds
-USB_TIMEOUT = 1000 # in milliseconds
-USB_SEND_WAIT = 0.2 # in seconds
-
-APP_NAME = "Keyboard Center Service"
+APP_NAME = "Keyboard-Center service"
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_LOCATION = os.path.join(
-    PARENT_LOCATION, "config", "testconfig-example.yaml"
-)
 ICON_LOCATION = os.path.join(
     PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
 )
@@ -71,21 +58,23 @@ class BackgroundService(QThread):
     stopEvent = Event()
     keyReleasedEvent = Event()
 
-    def __init__(self, config: Configparser, useOpenRGB=True):
+    def __init__(self, config: config.ConfigLoader, devmode=False):
         super().__init__()
         self.logger = logging.getLogger("BGService")
         self.rgbLogger = logging.getLogger("RGB Thread")
 
         self.config = config
-        self.currProfile = MEMORY_1
-        self.useOpenRGB = useOpenRGB
+        self.devmode = devmode
+        self.retryCount = self.config.data.settings.retryCount
+        self.retryTimeout = self.config.data.settings.retryTimeout
+        self.currProfile = Mkey.M1
 
-        self.logger.info("setting up service...")
-        self.logger.info("searching for supported keyboard...")
+        self.logger.info("setting up service")
+        self.logger.debug("searching for supported keyboard")
         self._initKeyboard()
 
-    def _initKeyboard(self, retry=RETRY_COUNT):
-        if retry <= 0:
+    def _initKeyboard(self, retryCount=0):
+        if retryCount >= self.config.data.settings.retryCount:
             raise NoKeyboardException()
 
         tStart = time.time()
@@ -96,38 +85,38 @@ class BackgroundService(QThread):
             if keyboard:
                 self.logger.info(f"keyboard found: {device.devicename}")
 
-                self.config.setAndSaveDeviceID(i)
-
+                self.config.data.settings.usbDeviceID = i
                 self.keyboardDev = device
                 break
 
         if not keyboard:
-            if retry == RETRY_COUNT:
+            if retryCount == 0:
                 self.logger.critical("no supported keyboard found, retrying...")
-                self.config.setAndSaveDeviceID("None")
+                self.config.data.settings.usbDeviceID = 0
                 self.waitingForKeyboardEvent.emit()
 
-            time.sleep(1)
-            return self._initKeyboard(retry-1)
-
-        self.keyboard = keyboard
+            time.sleep(self.retryTimeout)
+            return self._initKeyboard(retryCount + 1)
 
         tEnd = time.time()
         self.logger.debug(f"time taken to find keyboard in ms: {(tEnd-tStart)*1000}")
 
-        self.logger.debug("requesting USB endpoint...")
+        self.keyboard = keyboard
+        self.config.save()
+
+        self.logger.debug("requesting USB endpoint")
         self.keyboardEndpoint: core.Endpoint = self.keyboard\
                                             [self.keyboardDev.usbConfiguration]\
                                             [self.keyboardDev.usbInterface]\
                                             [self.keyboardDev.usbEndpoint]
 
-        self.logger.debug("Searching for HID endpoints...")
+        self.logger.debug("searching for HID endpoints")
         self._getHIDpaths()
-        
+
         self.logger.debug("creating uinput device")
         self.virtualKeyboard = uinput.Device(
             ALL_KNOWN_KEYS,
-            name=self.keyboardDev.devicename+" (keyboard-center)",
+            name=f"{self.keyboardDev.devicename} (keyboard-center)",
             vendor=self.keyboardDev.usbVendor
         )
 
@@ -151,26 +140,25 @@ class BackgroundService(QThread):
         def __HIDavailable(HIDpath: bytes, tries: int) -> bool:
             try:
                 with HIDDevice(path=HIDpath) as _:
-                    self.logger.debug(f"Connected to {HIDpath.decode()}")
+                    self.logger.debug(f"connected to {HIDpath.decode()}")
                 return True
             except HIDFailedToOpenException:
                 if tries <= 0:
                     return False
                 else:
-                    self.logger.warning("Could not open HID device, retrying...")
-                    time.sleep(RETRY_TIMEOUT)
+                    self.logger.warning("could not open HID device, retrying")
+                    time.sleep(self.retryTimeout)
                     return __HIDavailable(HIDpath, tries-1)
 
         if not HIDpath or not HIDpath_disable:
             raise NoEndpointException()
 
-        self.logger.debug("Checking for HID availability...")
-        numTries = self.config.getSettings().get("retryCount") or RETRY_COUNT
-        
-        if not __HIDavailable(HIDpath, numTries):
-            raise HIDFailedToOpenException(f"Unable to open device {HIDpath.decode()}")
-        if HIDpath != HIDpath_disable and not __HIDavailable(HIDpath_disable, numTries):
-            raise HIDFailedToOpenException(f"Unable to open device {HIDpath_disable.decode()}")
+        self.logger.debug("checking for HID availability")
+
+        if not __HIDavailable(HIDpath, self.retryCount):
+            raise HIDFailedToOpenException(f"unable to open device {HIDpath.decode()}")
+        if HIDpath != HIDpath_disable and not __HIDavailable(HIDpath_disable, self.retryCount):
+            raise HIDFailedToOpenException(f"unable to open device {HIDpath_disable.decode()}")
 
         self.HIDpath = HIDpath
         self.HIDpath_write = HIDpath_disable
@@ -178,9 +166,10 @@ class BackgroundService(QThread):
     ##
 
     def _setOpenRGBProfile(self, retry: int, first: bool):
-        if not self.useOpenRGB: return
+        if not self.config.data.settings.useOpenRGB or self.devmode:
+            return
 
-        orgb = self.config.getOpenRGB().get(self.currProfile)
+        orgb = self.config.data.getRGBprofile(self.currProfile)
         if not orgb: return
 
         try:
@@ -188,28 +177,31 @@ class BackgroundService(QThread):
 
             if first and not self.rgbClient:
                 self.rgbClient = OpenRGBClient()
-                self.rgbClient.load_profile(orgb) # we need to run this first, in case the profile does not exist
                 self.rgbClient.clear() # we need to clear because sometimes load_profile just does not fucking work
                 time.sleep(0.5) # we need to wait a moment after clear
 
-            self.rgbClient.load_profile(orgb)
+            try:
+                print(self.rgbClient.profiles)
+                self.rgbClient.load_profile(orgb)
+            except ValueError:
+                self.rgbLogger.warning(f"openRGB profile {orgb} does not exist")
 
         except ConnectionRefusedError:
             if retry <= 0 or not first or not shutil.which("openrgb"):
                 self.rgbLogger.debug("giving up reaching OpenRGB SDK")
                 return
 
-            if retry == RETRY_COUNT:
+            if retry >= self.config.data.settings.retryCount:
                 self.openRGBProcess = subprocess.Popen(["openrgb", "--server"], shell=False)
 
             self.rgbLogger.debug("could not reach OpenRGB SDK, retrying...")
-            time.sleep(RETRY_TIMEOUT)
+            time.sleep(self.config.data.settings.retryTimeout)
             self._setOpenRGBProfile(retry-1, first)
 
         except ValueError as e:
             self.rgbLogger.exception(e)
 
-    def _switchProfile(self, profile: str, first=False):
+    def _switchProfile(self, profile: Mkey, first=False):
         self.currProfile = profile
 
         # switch Mkey LED
@@ -222,12 +214,11 @@ class BackgroundService(QThread):
         # set openRGB profile
         Thread(
             target=self._setOpenRGBProfile,
-            args=(RETRY_COUNT, first), daemon=True
+            args=(self.config.data.settings.retryCount, first), daemon=True
         ).start()
 
         path = os.path.join(
             PARENT_LOCATION, "assets", f"{profile}.png")
-
         self.notificationIconEvent.emit(
             f"Switched to profile {profile}", "", path)
 
@@ -242,73 +233,79 @@ class BackgroundService(QThread):
         with HIDDevice(path=self.HIDpath_write) as hdev:
             for data in self.keyboardDev.disableGKeys:
                 self._sendData(hdev, data)
-                time.sleep(USB_SEND_WAIT)
+                time.sleep(self.config.data.settings.usbSendDelay)
 
-    def _emitKeys(self, key):
+    def _emitKeys(self, key: Gkey):
         """ 
         Function that emits the requested keys
-
-        this function can be blocking
+        should be run in a separate thread
         """
-        self.logger.debug(f"{key} pressed")
+        self.logger.debug(f"{self.currProfile.name} / {key.name} pressed")
 
-        if isinstance(key, str):
-            type, data, gamemode = self.config.getKey(self.currProfile, key)
-        else: # key is uinput
-            type, data, gamemode = TYPE_KEY, key, False
+        entry: config.Entry = self.config.data.getEntry(self.currProfile, key)
+        if not entry:
+            return
 
-        if type == TYPE_KEY and data:
-            self.virtualKeyboard.emit(data, 1)
-
-            self.keyReleasedEvent.wait()
-            self.keyReleasedEvent.clear()
-
-            self.virtualKeyboard.emit(data, 0)
-
-        elif type == TYPE_COMMAND and data:
-            executeCommand(data)
-
-        elif type == TYPE_COMBO and data:
-            self._executeCombo(data, gamemode)
-
-        elif type == TYPE_MACRO and data:
-            print(data)
-            # Macros are ignoring gamemode and key release events
-            # since users can specify their own delay, so it should just
-            # "play" whatever keys the user wants independent from
-            # any other input or delay
-            # anything else would not make sense RIGHT????
-            self._executeMacro(data)
-
-    def _executeCombo(self, combo: list, gamemode=0):
-        for i, c in enumerate(combo):
-            self.virtualKeyboard.emit(c, 1, i == len(combo)-1)
-
-        if gamemode > 1:
-            time.sleep(gamemode / 1000)
-        else:
-            self.keyReleasedEvent.wait()
-            self.keyReleasedEvent.clear()
-
-        for i, c in enumerate(combo):
-            self.virtualKeyboard.emit(c, 0, i == len(combo)-1)
-
-    def _executeMacro(self, macro: list):
-        for action in macro:
-            if len(action) == 1:
-                if action[0][0] == TYPE_CLICK:
-                    self.virtualKeyboard.emit_click(action[0])
-
-                elif action[0][0] == TYPE_DELAY:
-                    time.sleep(action[0][1] / 1000)
-                
-                elif action[0][0] == TYPE_COMMAND:
-                    executeCommand(action[0][1])
-
-            elif all([ x[0] == TYPE_CLICK for x in action ]):
-                self.virtualKeyboard.emit_combo(action)
+        if entry.type == config.EntryType.UI and isinstance(entry.values, list):
+            nval = len(entry.values)
+            if nval == 0:
+                return
+            elif nval == 1:
+                self._emitSingle(entry.values[0], wait=True)
             else:
-                self.logger.error(f"unknown keyboard action....{action}")
+                for value in entry.values:
+                    self._emitSingle(value, wait=False)
+                    time.sleep(entry.gamemode)
+
+        elif entry.type == config.EntryType.SCRIPT:
+            # TODO
+            pass
+
+    def _emitSingle(self, value: config.Value, wait: bool):
+        if isinstance(value, config.KeyValue):
+            self._emitModifiers(value, 1)
+            self.virtualKeyboard.emit((1, value.keycode), 1, syn=False)
+            self.virtualKeyboard.syn()
+
+            if wait:
+                self.keyReleasedEvent.wait()
+                self.keyReleasedEvent.clear()
+
+            self._emitModifiers(value, 0)
+            self.virtualKeyboard.emit((1, value.keycode), 0, syn=False)
+            self.virtualKeyboard.syn()
+
+        elif isinstance(value, config.DelayValue):
+            time.sleep(value.delay / 1000)
+
+        elif isinstance(value, config.CommandValue):
+            utils.executeCommand(value.command)
+
+    def _emitModifiers(self, keyValue: config.KeyValue, value: int):
+        btnFlags = keyValue.modFlags
+        if isinstance(btnFlags, int):
+            btnFlags = config.Modifiers(btnFlags)
+
+        if not btnFlags.isSet():
+            return
+
+        if config.Modifiers.CTRL in btnFlags:
+            self.virtualKeyboard.emit(uinput.KEY_LEFTCTRL, value, syn=False)
+
+        if config.Modifiers.ALT in btnFlags:
+            self.virtualKeyboard.emit(uinput.KEY_LEFTALT, value, syn=False)
+
+        if config.Modifiers.ALTGR in btnFlags:
+            self.virtualKeyboard.emit(uinput.KEY_RIGHTALT, value, syn=False)
+
+        if config.Modifiers.SHIFT in btnFlags:
+            self.virtualKeyboard.emit(uinput.KEY_LEFTSHIFT, value, syn=False)
+
+        if config.Modifiers.META in btnFlags:
+            self.virtualKeyboard.emit(uinput.KEY_LEFTMETA, value, syn=False)
+
+        if config.Modifiers.CUSTOM in btnFlags:
+            self.virtualKeyboard.emit((1, keyValue.customKeycode), value, syn=False)
 
     def _handleRawData(self, fromKeyboard: bytes):
 
@@ -341,21 +338,20 @@ class BackgroundService(QThread):
         self.logger.info("Starting service loop")
         self.stopEvent.clear()
         
-        _usbTimeout: int = self.config.getSettings().get("usbTimeout") or USB_TIMEOUT
+        usbTimeout = self.config.data.settings.usbTimeout
 
         if self.keyboardDev.disableGKeys:
             self._disableGkeyMapping()
 
         with HIDDevice(path=self.HIDpath) as hdev:
             hdev.nonblocking = True
-
-            self._switchProfile(self.currProfile, True)
+            self._switchProfile(self.currProfile, first=True)
 
             errorCount = 0
             while not self.stopEvent.isSet():
                 try:
                     fromKeyboard = hdev.read(
-                        self.keyboardEndpoint.wMaxPacketSize, _usbTimeout)
+                        self.keyboardEndpoint.wMaxPacketSize, usbTimeout)
 
                     if fromKeyboard:
                         self._handleRawData(bytes(fromKeyboard))
@@ -376,11 +372,12 @@ class BackgroundService(QThread):
         self.logger.debug("Thread stop triggered")
         self.stopEvent.set()
 
-        try:
-            self.virtualKeyboard.destroy()
-        except OSError:
-            # this gets thrown when keyboard is unplugged
-            pass
+        if self.virtualKeyboard:
+            try:
+                self.virtualKeyboard.destroy()
+            except OSError:
+                # this gets thrown when keyboard is unplugged
+                pass
 
         if self.rgbClient: self.rgbClient.disconnect()
         if self.openRGBProcess:
