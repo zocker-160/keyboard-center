@@ -111,6 +111,11 @@ class Ui_MainWindow(object):
         self.macroKeys = QtWidgets.QWidget()
         self.macroKeys.setGeometry(QtCore.QRect(0, 0, 83, 437))
         self.macroKeys.setObjectName("macroKeys")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.macroKeys)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.macroKeySlots = QtWidgets.QVBoxLayout()
+        self.macroKeySlots.setObjectName("macroKeySlots")
+        self.verticalLayout_2.addLayout(self.macroKeySlots)
         self.scrollArea.setWidget(self.macroKeys)
         self.horizontalLayout_2.addWidget(self.scrollArea)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
@@ -306,4 +311,3 @@ class Ui_MainWindow(object):
         self.actionRestartService.setToolTip(_translate("MainWindow", "check status of the background service"))
         self.actionOpenLogFolder.setText(_translate("MainWindow", "Open log folder"))
 from gui.customwidgets import CListWidgetContent
-from . import ressources_rc

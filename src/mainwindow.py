@@ -17,18 +17,19 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
-from devices.allkeys import ALL_MEMORY_KEYS, ALL_MACRO_KEYS
 from lib.QSingleApplication import QSingleApplication
-from lib.configparser import Configparser
-from lib.servicehelper import *
+from lib import utils
 
 from gui.tray import TrayIcon
-from gui.CEntryButton import CEntryButton
-from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget
 from gui.Ui_mainwindow import Ui_MainWindow
+from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
 
-from constants import *
+from config import config
+from config.constants import *
+
+from devices.allkeys import Mkey, Gkey
+from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
+
 from service import BackgroundService, NoKeyboardException, NoEndpointException
 
 PLACEHOLDER_STR = "$$$"
@@ -36,6 +37,10 @@ PLACEHOLDER_STR = "$$$"
 class MainWindow(QMainWindow, Ui_MainWindow):
 
     service: BackgroundService = None
+    usbDevice: KeyboardInterface = None
+    
+    currMkey: Mkey = Mkey.M1
+    currGkey: Gkey = Gkey.G1
 
     def __init__(self, 
             app: QSingleApplication, 
@@ -43,50 +48,79 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.app = app
         self.devmode = devmode
-        self.logger = logging.getLogger("QT")
+        self.logger = logging.getLogger("GUI")
 
         self.app.onActivate.connect(self.activateTrigger)
 
         self.healthCheck = QTimer(self)
         self.healthCheck.timeout.connect(self._serviceHealthCheck)
 
-        #if not devmode: self.checkServiceStatus(manual=False)
-        self.configparser = self.getConfiguration()
-        self.initBackgroundService()
+        self.config = self.loadConfiguration()
+        
+        self.initBackgroundService() # TODO
+        self.initUsbDevice()
 
         self.icon = QIcon(":/icons/assets/input-keyboard-virtual.png")
         self.tray = TrayIcon(self, self.icon, trayVisible)
 
-        self.setupUi()
-        self.setupSlots()
+        self.initUI()
+        self.initSlots()
 
         # workaround for weird KDE bug where spinner keeps running
         # in task bar despite app being long started
         # by calling show() we make sure the spinner stops
         # and then we hide() afterwards when needed
         self.show()
-        self.center()
-        if not self.devmode and self.configparser.getMinimizeOnStart():
+        if not self.devmode and self.config.data.settings.minimizeOnStart:
             self.hide()
 
-    def setupUi(self):
-        self.logger.debug("setting up GUI...")
-        super().setupUi(self)
-        # TODO: why the fuck is this not in the layout??
-        self.macroKeySlots = QVBoxLayout(self.macroKeys)
-
+    def initUI(self):
+        self.logger.debug("setting up GUI")
+        self.setupUi(self)
         self.setWindowIcon(self.icon)
+        self.initProfileButtons()
 
-        #self.generateProfileButtons()
-        self.loadConfiguration()
-        
-        #self.tray.messageClicked.connect(lambda: print("MESSAGE CLICKED"))
-        #self.tray.showMessage("TITLE", "MESSAGE", QSystemTrayIcon.Warning, 10000)
+    def initProfileButtons(self):
+        for i in range(self.usbDevice.numMemoryKeys):
+            key = Mkey(i+1) # Mkey count starts at 1
 
-        #self.icon = QIcon()
-        #self.icon.addPixmap(QPixmap(":/icons/assets/input-keyboard-virtual.png"), QIcon.Normal, QIcon.Off)
+            btn = CEntryButton(self, key, vert=False)
+            btn.onSelection.connect(self.setCurrMkey)
 
-    def setupSlots(self):
+            self.memoryKeySlots.addWidget(btn)
+
+        for y in range(self.usbDevice.numMacroKeys):
+            key = Gkey(y+1) # Gkey count starts at 1
+
+            btn = CEntryButton(self, key, vert=True)
+            btn.onSelection.connect(self.setCurrGkey)
+
+            self.macroKeySlots.addWidget(btn)
+
+        # set device name
+        self.supportedDevice.setText(self.usbDevice.devicename)
+
+        # enable buttons
+        self.saveButton.setEnabled(True)
+        self.resetButton.setEnabled(True)
+
+        self.updateProfileButtons()
+        self.loadData()
+
+    def updateProfileButtons(self):
+        for i in range(self.memoryKeySlots.count()):
+            w = self.memoryKeySlots.itemAt(i).widget()
+
+            if isinstance(w, CEntryButton):
+                w.setChecked(self.currMkey == w.key)
+
+        for i in range(self.macroKeySlots.count()):
+            w = self.macroKeySlots.itemAt(i).widget()
+
+            if isinstance(w, CEntryButton):
+                w.setChecked(self.currGkey == w.key)
+
+    def initSlots(self):
         self.actionOpenConfigFolder.triggered.connect(self.openConfigFolder)
         self.actionOpenLogFolder.triggered.connect(self.openLogFolder)
         self.actionRestartService.triggered.connect(self.forceRestart)
@@ -114,38 +148,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tray.restartAction.triggered.connect(self.forceRestart)
         self.tray.exitAction.triggered.connect(self.close)
 
-    def getConfiguration(self):
+    def loadConfiguration(self) -> config.ConfigLoader:
         try:
-            configparser = Configparser(TEMPLATE_LOCATION, silent=False)
+            cl = config.ConfigLoader()
+            cl.load()
+            return cl
         except Exception as e:
             self.showErrorMSG(
-                "Could not load config file! \n\n",
+                "Failed to load configuration file! \n\n",
                 detailText=str(e),
                 title_msg="FATAL ERROR"
             )
             raise
 
-        return configparser
-
     def initBackgroundService(self):
         if self.service:
-            self.logger.debug("deleting BGService")
+            self.logger.debug("waiting for BGService")
             self.service.wait()
             self.service.deleteLater()
             self.service = None
 
         try:
-            useOpenRGB = self.configparser.getUseOpenRGB()
+            useOpenRGB = self.config.data.settings.useOpenRGB
             if self.devmode:
                 useOpenRGB = False
 
-            self.service = BackgroundService(self.configparser, useOpenRGB)
+            # TODO
+            self.service = BackgroundService(self.config, useOpenRGB)
             self.service.notificationEvent.connect(self.showNotification)
             self.service.notificationIconEvent.connect(self.showNotificationIcon)
             self.service.quitTriggered.connect(self._forcedHealthCheck)
-            self.service.start()
+            #self.service.start()
 
         except NoKeyboardException:
+            # TODO
             pass
         except NoEndpointException as e:
             self.showErrorMSG(
@@ -163,8 +199,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
             raise
 
-        self.logger.debug("start health check...")
-        self.healthCheck.start(1000 * 10) # every 10 seconds
+        #self.logger.debug("starting health check")
+        #self.healthCheck.start(1000 * 10) # every 10 seconds
+
+    def initUsbDevice(self):
+        try:
+            self.usbDevice = SUPPORTED_DEVICES[self.config.data.settings.usbDeviceID]
+        except Exception as e:
+            self.showErrorMSG(
+                f"Error during loading of keyboard config! \n\n",
+                detailText=f"err:({str(e)})",
+                title_msg="FATAL ERROR")
+            raise
+
+    def setCurrMkey(self, key: Mkey, save=True):
+        if save and not self.saveData():
+            return
+        
+        self.currMkey = key
+        self.updateProfileButtons()
+        self.loadData()
+
+    def setCurrGkey(self, key: Gkey, save=True):
+        if save and not self.saveData():
+            return
+
+        self.currGkey = key
+        self.updateProfileButtons()
+        self.loadData()
 
     def _forcedHealthCheck(self):
         try:
@@ -181,23 +243,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.logger.debug("restarting service...")
             self.initBackgroundService()
             self.resetProfileButtons()
-            self.loadConfiguration()
+            self.loadConfiguration_renameME()
 
-    def loadConfiguration(self):
-        try:
-            self.configparser.load(True)
-            _did = self.configparser.getDeviceID()
-            self.usbDevice: KeyboardInterface = SUPPORTED_DEVICES[_did]
-        except TypeError:
-            return
-        except Exception as e:
-            self.showErrorMSG(
-                f"Error during loading of keyboard config! \n\n",
-                detailText=f"err:({str(e)})",
-                title_msg="FATAL ERROR")
-            raise
-
-        self.generateProfileButtons()
 
     def resetProfileButtons(self):
         self.supportedDevice.setText("no supported device found :(")
@@ -214,148 +261,71 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if w := child.widget():
                 w.deleteLater()
 
-    def generateProfileButtons(self):
-        # generate buttons
-        for i in range(self.usbDevice.numMemoryKeys):
-            btn = CEntryButton(
-                name=f"M{i+1}",
-                position=i,
-                parent=self)
-            btn.onSelection.connect(self.setCurrMemory)
-            self.memoryKeySlots.addWidget(btn)
-        #else:
-        #    # this is needed to move all the buttons to the left
-        #    self.memoryKeySlots.addSpacerItem(QSpacerItem(
-        #        40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-
-        for y in range(self.usbDevice.numMacroKeys):
-            btn = CEntryButton(
-                name=f"G{y+1}",
-                position=y,
-                parent=self,
-                vert=True)
-            btn.onSelection.connect(self.setCurrMacro)
-            self.macroKeySlots.addWidget(btn)
-    
-        self.setCurrMemory(0, save=False, load=False)
-        self.setCurrMacro(0, save=False)
-
-        # set device name
-        self.supportedDevice.setText(self.usbDevice.devicename)
-
-        # enable buttons
-        self.saveButton.setEnabled(True)
-        self.resetButton.setEnabled(True)
-
-    def setCurrMemory(self, id: int, save=True, load=True):
-        if save: self.saveData()
-
-        def __setMarked(item, value: bool):
-            if item:
-                item.setChecked(value)
-            
-        self.currMemory = id
-        for i in range(self.memoryKeySlots.count()):
-            if i == id:
-                __setMarked(self.memoryKeySlots.itemAt(i).widget(), True)
-            else:
-                __setMarked(self.memoryKeySlots.itemAt(i).widget(), False)
-
-        if load: self.loadData()
-
-    def setCurrMacro(self, id: int, save=True, load=True):
-        # don't switch currMacro when saving fails
-        if save and not self.saveData():
-            id = self.currMacro
-            load = False
-
-        self.currMacro = id
-        for i in range(self.macroKeySlots.count()):
-            if i == id:
-                self.macroKeySlots.itemAt(i).widget().setChecked(True)
-            else:
-                self.macroKeySlots.itemAt(i).widget().setChecked(False)
-
-        if load: self.loadData()
 
     def addBlankKeyWidget(self):
-        self.keyListWidgetContents.addWidget(KeyPressWidget())
+        self.keyListWidgetContents.addWidget(KeyPressWidget(self))
 
     def addBlankDelayWidget(self):
-        self.keyListWidgetContents.addWidget(DelayWidget())
+        self.keyListWidgetContents.addWidget(DelayWidget(self))
 
     def addBlankCommandWidget(self):
-        self.keyListWidgetContents.addWidget(CommandWidget())
+        self.keyListWidgetContents.addWidget(CommandWidget(self))
 
-    def saveData(self, saveToFile=False):
-        self.logger.info("saving")
+    def saveData(self, saveToFile=False) -> bool:
+        self.logger.debug("saving")
+
         try:
-            data = self.keyListWidgetContents.getKeyData()
-            if data:
-                data.name = self.macroNameEdit.text()
-                if self.gameMode.isChecked():
-                    data.gamemode = self.gameModeTime.value()
-                else:
-                    data.gamemode = 0
-            print(data)
-            self.configparser.saveFromGui(
-                profile=ALL_MEMORY_KEYS[self.currMemory],
-                macroKey=ALL_MACRO_KEYS[self.currMacro],
-                orgb=self.openRGBedit.text(),
-                data=data,
-                notifications= not self.disableNotifications.isChecked(),
-                minOnStart=self.minimizeOnStart.isChecked(),
-                useOpenRGB=self.useOpenRGB.isChecked(),
-                bSavetoFile=saveToFile
-            )
-        except Exception as e:
+            self.config.data.setRGBprofile(self.currMkey, self.openRGBedit.text())
+            self.config.data.setEntry(self.currMkey, self.currGkey, config.Entry(
+                name=self.macroNameEdit.text(),
+                type=config.EntryType.UI,
+                gamemode=self.gameModeTime.value() if self.gameMode.isChecked() else 0,
+                values=self.keyListWidgetContents.getData()
+            ))
+
+            if saveToFile:
+                self.logger.info("saving to disk")
+                self.config.save()
+                self.bottomStatusBar.showMessage(
+                    "Configuration saved to file", 2000)
+
+            return True
+
+        except ValueError as e:
             self.showErrorMSG(str(e))
             return False
-        if saveToFile:
-            self.bottomStatusBar.showMessage(
-                "Configuration saved to file", 2000
-            )
-        return True
+        except Exception as e:
+            self.showErrorMSG(str(e)) # TODO create better error message
+            self.logger.exception(e)
+            return False
 
     def loadData(self):
-        print("loading", self.currMemory, self.currMacro)
-        d, orgb = self.configparser.loadForGui(
-            ALL_MEMORY_KEYS[self.currMemory],
-            ALL_MACRO_KEYS[self.currMacro]
-        )
+        self.logger.debug(f"loading {self.currMkey}/{self.currGkey}")
 
-        try:
-            self.keyListWidgetContents.setKeyData(d)
-        except TypeError:
-            self.bottomStatusBar.showMessage("loading failed: ignoring...")
-        except Exception as e:
-            self.logger.exception(e)
-            self.showErrorMSG(str(e))
-        
-        if d:
-            #print("AAAAA", d, d.name, orgb)
-            self.macroNameEdit.setText(d.name)
+        self.frame.setEnabled(self.config.data.settings.useOpenRGB)
+        self.openRGBedit.setText(self.config.data.getRGBprofile(self.currMkey))
 
-            if d.gamemode > 1:
+        self.keyListWidgetContents.clearAllEntries()
+        entry = self.config.data.getEntry(self.currMkey, self.currGkey)
+        if entry:
+            self.macroNameEdit.setText(entry.name)
+            if entry.gamemode > 1:
                 self.gameMode.setChecked(True)
                 self.gameModeTime.setEnabled(True)
-                self.gameModeTime.setValue(d.gamemode)
+                self.gameModeTime.setValue(entry.gamemode)
             else:
                 self.gameMode.setChecked(False)
                 self.gameModeTime.setDisabled(True)
+
+            if entry.type == config.EntryType.UI:
+                self.keyListWidgetContents.setData(entry.values)
+            else:
+                # TODO
+                pass
         else:
             self.macroNameEdit.setText("")
             self.gameMode.setChecked(False)
             self.gameModeTime.setDisabled(True)
-        
-        self.openRGBedit.setText(orgb)
-
-        self.disableNotifications.setChecked(not self.configparser.getShowNotifications())
-        self.minimizeOnStart.setChecked(self.configparser.getMinimizeOnStart())
-
-        orgb = self.configparser.getUseOpenRGB()
-        self.useOpenRGB.setChecked(orgb)
-        self.frame.setEnabled(orgb)
 
     ### function overloading
     def keyPressEvent(self, a0: QKeyEvent):
@@ -382,19 +352,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     ### actions
     def openConfigFolder(self):
-        openUrl(self.configparser.configFolder)
+        utils.openUrl(self.config.configFolder)
 
     def openLogFolder(self):
-        openUrl(Configparser.getLogFolder())
+        utils.openUrl(utils.getLogFolder())
 
     def showGitHub(self):
-        openUrl("https://github.com/zocker-160/keyboard-center")
+        utils.openUrl("https://github.com/zocker-160/keyboard-center")
 
     def showReportIssue(self):
-        openUrl("https://github.com/zocker-160/keyboard-center/issues")
+        utils.openUrl("https://github.com/zocker-160/keyboard-center/issues")
 
     def showOpenRGBsetup(self):
-        openUrl("https://github.com/zocker-160/keyboard-center#setup-openrgb-integration")
+        utils.openUrl("https://github.com/zocker-160/keyboard-center#setup-openrgb-integration")
 
     def showNotification(self, title: str, msg: str, urgent: bool):
         if urgent:
@@ -471,12 +441,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pass
 
     ### other ui stuff
-    def center(self):
-        qr = self.frameGeometry()
-        qr.moveCenter(
-            self.app.primaryScreen().availableGeometry().center())
-        self.move(qr.topLeft())
-
     def activateTrigger(self):
         self.logger.debug("window activation from secondary instance triggered")
 

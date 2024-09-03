@@ -1,5 +1,104 @@
 import uinput
-from PyQt5.QtCore import Qt
+
+from enum import Enum, IntEnum, auto
+# TODO: replace all with StrEnum for Python >=3.12
+
+class Numpad(Enum):
+    KP0 = 82
+    KP1 = 79
+    KP2 = 80
+    KP3 = 81
+    KP4 = 75
+    KP5 = 76
+    KP6 = 77
+    KP7 = 71
+    KP8 = 72
+    KP9 = 73
+
+    NUMLOCK = 69
+    DIVIDE = 98
+    MULTIPLY = 55
+    MINUS = 74
+    PLUS = 78
+    ENTER = 96
+    COMMMA = 83
+
+class Modifiers(Enum):
+    L_CTRL = 29
+    R_CTRL = 97
+    L_SHIFT = 42
+    R_SHIFT = 54
+    L_ALT = 56
+    R_ALT = 100
+    L_META = 125
+    R_META = 126
+    CAPSLOCK = 58
+    MENU = 127
+
+
+class Mkey(IntEnum):
+    M1 = 1
+    M2 = 2
+    M3 = 3
+    M4 = 4
+
+class Gkey(IntEnum):
+    G1 = 1
+    G2 = 2
+    G3 = 3
+    G4 = 4
+    G5 = 5
+    G6 = 6
+    G7 = 7
+    G8 = 8
+    G9 = 9
+    G10 = 10
+    G11 = 11
+    G12 = 12
+    G13 = 13
+    G14 = 14
+    G15 = 15
+    G16 = 16
+    G17 = 17
+    G18 = 18
+    G19 = 19
+    G20 = 20
+    G21 = 21
+    G22 = 22
+    G23 = 23
+    G24 = 24
+    G25 = 25
+    G26 = 26
+    G27 = 27
+    G28 = 28
+    G29 = 29
+    G30 = 30
+
+class MediaKeys(Enum):
+    MEMORY_RECORD = auto()
+
+    MEDIA_PLAY_PAUSE = auto()
+    MEDIA_PLAY = auto()
+    MEDIA_STOP = auto()
+    MEDIA_SELECT = auto()
+
+    MEDIA_PREVIOUS = auto()
+    MEDIA_NEXT = auto()
+
+    MEDIA_REWIND = auto()
+    MEDIA_FAST_FORWARD = auto()
+    MEDIA_SEEK_BACK = auto()
+    MEDIA_SEEK_FORWARD = auto()
+
+    MEDIA_VOLUME_UP = auto()
+    MEDIA_VOLUME_DOWN = auto()
+    MEDIA_MUTE_UNMUTE = auto()
+    MEDIA_MUTE = auto()
+    MEDIA_UNMUTE = auto()
+
+    MEDIA_STOP_RECORDING = auto()
+    MEDIA_RECORD = auto()
+
 
 ALL_KNOWN_KEYS = [
     uinput.KEY_RESERVED,
@@ -427,125 +526,3 @@ ALL_KNOWN_KEYS = [
     uinput.KEY_MIN_INTERESTING,
     uinput.KEY_MAX
 ]
-
-NUMPAD_SCANCODES = [
-    79, 80, 81, 83, 84, 85, 87, 88, 89, 90, # numkeys from 1 to 9
-    82, # minus
-    86, # plus
-    91, # comma
-    106, # divide
-    63, # multiply
-    104, # enter
-]
-
-MODIFIER_SCANCODES = [
-    37, 105, # L_STR, R_STR
-    50, 62, # L_SHIFT, R_SHIFT
-    66, # CAPS LOCK
-    64, # L_ALT
-    108, # R_ALT_GR
-    135, # MENU
-    133, 134, # L_META, R_META
-]
-
-MACRO_1 = "MACRO_1"
-MACRO_2 = "MACRO_2"
-MACRO_3 = "MACRO_3"
-MACRO_4 = "MACRO_4"
-MACRO_5 = "MACRO_5"
-MACRO_6 = "MACRO_6"
-MACRO_7 = "MACRO_7"
-MACRO_8 = "MACRO_8"
-MACRO_9 = "MACRO_9"
-MACRO_10 = "MACRO_10"
-MACRO_11 = "MACRO_11"
-MACRO_12 = "MACRO_12"
-MACRO_13 = "MACRO_13"
-MACRO_14 = "MACRO_14"
-MACRO_15 = "MACRO_15"
-MACRO_16 = "MACRO_16"
-MACRO_17 = "MACRO_17"
-MACRO_18 = "MACRO_18"
-MACRO_19 = "MACRO_19"
-MACRO_20 = "MACRO_20"
-MACRO_21 = "MACRO_21"
-MACRO_22 = "MACRO_22"
-MACRO_23 = "MACRO_23"
-MACRO_24 = "MACRO_24"
-MACRO_25 = "MACRO_25"
-MACRO_26 = "MACRO_26"
-MACRO_27 = "MACRO_27"
-MACRO_28 = "MACRO_28"
-MACRO_29 = "MACRO_29"
-MACRO_30 = "MACRO_30"
-
-MEMORY_1 = "MEMORY_1"
-MEMORY_2 = "MEMORY_2"
-MEMORY_3 = "MEMORY_3"
-MEMORY_4 = "MEMORY_4"
-
-ALL_MACRO_KEYS = [
-    MACRO_1,
-    MACRO_2,
-    MACRO_3,
-    MACRO_4,
-    MACRO_5,
-    MACRO_6,
-    MACRO_7,
-    MACRO_8,
-    MACRO_9,
-    MACRO_10,
-    MACRO_11,
-    MACRO_12,
-    MACRO_13,
-    MACRO_14,
-    MACRO_15,
-    MACRO_16,
-    MACRO_17,
-    MACRO_18,
-    MACRO_19,
-    MACRO_20,
-    MACRO_21,
-    MACRO_22,
-    MACRO_23,
-    MACRO_24,
-    MACRO_25,
-    MACRO_26,
-    MACRO_27,
-    MACRO_28,
-    MACRO_29,
-    MACRO_30,
-]
-
-ALL_MEMORY_KEYS = [
-    MEMORY_1,
-    MEMORY_2,
-    MEMORY_3,
-    MEMORY_4,
-]
-
-# media keys
-
-MEMORY_RECORD = "MEMORY_RECORD"
-
-MEDIA_PLAY_PAUSE = "MEDIA_PLAY_PAUSE"
-MEDIA_PLAY = "MEDIA_PLAY"
-MEDIA_STOP = "MEDIA_STOP"
-MEDIA_SELECT = "MEDIA_SELECT"
-
-MEDIA_PREVIOUS = "MEDIA_PREVIOUS"
-MEDIA_NEXT = "MEDIA_NEXT"
-
-MEDIA_REWIND = "MEDIA_REWIND"
-MEDIA_FAST_FORWARD = "MEDIA_FAST_FORWARD"
-MEDIA_SEEK_BACK = "MEDIA_SEEK_BACK"
-MEDIA_SEEK_FORWARD = "MEDIA_SEEK_FORWARD"
-
-MEDIA_VOLUME_UP = "MEDIA_VOLUME_UP"
-MEDIA_VOLUME_DOWN = "MEDIA_VOLUME_DOWN"
-MEDIA_MUTE_UNMUTE = "MEDIA_MUTE_UNMUTE"
-MEDIA_MUTE = "MEDIA_MUTE"
-MEDIA_UNMUTE = "MEDIA_UNMUTE"
-
-MEDIA_STOP_RECORDING = "MEDIA_STOP_RECORDING"
-MEDIA_RECORD = "MEDIA_RECORD"

@@ -1,14 +1,15 @@
 #! /usr/bin/env python3
 
 import sys
+import signal
 import logging
 
-from lib.QSingleApplication import QSingleApplication, QSingleApplicationTCP
+from lib.QSingleApplication import QSingleApplicationTCP
 
-from mainUi import MainWindow
-from constants import *
-from lib.configparser import Configparser
+from mainwindow import MainWindow
 
+from lib import utils
+from config.constants import *
 
 if __name__ == "__main__":
 
@@ -22,11 +23,11 @@ if __name__ == "__main__":
     app.setApplicationVersion(VERSION)
 
     if app.isRunning:
-        print("Other instance already running - exiting")
+        print("other instance already running - exiting")
         sys.exit()
 
     logHandlers = [
-        logging.FileHandler(Configparser.getLogfile(), "w"),
+        logging.FileHandler(utils.getLogFile(), "w"),
         logging.StreamHandler(sys.stdout)
     ]
 
@@ -40,18 +41,19 @@ if __name__ == "__main__":
 
     # devmode disables openRGB integration
     devmode = "--dev" in sys.argv
-    if devmode: logging.info("Entered DEVMODE")
+    if devmode: logging.info("entered DEVMODE")
 
     # CLI option to disable tray icon (aka background mode)
-    bgmode = "--background-mode" in sys.argv
-    if bgmode: logging.info("Running in background mode")
+    notray = "--notray" in sys.argv
+    if notray: logging.info("disabled tray icon")
 
-    logging.info(f"------------ starting {VERSION} -------------")
+    logging.info(f"------------ {APP_NAME} {VERSION} -------------")
 
     try:
-        window = MainWindow(app, devmode, not bgmode)
+        window = MainWindow(app, devmode, trayVisible=not notray)
     except Exception as e:
         logging.exception(e)
         raise
 
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
     sys.exit(app.exec_())
