@@ -193,8 +193,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             )
             raise
 
-        #self.logger.debug("starting health check")
-        #self.healthCheck.start(1000 * 10) # every 10 seconds
+        self.logger.debug("starting health check")
+        self.healthCheck.start(10 * 1000) # every 10s
 
     def initUsbDevice(self):
         try:
@@ -235,26 +235,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.healthCheck.stop()
 
             self.logger.debug("restarting service...")
-            self.initBackgroundService()
             self.resetProfileButtons()
-            self.loadConfiguration_renameME()
-
+            self.initBackgroundService()
+            self.initProfileButtons()
 
     def resetProfileButtons(self):
         self.supportedDevice.setText("no supported device found :(")
         self.saveButton.setDisabled(True)
         self.resetButton.setDisabled(True)
 
-        while self.macroKeySlots.count():
-            child = self.macroKeySlots.takeAt(0)
-            if w := child.widget():
-                w.deleteLater()
+        self.keyListWidgetContents.clearAllEntries()
 
-        while self.memoryKeySlots.count():
-            child = self.memoryKeySlots.takeAt(0)
-            if w := child.widget():
-                w.deleteLater()
+        while self.macroKeySlots.count() > 0:
+            self.macroKeySlots.removeWidget(self.macroKeySlots.itemAt(0).widget())
 
+        while self.memoryKeySlots.count() > 0:
+            self.memoryKeySlots.removeWidget(self.memoryKeySlots.itemAt(0).widget())
 
     def addBlankKeyWidget(self):
         self.keyListWidgetContents.addWidget(KeyPressWidget(self))
