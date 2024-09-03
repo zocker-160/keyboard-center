@@ -58,7 +58,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initBackgroundService() # TODO
         self.initUsbDevice()
 
-        self.icon = QIcon(":/icons/assets/input-keyboard-virtual.png")
+        self.icon = QIcon.fromTheme("keyboard-center", QIcon.fromTheme("preferences-desktop-keyboard"))
         self.tray = TrayIcon(self, self.icon, trayVisible)
 
         self.initUI()

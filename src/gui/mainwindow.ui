@@ -523,9 +523,7 @@ QLabel#asd:pressed {
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="ressources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>gameMode</sender>
