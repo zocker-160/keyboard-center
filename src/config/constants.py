@@ -2,8 +2,8 @@
 
 import os
 
-APP_NAME = "Keyboard-Center"
-VERSION = "2.0.2"
+APP_NAME = "Keyboard Center"
+VERSION = "2.0.3"
 
 APPUUID = "73f39707-f330-45b8-9aef-fd7a82149292"
 

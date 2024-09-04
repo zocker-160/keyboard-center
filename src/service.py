@@ -22,8 +22,6 @@ from devices.allkeys import ALL_UINPUT_KEYS, Mkey, Gkey
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 
 
-APP_NAME = "Keyboard-Center service"
-
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))
 ICON_LOCATION = os.path.join(
     PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
