@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>906</width>
-    <height>627</height>
+    <width>950</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -169,7 +169,7 @@ QLabel#asd:pressed {
            <x>0</x>
            <y>0</y>
            <width>83</width>
-           <height>437</height>
+           <height>460</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -197,49 +197,22 @@ QLabel#asd:pressed {
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Profile:</string>
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string>Name</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="macroNameEdit">
-            <property name="placeholderText">
-             <string>name</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="gameMode">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;quot;GameMode&amp;quot; delays the execution of combos.&lt;/p&gt;&lt;p&gt;Some games truggle to recognize it when execution is too fast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>GameMode</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="gameModeTime">
-            <property name="toolTip">
-             <string>delay in milliseconds</string>
-            </property>
-            <property name="suffix">
-             <string> ms</string>
-            </property>
-            <property name="minimum">
-             <number>10</number>
-            </property>
-            <property name="maximum">
-             <number>1000</number>
-            </property>
-            <property name="singleStep">
-             <number>10</number>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::DefaultStepType</enum>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QLineEdit" name="macroNameEdit">
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="placeholderText">
+                <string>profile name</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
@@ -256,32 +229,118 @@ QLabel#asd:pressed {
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="addKey">
-            <property name="text">
-             <string>Add Key</string>
+           <widget class="QGroupBox" name="gameMode">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;quot;GameMode&amp;quot; adds a delay between actions.&lt;/p&gt;&lt;p&gt;Some games struggle to recognize it when execution is too fast.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
-            <property name="icon">
-             <iconset theme="input-keyboard">
-              <normaloff>.</normaloff>.</iconset>
+            <property name="title">
+             <string>GameMode</string>
             </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QSpinBox" name="gameModeTime">
+               <property name="toolTip">
+                <string>delay in milliseconds</string>
+               </property>
+               <property name="suffix">
+                <string> ms</string>
+               </property>
+               <property name="minimum">
+                <number>10</number>
+               </property>
+               <property name="maximum">
+                <number>1000</number>
+               </property>
+               <property name="singleStep">
+                <number>10</number>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::DefaultStepType</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addDelay">
-            <property name="text">
-             <string>Add Delay</string>
+           <widget class="QGroupBox" name="useScripting">
+            <property name="title">
+             <string>use LUA script</string>
             </property>
-            <property name="icon">
-             <iconset theme="list-add">
-              <normaloff>.</normaloff>.</iconset>
+            <property name="checkable">
+             <bool>true</bool>
             </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QPushButton" name="editScript">
+               <property name="toolTip">
+                <string>edit LUA script</string>
+               </property>
+               <property name="icon">
+                <iconset theme="document-edit"/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="checkScript">
+               <property name="toolTip">
+                <string>validate LUA script</string>
+               </property>
+               <property name="icon">
+                <iconset theme="dialog-ok"/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="addCommand">
-            <property name="text">
-             <string>Add Command</string>
+           <widget class="QGroupBox" name="addBox">
+            <property name="title">
+             <string>Add</string>
             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QPushButton" name="addKey">
+               <property name="toolTip">
+                <string>add key</string>
+               </property>
+               <property name="icon">
+                <iconset theme="input-keyboard">
+                 <normaloff>.</normaloff>.</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addDelay">
+               <property name="toolTip">
+                <string>add delay</string>
+               </property>
+               <property name="icon">
+                <iconset theme="chronometer"/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addCommand">
+               <property name="toolTip">
+                <string>add command</string>
+               </property>
+               <property name="icon">
+                <iconset theme="utilities-terminal"/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
@@ -291,9 +350,6 @@ QLabel#asd:pressed {
             </property>
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;delete profile&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string/>
             </property>
             <property name="icon">
              <iconset theme="edit-delete">
@@ -313,8 +369,8 @@ QLabel#asd:pressed {
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>797</width>
-             <height>385</height>
+             <width>841</width>
+             <height>364</height>
             </rect>
            </property>
           </widget>
@@ -334,13 +390,6 @@ QLabel#asd:pressed {
         <property name="icon">
          <iconset theme="edit-undo">
           <normaloff>.</normaloff>.</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -388,7 +437,7 @@ QLabel#asd:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>906</width>
+     <width>950</width>
      <height>34</height>
     </rect>
    </property>
@@ -508,7 +557,8 @@ QLabel#asd:pressed {
   </action>
   <action name="actionSettings">
    <property name="icon">
-    <iconset theme="preferences-desktop-personal"/>
+    <iconset theme="preferences-desktop-personal">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -524,22 +574,5 @@ QLabel#asd:pressed {
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>gameMode</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>gameModeTime</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>386</x>
-     <y>138</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>480</x>
-     <y>136</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -1,9 +1,8 @@
 import uinput
 
-from enum import Enum, IntEnum, auto
-# TODO: replace all with StrEnum for Python >=3.12
+from enum import IntEnum, Enum, auto
 
-class Numpad(Enum):
+class Numpad(IntEnum):
     KP0 = 82
     KP1 = 79
     KP2 = 80
@@ -23,7 +22,7 @@ class Numpad(Enum):
     ENTER = 96
     COMMMA = 83
 
-class Modifiers(Enum):
+class Modifiers(IntEnum):
     L_CTRL = 29
     R_CTRL = 97
     L_SHIFT = 42
@@ -99,6 +98,8 @@ class MediaKeys(Enum):
     MEDIA_STOP_RECORDING = auto()
     MEDIA_RECORD = auto()
 
+
+ALL_UINPUT_KEYS = [(0x1, x) for x in range(0x00, uinput.KEY_MAX[1])]
 
 ALL_KNOWN_KEYS = [
     uinput.KEY_RESERVED,

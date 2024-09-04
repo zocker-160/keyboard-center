@@ -1,6 +1,5 @@
 import os
 import time
-import signal
 import shutil
 import subprocess
 
@@ -15,10 +14,11 @@ import lib.hid as hid
 from lib.hid import Device as HIDDevice, HIDFailedToOpenException
 from lib.openrgb.orgb import OpenRGBClient
 
+from lua import lua
 from lib import utils
 from config import config
 
-from devices.allkeys import ALL_KNOWN_KEYS, Mkey, Gkey
+from devices.allkeys import ALL_UINPUT_KEYS, Mkey, Gkey
 from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 
 
@@ -115,7 +115,8 @@ class BackgroundService(QThread):
 
         self.logger.debug("creating uinput device")
         self.virtualKeyboard = uinput.Device(
-            ALL_KNOWN_KEYS,
+            #ALL_KNOWN_KEYS,
+            ALL_UINPUT_KEYS,
             name=f"{self.keyboardDev.devicename} (keyboard-center)",
             vendor=self.keyboardDev.usbVendor
         )
@@ -237,13 +238,13 @@ class BackgroundService(QThread):
 
     def _emitKeys(self, key: Gkey):
         """ 
-        Function that emits the requested keys
+        function that emits the requested keys
         should be run in a separate thread
         """
         self.logger.debug(f"{self.currProfile.name} / {key.name} pressed")
 
         entry: config.Entry = self.config.data.getEntry(self.currProfile, key)
-        if not entry:
+        if entry is None:
             return
 
         if entry.type == config.EntryType.UI and isinstance(entry.values, list):
@@ -258,8 +259,23 @@ class BackgroundService(QThread):
                     time.sleep(entry.gamemode)
 
         elif entry.type == config.EntryType.SCRIPT:
-            # TODO
-            pass
+            keyUp = Event()
+
+            runner = lua.Runner(keyUp, self.config.configFolder, self.currProfile, key)
+            runner.initScript()
+            runner.validateScript()
+            runner.setCallbacks(
+                keyClick=lambda key: self.virtualKeyboard.emit_click((1, key)),
+                keyEmit=lambda key, val: self.virtualKeyboard.emit((1, key), val, syn=False),
+                keySyn=self.virtualKeyboard.syn
+            )
+            runner.start()
+
+            self.keyReleasedEvent.wait()
+            self.keyReleasedEvent.clear()
+            keyUp.set()
+
+            runner.join()
 
     def _emitSingle(self, value: config.Value, wait: bool):
         if isinstance(value, config.KeyValue):

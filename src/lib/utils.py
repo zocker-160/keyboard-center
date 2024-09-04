@@ -37,13 +37,3 @@ def getLogFolder() -> str:
         os.makedirs(folder, exist_ok=True)
 
     return folder
-
-
-def valueInEnum(value: object, enum: Enum) -> bool:
-    """
-    hacky workaround for missing "in" keyword in Enums for older Python <3.12
-
-    TODO: replace with "in" for Python >=3.12
-    see: https://docs.python.org/3/library/enum.html#enum.EnumType.__contains__
-    """
-    return value in [x.value for x in enum]

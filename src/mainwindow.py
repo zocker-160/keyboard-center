@@ -14,14 +14,15 @@ from PyQt5.QtWidgets import (
     QDialog
 )
 
-from lib.QSingleApplication import QSingleApplication
 from lib import utils
+from lib.QSingleApplication import QSingleApplication
 
 from gui.tray import TrayIcon
 from gui.Ui_mainwindow import Ui_MainWindow
 from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
 from gui.settingswindow import SettingsWindow
 
+from lua import lua
 from config import config
 from config.constants import *
 
@@ -55,7 +56,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.config = self.loadConfiguration()
         
-        self.initBackgroundService() # TODO
+        self.initBackgroundService()
         self.initUsbDevice()
 
         self.icon = QIcon.fromTheme("keyboard-center", QIcon.fromTheme("preferences-desktop-keyboard"))
@@ -131,13 +132,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.close)
         self.openRGBhelp.clicked.connect(self.showOpenRGBsetup)
 
+        self.useScripting.toggled.connect(self.toggleScriptingMode)
+        self.editScript.clicked.connect(self.openLuaScript)
+        self.checkScript.clicked.connect(self.validateLuaScript)
+
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
         self.addCommand.clicked.connect(self.addBlankCommandWidget)
         self.saveButton.clicked.connect(lambda: self.saveData(saveToFile=True))
         self.toTrayButton.clicked.connect(self.hide)
-        self.clearAllButton.clicked.connect(
-            self.keyListWidgetContents.clearAllEntries)
+        self.clearAllButton.clicked.connect(self.keyListWidgetContents.clearAllEntries)
         self.clearAllButton.clicked.connect(self.macroNameEdit.clear)
         self.resetButton.clicked.connect(self.loadData)
 
@@ -252,6 +256,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         while self.memoryKeySlots.count() > 0:
             self.memoryKeySlots.removeWidget(self.memoryKeySlots.itemAt(0).widget())
 
+    def toggleScriptingMode(self, currValue: bool):
+        self.keyListWidget.setEnabled(not currValue)
+        self.addBox.setEnabled(not currValue)
+
     def addBlankKeyWidget(self):
         self.keyListWidgetContents.addWidget(KeyPressWidget(self))
 
@@ -265,13 +273,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logger.debug("saving")
 
         try:
+            entry: config.Entry = None
+
+            if self.useScripting.isChecked():
+                entry = config.Entry(
+                    name=self.macroNameEdit.text(),
+                    type=config.EntryType.SCRIPT,
+                    gamemode=0,
+                    values=""
+                )
+            else:
+                entry = config.Entry(
+                    name=self.macroNameEdit.text(),
+                    type=config.EntryType.UI,
+                    gamemode=self.gameModeTime.value() if self.gameMode.isChecked() else 0,
+                    values=self.keyListWidgetContents.getData()
+                )
+
             self.config.data.setRGBprofile(self.currMkey, self.openRGBedit.text())
-            self.config.data.setEntry(self.currMkey, self.currGkey, config.Entry(
-                name=self.macroNameEdit.text(),
-                type=config.EntryType.UI,
-                gamemode=self.gameModeTime.value() if self.gameMode.isChecked() else 0,
-                values=self.keyListWidgetContents.getData()
-            ))
+            self.config.data.setEntry(self.currMkey, self.currGkey, entry)
 
             if saveToFile:
                 self.logger.info("saving to disk")
@@ -292,34 +312,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def loadData(self):
         self.logger.debug(f"loading {self.currMkey.name} / {self.currGkey.name}")
 
-        #self.frame.setEnabled(self.config.data.settings.useOpenRGB)
         self.openRGBedit.setText(self.config.data.getRGBprofile(self.currMkey))
+        self.macroNameEdit.setText("")
 
+        self.gameMode.setChecked(False)
+        self.keyListWidget.setEnabled(True)
         self.keyListWidgetContents.clearAllEntries()
+
+        self.useScripting.setChecked(False)
+        self.toggleScriptingMode(False)
+
         entry = self.config.data.getEntry(self.currMkey, self.currGkey)
         if entry:
             self.macroNameEdit.setText(entry.name)
             if entry.gamemode > 1:
                 self.gameMode.setChecked(True)
-                self.gameModeTime.setEnabled(True)
                 self.gameModeTime.setValue(entry.gamemode)
-            else:
-                self.gameMode.setChecked(False)
-                self.gameModeTime.setDisabled(True)
 
             if entry.type == config.EntryType.UI:
                 self.keyListWidgetContents.setData(entry.values)
-            else:
-                # TODO
-                pass
-        else:
-            self.macroNameEdit.setText("")
-            self.gameMode.setChecked(False)
-            self.gameModeTime.setDisabled(True)
+            elif entry.type == config.EntryType.SCRIPT:
+                self.useScripting.setChecked(True)
+                self.toggleScriptingMode(True)
 
     ### function overloading
     def keyPressEvent(self, a0: QKeyEvent):
-        print(a0.nativeScanCode())
+        print("key:", a0.key(), "uinput keycode:", a0.nativeScanCode() - 8)
         return super().keyPressEvent(a0)
 
     def closeEvent(self, event: QCloseEvent):
@@ -340,7 +358,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         return super().closeEvent(event)
 
-    ### actions
+    ### helper stuff and actions
+    def openLuaScript(self):
+        try:
+            runner = lua.Runner(
+                keyReleased=None,
+                scriptLocation=self.config.configFolder,
+                mkey=self.currMkey, gkey=self.currGkey
+            )
+            runner.initScript()
+            utils.openUrl(runner.getScriptPath())
+
+        except Exception as e:
+            self.logger.exception(e)
+            self.showErrorMSG(str(e))
+
+    def validateLuaScript(self):
+        try:
+            runner = lua.Runner(
+                keyReleased=None,
+                scriptLocation=self.config.configFolder,
+                mkey=self.currMkey, gkey=self.currGkey
+            )
+            runner.initScript()
+            runner.validateScript()
+
+            self.showInfoMSG("OK", title_msg="LUA check")
+
+        except Exception as e:
+            self.logger.exception(e)
+            self.showErrorMSG(str(e))
+
     def openConfigFolder(self):
         utils.openUrl(self.config.configFolder)
 

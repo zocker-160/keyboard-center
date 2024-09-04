@@ -19,26 +19,11 @@ class CKeySequenceEdit(QKeySequenceEdit):
 
         self.editingFinished.connect(self.finalize)
 
-    #def getUinputKeycode(self) -> int:
-    #    # We need to -8 to convert X keycode -> uinput keycode
-    #    return self.pressedKeycode - 8
-
-    #def setKeycode(self, uinputKeycode: int) -> None:
-    #    # We need to +8 to convert uinput keycode -> X keycode
-    #    self.pressedKeycode = uinputKeycode + 8
-    #    self.onNewKeySet.emit(self.pressedKeycode)
-
-    #def setKeySequence(self, keySequence: str):
-    #    if keySequence.startswith("0x") and self.rawEnabled:
-    #        keySequence = "nullkey"
-    #    return super().setKeySequence(keySequence)
-
     def setKeycode(self, keycode: int):
         self.pressedKeycode = keycode
         self.onNewKeySet.emit(self.pressedKeycode)
 
     def setKeySequence(self, keySequence: str):
-        # TODO FIXME this makes no sense
         if self.rawEnabled and keySequence.startswith("0x"):
             keySequence = "nullkey"
         return super().setKeySequence(keySequence)
