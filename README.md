@@ -13,12 +13,13 @@ Keyboard Center is an application attempting to create an easy way for users to 
 ## Features
 
 - [x] Mapping of keys, combos and macros
-- [x] Ability to map commands to keys
-- [x] Ablity to add delays to macros
-- [x] libhidraw backend ~and libusb as backup if needed~ (libusb only < 0.2.0)
+- [x] Ability to map keys to buttons and commands
+- [x] Ability to map keys to a LUA script for more advanced macros
+- [x] Ability to add delays between actions
 - [x] Support for switching LEDs of profile keys
 - [x] Import and export of the configuration (added ability to open configuration folder instead)
 - [x] openRGB integration - linking of macro profiles with openRGB profiles
+- [x] libhidraw backend compatible with other control software like openRGB
 - [ ] Application specific profiles *(on hold until there is a common way to do this on Wayland[^1])*
 
 [^1]: For more information see [this](https://github.com/flatpak/xdg-desktop-portal/issues/304) and [this](https://unix.stackexchange.com/questions/399753/how-to-get-a-list-of-active-windows-when-using-wayland) and [this](https://askubuntu.com/questions/1414320/how-to-get-current-active-window-in-ubuntu-22-04)
@@ -37,14 +38,17 @@ Keyboard Center is an application attempting to create an easy way for users to 
 
 ### Arch / Manjaro
 
-available in the AUR: [[AUR] keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
+- v1: [[AUR] keyboard-center](https://aur.archlinux.org/packages/keyboard-center/)
+- v2: [[AUR] keyboard-center2](https://aur.archlinux.org/packages/keyboard-center2/)
 
 ### Debian / Ubuntu
 
 - Download `.deb` from [release page](https://github.com/zocker-160/keyboard-center/releases)
 - Install using package manager of your choice or in terminal: `apt install ./<packagename>.deb`
 
-## Setup OpenRGB Integration
+NOTE: v2 only works with Ubuntu 24.04 LTS and newer due to Python3.12 dependency
+
+## OpenRGB Integration
 ### Step 1: Create Profile(s) in OpenRGB
 ![OpenRGBprofiles](images/OpenRGBprofiles.png)
 
@@ -54,6 +58,11 @@ available in the AUR: [[AUR] keyboard-center](https://aur.archlinux.org/packages
 
 **note:** if you install OpenRGB after Keyboard Center, you will need to restart it.
 
+## LUA scripting
+
+The basics of LUA scripting are explained in the [LUA template](src/lua/template.lua). \
+For examples see the [examples folder](lua_examples/).
+
 ## Manage Background Service
 
 Keyboard Center places itself into the system tray (unless disabled see [CLI options](#cli-options)).
@@ -62,7 +71,7 @@ If you try to open a secondary instance, it ~will~ should reactivate the primary
 
 ## Settings
 
-Settings are stored in a `settings.yml` file, which is located at
+Settings are stored in a `settings.json` file, which is located at
 - `$XDG_CONFIG_HOME/keyboard-center` **or** if not defined
 - `$HOME/.config/keyboard-center`
 
@@ -72,13 +81,11 @@ Settings are stored in a `settings.yml` file, which is located at
 - `--background-mode`: hides tray icon
 - `--dev`: meant for development purposes only
 
-#### Current default settings
-`settings: {usbTimeout: 1000, retryCount: 5}`
-
 ## Known issues
 ### Icons on buttons and in the menu not visible
 
-Keyboard-center relies on icons provided by the desktop environment. Some DEs (like i3) don't seem to provide those, so in that case you can manually overwrite the used icon them by setting `XDG_SESSION_DESKTOP` and `XDG_CURRENT_DESKTOP` ENV variables.
+Keyboard Center relies on icons provided by the desktop environment. 
+Some DEs (like i3) don't seem to provide those, so in that case you can manually overwrite the used icon theme by setting `XDG_SESSION_DESKTOP` and `XDG_CURRENT_DESKTOP` ENV variables.
 
 Two known good values are `KDE` (recommended) and `GNOME`.
 
@@ -86,19 +93,20 @@ Thanks to [@scott-carrion](https://github.com/scott-carrion) for this info.
 
 ## Dependencies
 #### Debian / Ubuntu
-- python3 >= 3.9
+- python3 >= 3.12
 - python3-pyqt5 >= 5.15
-- python3-usb
 - python3-uinput
-- python3-ruamel.yaml
+- python3-usb
+- python3-lupa >= 1.14.1
+- python3-setuptools
 - libhidapi-hidraw0
 - libnotify-bin
 
 #### Arch / Manjaro
-- python >= 3.9
+- python >= 3.12
 - python-pyqt5 >= 5.15
-- python-uinput >= 0.11.2
-- python-ruamel-yaml >= 0.15
+- python-uinput >= 1.0.1
+- python-lupa >= 1.14.1
 - python-pyusb >= 1.0.2
 - hidapi >= 0.10
 - libnotify >= 0.7.9
