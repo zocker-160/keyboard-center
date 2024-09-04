@@ -8,7 +8,7 @@ Internal functions:
 KC_sleep(seconds): sleeps for given amount of seconds
 KC_sleepMS(milliseconds): sleeps for given amount of milliseconds
 KC_isKeyDown(): returns boolean if key is pressed down or not (can be used in while loops)
-KC_keyClick(keycode): uinput keycode to simulator key click
+KC_keyClick(keycode): uinput keycode to emit key click
 KC_keyEmit(keycode, value): uinput keycode to emit; value 1: keydown and 0: keyup
 KC_keySyn(): sync specified keys with uinput (see example scripts)
 KC_logInfo(message): log message on info level
