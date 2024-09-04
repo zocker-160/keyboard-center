@@ -1,7 +1,7 @@
 maintainer="zocker_160 <zocker1600 at posteo dot net>"
 
 name=keyboard-center
-version=2.0.2
+version=2.0.3
 release=1
 desc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 homepage="https://github.com/zocker-160/keyboard-center"
@@ -14,8 +14,8 @@ deps=(
   'python3-pyqt5'
   'python3-uinput'
   'python3-usb'
-  'python3-setuptools'
   'python3-lupa'
+  'python3-setuptools'
   'libhidapi-hidraw0' 'udev' 'libnotify-bin'
 )
 #build_deps=('git')
@@ -36,8 +36,8 @@ scripts=(
 package() {
   cd "$srcdir/keyboard-center"
 
-  mkdir -p "$pkgdir/opt/$name/src"
-  cp -r src "$pkgdir/opt/$name"
+  mkdir -p "$pkgdir/opt"
+  cp -r src/. "$pkgdir/opt/$name"
 
   install -D -m644 linux_packaging/60-keyboard-center.rules -t "$pkgdir/usr/lib/udev/rules.d"
   install -D -m644 linux_packaging/uinput-keyboard-center.conf "$pkgdir/usr/lib/modules-load.d/$name.conf"
