@@ -62,7 +62,7 @@ class Runner(Thread):
         glob = self.lua.globals()
 
         glob.KC_sleep = time.sleep
-        glob.KC_sleemMS = lambda x: time.sleep(x / 1000)
+        glob.KC_sleepMS = lambda x: time.sleep(x / 1000)
         glob.KC_isKeyDown = lambda: not self.keyReleased.is_set()
         glob.KC_keyClick = keyClick
         glob.KC_keyEmit = keyEmit
