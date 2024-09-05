@@ -35,32 +35,3 @@ jobs:
       with:
         name: keyboard-center
         path: ./linux_packaging/DEB-keyboard-center/*.deb
-
-  python3-uinput:
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: checkout repository
-      uses: actions/checkout@v3
-
-    - name: install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y curl git
-        #curl -fsSL lure.sh/install | bash ## does not work currently
-
-    - name: install lure
-      run: |
-        wget https://gitea.elara.ws/lure/lure/releases/download/v0.1.3/linux-user-repository-0.1.3-linux-x86_64.deb -O lure.deb
-        sudo apt-get install -y ./lure.deb
-        rm lure.deb
-
-    - name: build deb package
-      run: cd ./linux_packaging/DEB-python3-uinput/ && lure build -c
-
-    - name: save deb file
-      uses: actions/upload-artifact@master
-      with:
-        name: python3-uinput
-        path: ./linux_packaging/DEB-python3-uinput/*.deb
