@@ -1,8 +1,8 @@
 maintainer="zocker_160 <zocker1600 at posteo dot net>"
 
 name=keyboard-center
-version=2.0.3
-release=2
+version=2.0.4
+release=1
 desc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 homepage="https://github.com/zocker-160/keyboard-center"
 architectures=('amd64')
