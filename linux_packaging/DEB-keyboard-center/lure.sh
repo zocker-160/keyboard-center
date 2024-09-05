@@ -2,7 +2,7 @@ maintainer="zocker_160 <zocker1600 at posteo dot net>"
 
 name=keyboard-center
 version=2.0.3
-release=1
+release=2
 desc="Application to map G-keys on (some) Logitech Gaming Keyboards"
 homepage="https://github.com/zocker-160/keyboard-center"
 architectures=('amd64')
@@ -17,6 +17,7 @@ deps=(
   'python3-lupa'
   'python3-setuptools'
   'libhidapi-hidraw0' 'udev' 'libnotify-bin'
+  'lua5.3'
 )
 #build_deps=('git')
 opt_deps=(

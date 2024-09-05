@@ -101,6 +101,7 @@ Thanks to [@scott-carrion](https://github.com/scott-carrion) for this info.
 - python3-setuptools
 - libhidapi-hidraw0
 - libnotify-bin
+- lua
 
 #### Arch / Manjaro
 - python >= 3.12
@@ -110,6 +111,7 @@ Thanks to [@scott-carrion](https://github.com/scott-carrion) for this info.
 - python-pyusb >= 1.0.2
 - hidapi >= 0.10
 - libnotify >= 0.7.9
+- lua
 
 ## Contribute New Keyboard
 
