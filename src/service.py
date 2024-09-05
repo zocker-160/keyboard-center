@@ -36,6 +36,9 @@ class NoEndpointException(Exception):
 
 class BackgroundService(QThread):
 
+    logger = logging.getLogger("BGService")
+    rgbLogger = logging.getLogger("RGB Thread")
+
     keyboard: core.Device
     keyboardDev: KeyboardInterface
     keyboardEndpoint: core.Endpoint
@@ -56,16 +59,17 @@ class BackgroundService(QThread):
     stopEvent = Event()
     keyReleasedEvent = Event()
 
+    currProfile = Mkey.M1
+
+    LUAglobalRegister = dict()
+
     def __init__(self, config: config.ConfigLoader, devmode=False):
         super().__init__()
-        self.logger = logging.getLogger("BGService")
-        self.rgbLogger = logging.getLogger("RGB Thread")
 
         self.config = config
         self.devmode = devmode
         self.retryCount = self.config.data.settings.retryCount
         self.retryTimeout = self.config.data.settings.retryTimeout
-        self.currProfile = Mkey.M1
 
         self.logger.info("setting up service")
         self.logger.debug("searching for supported keyboard")
@@ -265,7 +269,10 @@ class BackgroundService(QThread):
             runner.setCallbacks(
                 keyClick=lambda key: self.virtualKeyboard.emit_click((1, key)),
                 keyEmit=lambda key, val: self.virtualKeyboard.emit((1, key), val, syn=False),
-                keySyn=self.virtualKeyboard.syn
+                keySyn=self.virtualKeyboard.syn,
+                setGlobalRegister=self._setLuaGlobal,
+                getGlobalRegister=self._getLuaGlobal,
+                clearGlobalRegister=self.LUAglobalRegister.clear
             )
             runner.start()
 
@@ -348,6 +355,14 @@ class BackgroundService(QThread):
 
     ##
 
+    def _setLuaGlobal(self, key: int, value: int):
+        self.LUAglobalRegister[key] = value
+
+    def _getLuaGlobal(self, key: int) -> int:
+        return self.LUAglobalRegister.get(key, 0)
+
+    ##
+
     def run(self):
         self.logger.info("Starting service loop")
         self.stopEvent.clear()
@@ -412,5 +427,7 @@ class BackgroundService(QThread):
                 self.rgbLogger.debug("openRGB server is not running")
 
         if error: self.quitTriggered.emit()
+
+        self.LUAglobalRegister.clear()
 
         return super().quit()

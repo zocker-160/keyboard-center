@@ -58,15 +58,24 @@ class Runner(Thread):
     def setCallbacks(self,
                      keyClick: Callable[[int], None],
                      keyEmit: Callable[[int, int], None],
-                     keySyn: Callable[[], None]):
+                     keySyn: Callable[[], None],
+                     setGlobalRegister: Callable[[int, int], None],
+                     getGlobalRegister: Callable[[int], int],
+                     clearGlobalRegister: Callable[[], None]):
         glob = self.lua.globals()
 
         glob.KC_sleep = time.sleep
         glob.KC_sleepMS = lambda x: time.sleep(x / 1000)
+
         glob.KC_isKeyDown = lambda: not self.keyReleased.is_set()
         glob.KC_keyClick = keyClick
         glob.KC_keyEmit = keyEmit
         glob.KC_keySyn = keySyn
+
+        glob.KC_setGlobalRegister = setGlobalRegister
+        glob.KC_getGlobalRegister = getGlobalRegister
+        glob.KC_clearGlobalRegister = clearGlobalRegister
+
         glob.KC_logInfo = self.log.info
         glob.KC_logDebug = self.log.debug
         glob.KC_logError = self.log.error
