@@ -330,4 +330,4 @@ class Ui_MainWindow(object):
         self.actionRestartService.setToolTip(_translate("MainWindow", "check status of the background service"))
         self.actionOpenLogFolder.setText(_translate("MainWindow", "Open log folder"))
         self.actionSettings.setText(_translate("MainWindow", "Settings"))
-from gui.customwidgets import CListWidgetContent
+from .customwidgets import CListWidgetContent

@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal, QEvent, Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QKeySequenceEdit
 
-from devices import allkeys
+from ..devices import allkeys
 
 class CKeySequenceEdit(QKeySequenceEdit):
 

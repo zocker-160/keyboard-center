@@ -14,22 +14,22 @@ from PyQt5.QtWidgets import (
     QDialog
 )
 
-from lib import utils
-from lib.QSingleApplication import QSingleApplication
+from .lib import utils
+from .lib.QSingleApplication import QSingleApplication
 
-from gui.tray import TrayIcon
-from gui.Ui_mainwindow import Ui_MainWindow
-from gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
-from gui.settingswindow import SettingsWindow
+from .gui.tray import TrayIcon
+from .gui.Ui_mainwindow import Ui_MainWindow
+from .gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
+from .gui.settingswindow import SettingsWindow
 
-from lua import lua
-from config import config
-from config.constants import *
+from .lua import lua
+from .config import config
+from .config.constants import *
 
-from devices.allkeys import Mkey, Gkey
-from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
+from .devices.allkeys import Mkey, Gkey
+from .devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 
-from service import BackgroundService, NoKeyboardException, NoEndpointException
+from .service import BackgroundService, NoKeyboardException, NoEndpointException
 
 PLACEHOLDER_STR = "$$$"
 
