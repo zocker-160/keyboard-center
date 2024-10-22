@@ -223,4 +223,4 @@ class Ui_KeyPressWidget(object):
         self.moveUp.setToolTip(_translate("KeyPressWidget", "<html><head/><body><p>move up</p></body></html>"))
         self.moveDown.setToolTip(_translate("KeyPressWidget", "<html><head/><body><p>move down</p></body></html>"))
         self.delButton.setToolTip(_translate("KeyPressWidget", "<html><head/><body><p>remove entry</p></body></html>"))
-from gui.customwidgets import CKeySequenceEdit
+from .customwidgets import CKeySequenceEdit

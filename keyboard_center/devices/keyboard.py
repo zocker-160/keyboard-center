@@ -1,5 +1,5 @@
 import uinput
-from devices import allkeys as key
+from . import allkeys as key
 from dataclasses import dataclass, field
 
 
