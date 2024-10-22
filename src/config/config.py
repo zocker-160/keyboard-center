@@ -228,8 +228,11 @@ class ConfigLoader:
         assert type(settings) == dict
 
     def save(self):
-        with open(self.configFile, "r") as f:
-            backupData: dict = json.load(f)
+        try:
+            with open(self.configFile, "r") as f:
+                backupData: dict = json.load(f)
+        except FileNotFoundError:
+            backupData = False
 
         data = asdict(self.data)
 
@@ -237,9 +240,12 @@ class ConfigLoader:
             try:
                 json.dump(data, f, indent=4)
             except Exception as e:
-                self.log.critical("saving failed, attempting to save backup config")
                 self.log.exception(e)
 
                 f.seek(0)
-                json.dump(backupData, f, indent=4)
+                if backupData:
+                    self.log.critical("saving failed, attempting to save backup config")
+                    json.dump(backupData, f, indent=4)
+                else:
+                    self.log.critical("saving failed")
                 raise
