@@ -77,7 +77,7 @@ class Entry:
 @dataclass
 class Settings:
     minimizeOnStart: bool = False
-    showNotifications: bool = True
+    showNotifications: bool = False
     useOpenRGB: bool = True
 
     usbTimeout: int = 1 # in s
@@ -147,7 +147,7 @@ class ConfigLoader:
 
         if not os.path.isfile(self.configFile):
             self.log.debug("config file not found - creating default")
-            self.save()
+            self.saveInit()
 
     def load(self):
         try:
@@ -243,3 +243,14 @@ class ConfigLoader:
                 f.seek(0)
                 json.dump(backupData, f, indent=4)
                 raise
+
+    def saveInit(self):
+        data = asdict(self.data)
+
+        try:
+            with open(self.configFile, "w") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            self.log.critical("init of config file failed - bailing out!")
+            self.log.exception(e)
+            raise
