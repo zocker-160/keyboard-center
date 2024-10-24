@@ -6,8 +6,8 @@ import logging
 from typing import Callable
 from threading import Thread, Event
 
-from config import config
-from devices import allkeys as keys
+from ..config import config
+from ..devices import allkeys as keys
 
 
 TEMPLATE = "template.lua"

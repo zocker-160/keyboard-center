@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keyboard-center"
+description = "Application for mapping macro keys on Logitech keyboards"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.12"
+dependencies = [
+    "lupa>=1.14.1",
+    "PyQt5>=5.15",
+    "python-uinput>=1.0.1",
+    "pyusb>=1.0.2"
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "keyboard_center.config.constants.VERSION"}
+
+[tool.setuptools.packages.find]
+include = ["keyboard_center*"]
+
+[project.gui-scripts]
+keyboard-center = "keyboard_center:main"

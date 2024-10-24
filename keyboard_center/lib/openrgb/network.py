@@ -3,7 +3,7 @@ import platform
 import socket
 import struct
 import threading
-from lib.openrgb import utils
+from . import utils
 from typing import Callable
 
 OPENRGB_PROTOCOL_VERSION = 3

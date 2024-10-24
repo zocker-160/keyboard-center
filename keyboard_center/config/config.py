@@ -6,8 +6,8 @@ import logging
 from enum import StrEnum, IntFlag, auto
 from dataclasses import dataclass, asdict, field, fields
 
-from lib import utils
-from devices import allkeys
+from ..lib import utils
+from ..devices import allkeys
 
 class Modifiers(IntFlag):
     NONE = 0 # kinda a hack, not sure if this is intended by Python

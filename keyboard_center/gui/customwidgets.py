@@ -9,10 +9,10 @@ from PyQt5.QtWidgets import (
 )
 
 # imports for pyuic
-from gui.CKeySequenceEdit import CKeySequenceEdit
-from gui.CEntryButton import CEntryButton
+from .CKeySequenceEdit import CKeySequenceEdit
+from .CEntryButton import CEntryButton
 
-from config import config
+from ..config import config
 
 class CListWidgetItem(QWidget):
 
@@ -46,7 +46,7 @@ class CListWidgetItem(QWidget):
         self.onMoveDown.emit(self)
 
 
-from gui.Ui_keypressWidget import Ui_KeyPressWidget
+from .Ui_keypressWidget import Ui_KeyPressWidget
 
 class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
 
@@ -129,7 +129,7 @@ class KeyPressWidget(CListWidgetItem, Ui_KeyPressWidget):
         self.rawInputLabel.setText("---")
 
 
-from gui.Ui_delayWidget import Ui_DelayWidget
+from .Ui_delayWidget import Ui_DelayWidget
 
 class DelayWidget(CListWidgetItem, Ui_DelayWidget):
     def __init__(self, parent: QWidget, value=config.DelayValue):
@@ -142,7 +142,7 @@ class DelayWidget(CListWidgetItem, Ui_DelayWidget):
     def getData(self) -> config.DelayValue:
         return config.DelayValue(delay=self.spinBox.value())
 
-from gui.Ui_commandWidget import Ui_CommandWidget
+from .Ui_commandWidget import Ui_CommandWidget
 
 class CommandWidget(CListWidgetItem, Ui_CommandWidget):
     def __init__(self, parent: QWidget, value=config.CommandValue()):

@@ -10,16 +10,16 @@ from threading import Event, Thread
 import uinput
 from usb import core
 
-import lib.hid as hid
-from lib.hid import Device as HIDDevice, HIDFailedToOpenException
-from lib.openrgb.orgb import OpenRGBClient
+from .lib import hid
+from .lib.hid import Device as HIDDevice, HIDFailedToOpenException
+from .lib.openrgb.orgb import OpenRGBClient
 
-from lua import lua
-from lib import utils
-from config import config
+from .lua import lua
+from .lib import utils
+from .config import config
 
-from devices.allkeys import ALL_UINPUT_KEYS, Mkey, Gkey
-from devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
+from .devices.allkeys import ALL_UINPUT_KEYS, Mkey, Gkey
+from .devices.keyboard import SUPPORTED_DEVICES, KeyboardInterface
 
 
 PARENT_LOCATION = os.path.dirname(os.path.abspath(__file__))

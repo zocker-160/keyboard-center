@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox
 )
 
-from config import config
+from ..config import config
 
 class SettingsWindow(QDialog):
     

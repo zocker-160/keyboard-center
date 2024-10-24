@@ -4,14 +4,14 @@ import sys
 import signal
 import logging
 
-from lib.QSingleApplication import QSingleApplicationTCP
+from .lib.QSingleApplication import QSingleApplicationTCP
 
-from mainwindow import MainWindow
+from .mainwindow import MainWindow
 
-from lib import utils
-from config.constants import *
+from .lib import utils
+from .config.constants import *
 
-if __name__ == "__main__":
+def main():
 
     if "--version" in sys.argv or "-v" in sys.argv:
         print("version:", VERSION)

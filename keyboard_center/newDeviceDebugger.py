@@ -6,9 +6,9 @@ import logging
 import asyncio
 import time
 from usb import core
-from lib import hid
-from lib.hid import Device as HIDDevice
-from lib.hid import HIDException
+from .lib import hid
+from .lib.hid import Device as HIDDevice
+from .lib.hid import HIDException
 
 usbConfiguration = 0
 usbInterface = (1, 0)
