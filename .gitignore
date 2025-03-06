@@ -1,13 +1,16 @@
 *.directory
 *.code-workspace
 *.deb
+*.egg-info
 
 __pycache*
 .qt_*
-
 .vscode
-venv/
+
 linux_packaging/keyboard-center*
 linux_packaging/AUR-*
 
+venv/
 testing/G510
+build/
+dist/
