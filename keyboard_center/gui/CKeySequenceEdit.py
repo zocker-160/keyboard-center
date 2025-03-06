@@ -70,8 +70,6 @@ class CKeySequenceEdit(QKeySequenceEdit):
         #print(self.pressedKeycode)
 
     def isSet(self):
-        #return self.keySequence().count() > 0 and self.pressedKeycode > 0
-        print(self.keySequence().toString())
         return self.keySequence().count() > 0
 
     def setNull(self):
@@ -79,9 +77,17 @@ class CKeySequenceEdit(QKeySequenceEdit):
         self.setKeySequence("0x0")
 
     def toString(self):
+        fallback = False
         string = self.keySequence().toString()
 
-        if self.rawEnabled and not string:
+        # toString() can return string with weird characters
+        # unable to be encoded in UTF-8, so we need to do this trickery
+        try:
+            string.encode()
+        except UnicodeEncodeError:
+            fallback = True
+
+        if fallback or (self.rawEnabled and not string):
             return f"0x{self.pressedKeycode}"
         else:
             return string
