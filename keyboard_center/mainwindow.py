@@ -37,7 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     service: BackgroundService = None
     usbDevice: KeyboardInterface = None
-    
+
     currMkey: Mkey = Mkey.M1
     currGkey: Gkey = Gkey.G1
 
@@ -302,11 +302,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return True
 
         except ValueError as e:
+            self.logger.exception(e)
             self.showErrorMSG(str(e))
             return False
         except Exception as e:
-            self.showErrorMSG(str(e)) # TODO create better error message
             self.logger.exception(e)
+            self.showErrorMSG(str(e)) # TODO create better error message
             return False
 
     def loadData(self):
