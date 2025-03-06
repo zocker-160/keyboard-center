@@ -97,7 +97,7 @@ class BackgroundService(QThread):
                 self.config.data.settings.usbDeviceID = 0
                 self.waitingForKeyboardEvent.emit()
 
-            time.sleep(self.retryTimeout)
+            time.sleep(self.retryTimeout) # FIXME this is blocking the UI, really fk bad design
             return self._initKeyboard(retryCount + 1)
 
         tEnd = time.time()
