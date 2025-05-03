@@ -4,12 +4,12 @@ import socket
 import struct
 import threading
 from . import utils
-from typing import Callable
+from typing import Callable, Optional
 
-OPENRGB_PROTOCOL_VERSION = 3
+OPENRGB_PROTOCOL_VERSION = 4
 
 if platform.system() == "Linux":
-    NOSIGNAL = socket.MSG_NOSIGNAL
+    NOSIGNAL: int = socket.MSG_NOSIGNAL
 else:
     NOSIGNAL = 0
 
@@ -19,7 +19,7 @@ class NetworkClient:
     A class for interfacing with the OpenRGB SDK
     '''
 
-    def __init__(self, update_callback: Callable, address: str = "127.0.0.1", port: int = 6742, name: str = "openrgb-python", protocol_version: int = None):
+    def __init__(self, update_callback: Callable, address: str = "127.0.0.1", port: int = 6742, name: str = "openrgb-python", protocol_version: Optional[int] = None):
         '''
         :param update_callback: the function to call when data is received
         :param address: the ip address of the SDK server
@@ -89,7 +89,7 @@ class NetworkClient:
 
         :raises utils.OpenRGBDisconnected: when it loses connection to the SDK
         '''
-        if self.sock is None:
+        if not self.connected:
             raise utils.OpenRGBDisconnected()
         header = bytearray(utils.HEADER_SIZE)
         try:
@@ -167,6 +167,32 @@ class NetworkClient:
                 finally:
                     self.lock.release()
                 self.callback(device_id, packet_type, utils.parse_list(utils.Profile, idata, self._protocol_version))
+            elif packet_type == utils.PacketType.REQUEST_PLUGIN_LIST:
+                try:
+                    data = bytes()
+                    while len(data) < packet_size:
+                        data += self.sock.recv(packet_size - len(data))
+                    idata = iter(data)
+                    for _ in range(4):
+                        next(idata)
+                except utils.CONNECTION_ERRORS as e:
+                    self.stop_connection()
+                    raise utils.OpenRGBDisconnected() from e
+                finally:
+                    self.lock.release()
+                self.callback(device_id, packet_type, utils.parse_list(utils.Plugin, idata, self._protocol_version))
+            elif packet_type == utils.PacketType.PLUGIN_SPECIFIC:
+                try:
+                    data = bytes()
+                    while len(data) < packet_size:
+                        data += self.sock.recv(packet_size - len(data))
+                    idata = iter(data)
+                except utils.CONNECTION_ERRORS as e:
+                    self.stop_connection()
+                    raise utils.OpenRGBDisconnected() from e
+                finally:
+                    self.lock.release()
+                self.callback(device_id, packet_type, idata)
 
     def requestDeviceData(self, device: int):
         '''
@@ -174,7 +200,7 @@ class NetworkClient:
 
         :param device: the id of the device to request data for
         '''
-        if self.sock is None:
+        if not self.connected:
             raise utils.OpenRGBDisconnected()
         self.send_header(device, utils.PacketType.REQUEST_CONTROLLER_DATA, struct.calcsize('I'))
         self.send_data(struct.pack("I", self._protocol_version), False)
@@ -194,7 +220,14 @@ class NetworkClient:
         self.send_header(0, utils.PacketType.REQUEST_PROFILE_LIST, 0)
         self.read()
 
-    def send_header(self, device_id: int, packet_type: int, packet_size: int):
+    def requestPluginList(self):
+        '''
+        Sends the request for the available plugins
+        '''
+        self.send_header(0, utils.PacketType.REQUEST_PLUGIN_LIST, 0)
+        self.read()
+
+    def send_header(self, device_id: int, packet_type: utils.PacketType, packet_size: int, release_lock: bool = True):
         '''
         Sends a header to the SDK
 
@@ -203,7 +236,7 @@ class NetworkClient:
         :param packet_size: The full size of the data to be sent after the header
         '''
         self.check_version(packet_type)
-        if self.sock is None:
+        if not self.connected:
             raise utils.OpenRGBDisconnected()
 
         if not self.lock.acquire(timeout=10):
@@ -211,14 +244,16 @@ class NetworkClient:
 
         try:
             data = struct.pack('ccccIII', b'O', b'R', b'G', b'B', device_id, packet_type, packet_size)
-            sent = self.sock.send(data, NOSIGNAL)
+            sent = self.sock.send(data, NOSIGNAL)  # type: ignore
             if sent != len(data):
                 self.stop_connection()
                 raise utils.OpenRGBDisconnected()
-            if packet_size == 0 and packet_type not in (utils.PacketType.REQUEST_CONTROLLER_COUNT,
-                                                        utils.PacketType.REQUEST_CONTROLLER_DATA,
-                                                        utils.PacketType.REQUEST_PROTOCOL_VERSION,
-                                                        utils.PacketType.REQUEST_PROFILE_LIST):
+            if release_lock and packet_size == 0 and packet_type not in (utils.PacketType.REQUEST_CONTROLLER_COUNT,
+                                                                         utils.PacketType.REQUEST_CONTROLLER_DATA,
+                                                                         utils.PacketType.REQUEST_PROTOCOL_VERSION,
+                                                                         utils.PacketType.REQUEST_PROFILE_LIST,
+                                                                         utils.PacketType.REQUEST_PLUGIN_LIST,
+                                                                         utils.PacketType.PLUGIN_SPECIFIC):
                 self.lock.release()
         except utils.CONNECTION_ERRORS as e:
             self.stop_connection()
@@ -230,10 +265,10 @@ class NetworkClient:
 
         :param data: The data to send
         '''
-        if self.sock is None:
+        if not self.connected:
             raise utils.OpenRGBDisconnected()
         try:
-            sent = self.sock.send(data, NOSIGNAL)
+            sent = self.sock.send(data, NOSIGNAL)  # type: ignore
             if sent != len(data):
                 self.stop_connection()
                 raise utils.OpenRGBDisconnected()
@@ -254,6 +289,16 @@ class NetworkClient:
                                                           utils.PacketType.REQUEST_SAVE_PROFILE,
                                                           utils.PacketType.REQUEST_LOAD_PROFILE,
                                                           utils.PacketType.REQUEST_DELETE_PROFILE):
-            raise utils.SDKVersionError("Profile controls not supported on protoocl versions < 2.  You probably need to update OpenRGB")
+            raise utils.SDKVersionError("Profile controls not supported on protocol versions < 2.  You probably need to update OpenRGB")
         elif self._protocol_version < 3 and packet_type == utils.PacketType.RGBCONTROLLER_SAVEMODE:
-            raise utils.SDKVersionError("Saving modes not supported on protoocl versions < 3.  You probably need to update OpenRGB")
+            raise utils.SDKVersionError("Saving modes not supported on protocol versions < 3.  You probably need to update OpenRGB")
+        elif self._protocol_version < 4 and packet_type in (utils.PacketType.REQUEST_PLUGIN_LIST,
+                                                            utils.PacketType.PLUGIN_SPECIFIC):
+            raise utils.SDKVersionError("Plugin controls not supported on protocol versions < 4.  You probably need to update OpenRGB")
+
+    @property
+    def connected(self) -> bool:
+        '''
+        Returns whether the current instance is currently connected to a server
+        '''
+        return self.sock is not None

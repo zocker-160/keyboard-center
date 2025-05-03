@@ -10,12 +10,13 @@ from threading import Event, Thread
 import uinput
 from usb import core
 
-from .lib import hid
-from .lib.hid import Device as HIDDevice, HIDFailedToOpenException
-from .lib.openrgb.orgb import OpenRGBClient
+from .lib import (
+    OpenRGBClient,
+    hid, HIDException, HIDDevice, HIDFailedToOpenException,
+    utils
+)
 
 from .lua import lua
-from .lib import utils
 from .config import config
 
 from .devices.allkeys import ALL_UINPUT_KEYS, Mkey, Gkey
@@ -386,7 +387,7 @@ class BackgroundService(QThread):
                         self._handleRawData(bytes(fromKeyboard))
                         errorCount = 0
 
-                except hid.HIDException as e:
+                except HIDException as e:
                     self.logger.error(f"HIDerror: ({e})")
 
                     if errorCount > 5:

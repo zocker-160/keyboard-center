@@ -1,10 +1,10 @@
 from __future__ import annotations
 import struct
 import platform
-from typing import Union, Optional
 from . import utils
+from typing import Union, Any, Optional
 from .network import NetworkClient
-# from dataclasses import dataclass
+from .plugins import create_plugin, ORGBPlugin
 from time import sleep
 from os import environ
 
@@ -43,6 +43,32 @@ class LED(utils.RGBObject):
             self.update()
 
 
+class Segment(utils.RGBContainer):
+    '''
+    A class to represent a segment
+    '''
+
+    def __init__(self, data: utils.SegmentData, id: int, parent: Zone):
+        self.leds = [None for _ in range(data.leds_count)]
+        self.id = id
+        self.parent_zone = parent
+        self._update(data)
+
+    def _update(self, data: utils.SegmentData):
+        self.name = data.name
+        self.type = data.segment_type
+        self.start_idx = data.start_idx
+        self.leds_count = data.leds_count
+        self.leds = self.parent_zone.leds[data.start_idx:data.start_idx + data.leds_count]
+
+    def set_color(self, color: utils.RGBColor, fast: bool = False):
+        self.set_colors([color] * self.leds_count, fast)
+
+    def set_colors(self, colors: list[utils.RGBColor], fast: bool = False):
+        new_colors = self.parent_zone.colors[:self.start_idx] + colors + self.parent_zone.colors[self.start_idx + self.leds_count:]
+        self.parent_zone.set_colors(new_colors, fast)
+
+
 class Zone(utils.RGBContainer):
     '''
     A class to represent a zone
@@ -50,6 +76,10 @@ class Zone(utils.RGBContainer):
 
     def __init__(self, data: utils.ZoneData, zone_id: int, device_id: int, network_client: NetworkClient):
         self.leds = [None for led in data.leds]
+        try:
+            self.segments: Optional[list[Segment]] = [None for _ in data.segments]  # type: ignore
+        except TypeError:
+            self.segments = None
         self.device_id = device_id
         self.comms = network_client
         self.id = zone_id
@@ -62,57 +92,59 @@ class Zone(utils.RGBContainer):
             self.leds = [None for led in data.leds]
         for x in range(len(data.leds)):
             if self.leds[x] is None:
-                self.leds[x] = LED(data.leds[x], data.colors[x], x, self.device_id, self.comms)
+                self.leds[x] = LED(data.leds[x], data.colors[x],
+                                   data.start_idx + x, self.device_id, self.comms)
             else:
                 self.leds[x]._update(data.leds[x], data.colors[x])
+        if self.segments:
+            for x in range(len(data.segments)):  # type: ignore
+                if self.segments[x] is None:
+                    self.segments[x] = Segment(data.segments[x], x, self)  # type: ignore
+                else:
+                    self.segments[x]._update(data.segments[x])  # type: ignore
         self.mat_width = data.mat_width
         self.mat_height = data.mat_height
         self.matrix_map = data.matrix_map
         self.colors = data.colors
         self._colors = self.colors[:]
 
-    def set_color(self, color: utils.RGBColor, start: int = 0, end: int = 0, fast: bool = False):
+    def set_color(self, color: utils.RGBColor, fast: bool = False):
         '''
-        Sets the LEDs' color in the zone between start and end
+        Sets the zone's color
 
         :param color: the color to set the LEDs to
-        :param start: the first LED to change
-        :param end: the first unchanged LED
         :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True`
         '''
-        if end == 0:
-            end = len(self.leds)
         self.comms.send_header(
             self.device_id,
             utils.PacketType.RGBCONTROLLER_UPDATEZONELEDS,
-            struct.calcsize(f"IiH{3*(end)}b{(end)}x")
+            struct.calcsize(f"iIH{3*(len(self.leds))}b{len(self.leds)}x")
         )
-        buff = struct.pack("iH", self.id, end) + b''.join((color.pack() for color in self._colors[:start])) + (color.pack())*(end - start)
-        buff = struct.pack("I", len(buff)) + buff
+        buff = struct.pack("iH", self.id, len(self.leds)) + \
+            (color.pack())*len(self.leds)
+        buff = struct.pack("I", len(buff) + struct.calcsize("I")) + buff
         self.comms.send_data(buff)
         if not fast:
             self.update()
 
-    def set_colors(self, colors: list[utils.RGBColor], start: int = 0, end: int = 0, fast: bool = False):
+    def set_colors(self, colors: list[utils.RGBColor], fast: bool = False):
         '''
-        Sets the LEDs' colors in the zone between start and end
+        Sets the LEDs' colors in the zone
 
         :param colors: the list of colors, one per LED
-        :param start: the first LED to change
-        :param end: the first unchanged LED
         :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True`
         '''
-        if end == 0:
-            end = len(self.leds)
-        if len(colors) != (end - start):
-            raise IndexError("Number of colors doesn't match number of LEDs")
+        if len(colors) != len(self.leds):
+            raise IndexError(
+                "Number of colors doesn't match number of LEDs in the zone")
         self.comms.send_header(
             self.device_id,
             utils.PacketType.RGBCONTROLLER_UPDATEZONELEDS,
-            struct.calcsize(f"IIH{3*(end)}b{(end)}x")
+            struct.calcsize(f"iIH{3*(len(self.leds))}b{len(self.leds)}x")
         )
-        buff = struct.pack("IH", self.id, end) + b''.join((color.pack() for color in self._colors[:start])) + b''.join((color.pack() for color in colors))
-        buff = struct.pack("I", len(buff)) + buff
+        buff = struct.pack("iH", self.id, len(self.leds)) + \
+            b''.join((color.pack() for color in colors))
+        buff = struct.pack("I", len(buff) + struct.calcsize("I")) + buff
         self.comms.send_data(buff)
         if not fast:
             self.update()
@@ -138,8 +170,8 @@ class Device(utils.RGBContainer):
     '''
 
     def __init__(self, data: utils.ControllerData, device_id: int, network_client: NetworkClient):
-        self.leds = [None for i in data.leds]
-        self.zones = [None for i in data.zones]
+        self.leds: list[LED] = [None for i in data.leds]  # type: ignore
+        self.zones: list[Zone] = [None for i in data.zones]  # type: ignore
         self.id = device_id
         self.device_id = device_id
         self.comms = network_client
@@ -150,85 +182,138 @@ class Device(utils.RGBContainer):
         self.metadata = data.metadata
         self.type = data.device_type
         if len(self.leds) != len(data.leds):
-            self.leds = [None for i in data.leds]
+            self.leds = [None for i in data.leds]  # type: ignore
         for x in range(len(data.leds)):
             if self.leds[x] is None:
-                self.leds[x] = LED(data.leds[x], data.colors[x], x, self.device_id, self.comms)
+                self.leds[x] = LED(data.leds[x], data.colors[x],
+                                   x, self.device_id, self.comms)
             else:
                 self.leds[x]._update(data.leds[x], data.colors[x])
         for x in range(len(data.zones)):
             if self.zones[x] is None:
-                self.zones[x] = Zone(data.zones[x], x, self.device_id, self.comms)
+                self.zones[x] = Zone(
+                    data.zones[x], x, self.device_id, self.comms)
             else:
-                self.zones[x]._update(data.zones[x])
+                self.zones[x]._update(data.zones[x])  # type: ignore
         self.modes = data.modes
         self.colors = data.colors
         self._colors = self.colors[:]
         self.active_mode = data.active_mode
         self.data = data
 
-    def set_color(self, color: utils.RGBColor, start: int = 0, end: int = 0, fast: bool = False):
+    def _set_device_color(self, color: utils.RGBColor, fast: bool = False):
         '''
-        Sets the LEDs' color between start and end
+        Sets the device's color
 
         :param color: the color to set the LED(s) to
-        :param start: the first LED to change
-        :param end: the first unchanged LED
         :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True`
         '''
-        if end == 0:
-            end = len(self.leds)
         self.comms.send_header(
             self.id,
             utils.PacketType.RGBCONTROLLER_UPDATELEDS,
-            struct.calcsize(f"IH{3*(end)}b{(end)}x")
+            struct.calcsize(f"IH{3*(len(self.leds))}b{len(self.leds)}x")
         )
-        buff = struct.pack("H", end) + b''.join((color.pack() for color in self._colors[:start])) + (color.pack())*(end - start)
-        buff = struct.pack("I", len(buff)) + buff
+        buff = struct.pack("H", len(self.leds)) + (color.pack())*len(self.leds)
+        buff = struct.pack("I", len(buff) + struct.calcsize("I")) + buff
         self.comms.send_data(buff)
         if not fast:
             self.update()
 
-    def set_colors(self, colors: list[utils.RGBColor], start: int = 0, end: int = 0, fast: bool = False):
+    def _set_device_colors(self, colors: list[utils.RGBColor], fast: bool = False):
         '''
-        Sets the LEDs' colors between start and end
+        Sets the devices LEDs' colors
 
         :param colors: the list of colors, one per LED
-        :param start: the first LED to change
-        :param end: the first unchanged LED
         :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True`
         '''
-        if end == 0:
-            end = len(self.leds)
-        if len(colors) != (end - start):
+        if len(colors) != len(self.leds):
             raise IndexError("Number of colors doesn't match number of LEDs")
         self.comms.send_header(
             self.id,
             utils.PacketType.RGBCONTROLLER_UPDATELEDS,
-            struct.calcsize(f"IH{3*(end)}b{(end)}x")
+            struct.calcsize(f"IH{3*(len(self.leds))}b{len(self.leds)}x")
         )
-        buff = struct.pack("H", end) + b''.join((color.pack() for color in self._colors[:start])) + b''.join((color.pack() for color in colors))
-        buff = struct.pack("I", len(buff)) + buff
+        buff = struct.pack("H", len(self.leds)) + \
+            b''.join((color.pack() for color in colors))
+        buff = struct.pack("I", len(buff) + struct.calcsize("I")) + buff
         self.comms.send_data(buff)
         if not fast:
             self.update()
 
-    def set_mode(self, mode: Union[int, str, utils.ModeData], save: bool = False):
+    def _set_mode_color(self, color: utils.RGBColor):
+        '''
+        Sets the mode-specific color, if possible
+
+        :param color: the color to set the LED(s) to
+        '''
+        active_mode = self.modes[self.active_mode]
+        assert active_mode.color_mode == utils.ModeColors.MODE_SPECIFIC
+        assert active_mode.colors is not None
+        active_mode.colors = [color]*active_mode.colors_max  # type: ignore
+        self.set_mode(active_mode)
+
+    def _set_mode_colors(self, colors: list[utils.RGBColor]):
+        '''
+        Sets the mode-specific color, if possible
+
+        :param color: the color to set the LED(s) to
+        '''
+        active_mode = self.modes[self.active_mode]
+        assert active_mode.color_mode == utils.ModeColors.MODE_SPECIFIC
+        assert active_mode.colors is not None
+        assert active_mode.colors_min <= len(  # type: ignore
+            colors) <= active_mode.colors_max
+        active_mode.colors = colors
+        self.set_mode(active_mode)
+
+    def set_color(self, color: utils.RGBColor, fast: bool = False):
+        '''
+        Sets the color of the device whether the current mode is per-led or
+        mode-specific
+
+        :param colors: the list of colors, one per LED
+        :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True` (only applies when not setting a mode-specific color)
+        '''
+        active_mode = self.modes[self.active_mode]
+        if active_mode.color_mode == utils.ModeColors.MODE_SPECIFIC:
+            self._set_mode_color(color)
+        elif active_mode.color_mode == utils.ModeColors.PER_LED:
+            self._set_device_color(color, fast)
+
+    def set_colors(self, colors: list[utils.RGBColor], fast: bool = False):
+        '''
+        Sets the colors of the device whether the current mode is per-led or
+        mode-specific
+
+        :param colors: the list of colors, one per LED or per mode-specific color
+        :param fast: If you care more about quickly setting colors than having correct internal state data, then set :code:`fast` to :code:`True` (only applies when not setting a mode-specific color)
+        '''
+        active_mode = self.modes[self.active_mode]
+        if active_mode.color_mode == utils.ModeColors.MODE_SPECIFIC:
+            self._set_mode_colors(colors)
+        elif active_mode.color_mode == utils.ModeColors.PER_LED:
+            self._set_device_colors(colors, fast)
+
+    def set_mode(self, mode: Union[str, int, utils.ModeData], save: bool = False):
         '''
         Sets the device's mode
 
-        :param mode: the id, name, or the ModeData object itself to set as the mode
+        :param mode: the name, id, or the ModeData object itself to set as the mode
         '''
-        if type(mode) == utils.ModeData:
-            pass
-        elif type(mode) == int:
-            mode = self.modes[mode]
-        elif type(mode) == str:
+        if isinstance(mode, str):
             try:
-                mode = next((m for m in self.modes if m.name.lower() == mode.lower()))
+                mode = next(
+                    (m for m in self.modes if m.name.lower() == mode.lower()))
             except StopIteration as e:
-                raise ValueError(f"Mode `{mode}` not found for device `{self.name}`") from e
-        data = mode.pack(self.comms._protocol_version)
+                raise ValueError(
+                    f"Mode `{mode}` not found for device `{self.name}`") from e
+        elif isinstance(mode, int):
+            mode = self.modes[mode]
+        elif isinstance(mode, utils.ModeData):
+            pass
+        else:
+            raise TypeError()
+        data = mode.pack(self.comms._protocol_version)  # type: ignore
         self.comms.send_header(
             self.id,
             utils.PacketType.RGBCONTROLLER_UPDATEMODE,
@@ -245,11 +330,17 @@ class Device(utils.RGBContainer):
         self.update()
 
     def set_custom_mode(self):
+        '''
+        Sets the mode to whatever the device supports that provides the most
+        granular control
+        '''
         self.comms.send_header(
             self.id,
             utils.PacketType.RGBCONTROLLER_SETCUSTOMMODE,
             0
         )
+        self.update()
+        self.set_mode(self.active_mode)
 
     def save_mode(self):
         '''
@@ -263,6 +354,13 @@ class Device(utils.RGBContainer):
         )
         self.comms.send_data(data)
 
+    def off(self):
+        '''
+        Turns off device by setting the custom mode and then calling :any:`RGBObject.clear`
+        '''
+        self.set_custom_mode()
+        self.clear()
+
 
 class OpenRGBClient(utils.RGBObject):
     '''
@@ -271,33 +369,33 @@ class OpenRGBClient(utils.RGBObject):
     Devices, Zones, and LEDs for you.
     '''
 
-    def __init__(self, address: str = "127.0.0.1", port: int = 6742, name: str = "openrgb-python", protocol_version: int = None):
+    def __init__(self, address: str = "127.0.0.1", port: int = 6742, name: str = "openrgb-python", protocol_version: Optional[int] = None):
         '''
         :param address: the ip address of the SDK server
         :param port: the port of the SDK server
         :param name: the string that will be displayed on the OpenRGB SDK tab's list of clients
+        :param protocol_version: which protocol version to use
         '''
         self.device_num = 0
-        self.devices = []
-        self.profiles = []
-        self.comms = NetworkClient(self._callback, address, port, name, protocol_version)
+        self.devices: list[Device] = []
+        self.profiles: list[utils.Profile] = []
+        self.plugins: list[ORGBPlugin] = []
+        self.comms = NetworkClient(
+            self._callback, address, port, name, protocol_version)
         self.address = address
         self.port = port
         self.name = name
-        self.comms.requestDeviceNum()
-        while any((dev is None for dev in self.devices)):
-            sleep(.1)
-        if self.comms._protocol_version >= 2:
-            self.update_profiles()
+        self.update()
 
     def __repr__(self):
         return f"OpenRGBClient(address={self.address}, port={self.port}, name={self.name})"
 
-    def _callback(self, device: int, type: int, data: Optional):
+    def _callback(self, device: int, type: int, data: Any):
         if type == utils.PacketType.REQUEST_CONTROLLER_COUNT:
             if data != self.device_num or data != len(self.devices):
                 self.device_num = data
-                self.devices = [None for x in range(self.device_num)]
+                self.devices = [None for x in range(  # type: ignore
+                    self.device_num)]  
                 for x in range(self.device_num):
                     self.comms.requestDeviceData(x)
         elif type == utils.PacketType.REQUEST_CONTROLLER_DATA:
@@ -305,7 +403,7 @@ class OpenRGBClient(utils.RGBObject):
                 if self.devices[device] is None:
                     self.devices[device] = Device(data, device, self.comms)
                 else:
-                    self.devices[device]._update(data)
+                    self.devices[device]._update(data)  # type: ignore
             except IndexError:
                 self.comms.requestDeviceNum()
         elif type == utils.PacketType.DEVICE_LIST_UPDATED:
@@ -313,6 +411,12 @@ class OpenRGBClient(utils.RGBObject):
             self.comms.requestDeviceNum()
         elif type == utils.PacketType.REQUEST_PROFILE_LIST:
             self.profiles = data
+        elif type == utils.PacketType.REQUEST_PLUGIN_LIST:
+            for plugin in data:
+                if (all(plugin.id != existing.id for existing in self.plugins)):
+                    self.plugins.append(create_plugin(plugin, self.comms))
+        elif type == utils.PacketType.PLUGIN_SPECIFIC:
+            next(plugin for plugin in self.plugins if plugin.id == device)._recv(data)
 
     def set_color(self, color: utils.RGBColor, fast: bool = False):
         '''
@@ -352,10 +456,11 @@ class OpenRGBClient(utils.RGBObject):
         :param directory: what directory the profile is in.  Defaults to OpenRGB's config directory for supported OS's (Windows or Linux), or falls back to using the current working directory.
         '''
         if local:
-            assert type(name) is str
+            assert isinstance(name, str)
             if directory == '':
                 if platform.system() == "Linux":
-                    directory = environ['HOME'].rstrip("/") + "/.config/OpenRGB"
+                    directory = environ['HOME'].rstrip(
+                        "/") + "/.config/OpenRGB"
                 elif platform.system() == "Windows":
                     directory = environ['APPDATA'].rstrip("\\") + "\\OpenRGB"
                 else:
@@ -379,18 +484,23 @@ class OpenRGBClient(utils.RGBObject):
                     if new_controller.active_mode != device.active_mode:
                         device.set_mode(new_controller.active_mode)
         else:
-            if type(name) is str:
+            if isinstance(name, str):
                 try:
-                    name = next(p for p in self.profiles if p.name.lower() == name.lower())
+                    name = next(
+                        p for p in self.profiles if p.name.lower() == name.lower())
                 except StopIteration as e:
-                    raise ValueError(f"`{name}` is not an existing profile") from e
-            elif type(name) is int:
+                    raise ValueError(
+                        f"`{name}` is not an existing profile") from e
+            elif isinstance(name, int):
                 name = self.profiles[name]
-            elif type(name) is utils.Profile:
+            elif isinstance(name, utils.Profile):
                 pass
-            name = name.pack()
-            self.comms.send_header(0, utils.PacketType.REQUEST_LOAD_PROFILE, len(name))
-            self.comms.send_data(name)
+            else:
+                raise TypeError()
+            raw_name = name.pack()  # type: ignore
+            self.comms.send_header(
+                0, utils.PacketType.REQUEST_LOAD_PROFILE, len(raw_name))
+            self.comms.send_data(raw_name)
 
     def save_profile(self, name: Union[str, int, utils.Profile], local: bool = False, directory: str = ''):
         '''
@@ -405,26 +515,32 @@ class OpenRGBClient(utils.RGBObject):
             self.update()
             if directory == '':
                 if platform.system() == "Linux":
-                    directory = environ['HOME'].rstrip("/") + "/.config/OpenRGB"
+                    directory = environ['HOME'].rstrip(
+                        "/") + "/.config/OpenRGB"
                 elif platform.system() == "Windows":
                     directory = environ['APPDATA'].rstrip("\\") + "\\OpenRGB"
                 else:
                     directory = '.'
             with open(f'{directory.rstrip("/")}/{name}.orp', 'wb') as f:
-                f.write(utils.Profile([dev.data for dev in self.devices]).pack())
+                f.write(utils.LocalProfile(
+                    [dev.data for dev in self.devices]).pack())
         else:
-            if type(name) is str:
+            if isinstance(name, str):
                 try:
-                    name = next(p for p in self.profiles if p.name.lower() == name.lower())
+                    name = next(
+                        p for p in self.profiles if p.name.lower() == name.lower())
                 except StopIteration:
-                    name = utils.Profile(name)
-            elif type(name) is int:
+                    name = utils.Profile(name)  # type: ignore
+            elif isinstance(name, int):
                 name = self.profiles[name]
-            elif type(name) is utils.Profile:
+            elif isinstance(name, utils.Profile):
                 pass
-            name = name.pack()
-            self.comms.send_header(0, utils.PacketType.REQUEST_SAVE_PROFILE, len(name))
-            self.comms.send_data(name)
+            else:
+                raise TypeError()
+            raw_name = name.pack()  # type: ignore
+            self.comms.send_header(
+                0, utils.PacketType.REQUEST_SAVE_PROFILE, len(raw_name))
+            self.comms.send_data(raw_name)
             self.update_profiles()
 
     def delete_profile(self, name: Union[str, int, utils.Profile]):
@@ -433,18 +549,22 @@ class OpenRGBClient(utils.RGBObject):
 
         :param name: Can be a profile's name, index, or even the Profile itself
         '''
-        if type(name) is str:
+        if isinstance(name, str):
             try:
-                name = next(p for p in self.profiles if p.name.lower() == name.lower())
+                name = next(
+                    p for p in self.profiles if p.name.lower() == name.lower())
             except StopIteration as e:
                 raise ValueError(f"`{name}` is not an existing profile") from e
-        elif type(name) is int:
+        elif isinstance(name, int):
             name = self.profiles[name]
-        elif type(name) is utils.Profile:
+        elif isinstance(name, utils.Profile):
             pass
-        name = name.pack()
-        self.comms.send_header(0, utils.PacketType.REQUEST_DELETE_PROFILE, len(name))
-        self.comms.send_data(name)
+        else:
+            raise TypeError()
+        raw_name = name.pack()  # type: ignore
+        self.comms.send_header(
+            0, utils.PacketType.REQUEST_DELETE_PROFILE, len(raw_name))
+        self.comms.send_data(raw_name)
         self.update_profiles()
 
     def update(self):
@@ -456,12 +576,24 @@ class OpenRGBClient(utils.RGBObject):
         self.comms.requestDeviceNum()
         for x in range(self.device_num):
             self.comms.requestDeviceData(x)
+        if self.comms._protocol_version >= 2:
+            self.update_profiles()
+        if self.comms._protocol_version >= 4:
+            self.update_plugins()
 
     def update_profiles(self):
         '''
         Gets the list of available profiles from the server.
         '''
         self.comms.requestProfileList()
+
+    def update_plugins(self):
+        '''
+        Gets the list of enabled plugins from the server.
+        '''
+        self.comms.requestPluginList()
+        for plugin in self.plugins:
+            plugin.update()
 
     def show(self, fast: bool = False, force: bool = False):
         '''
@@ -494,7 +626,8 @@ class OpenRGBClient(utils.RGBObject):
         if version <= self.comms.max_protocol_version:
             self.comms._protocol_version = version
         else:
-            raise ValueError(f"version {version} is greater than maximum supported version {self.comms.max_protocol_version}")
+            raise ValueError(
+                f"version {version} is greater than maximum supported version {self.comms.max_protocol_version}")
 
     @property
     def ee_devices(self):
