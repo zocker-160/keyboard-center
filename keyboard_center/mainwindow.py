@@ -461,7 +461,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         <h4>{APP_NAME}</h4>
         Version v{VERSION}
         <br>
-        (c) 2021 - 2024 zocker_160
+        {COPYRIGHT}
         <br>
         GPLv3
         <br><br>
