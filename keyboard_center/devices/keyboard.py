@@ -198,6 +198,8 @@ class Logitech_G510(KeyboardInterface):
         b'\x03\x00\x00\x40\x00': key.Mkey.M3,
     }
 
+    memoryKeysLEDs = {} # keyboard has LEDs, but command is unknown
+
     mediaKeys = {
         b'\x02\x08': uinput.KEY_PLAYPAUSE,
         b'\x02\x04': uinput.KEY_STOP,
