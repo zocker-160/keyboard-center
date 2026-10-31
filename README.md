@@ -60,9 +60,9 @@ NOTE: v2 only works with Ubuntu 24.04 LTS and newer due to Python3.12 dependency
 
 ## Recording macros
 
-Select a memory and macro key, then click **Record** next to the delete profile button.
+Select a memory and macro key, then click the red record icon next to the delete profile button.
 Key presses in the Keyboard Center window are appended to the selected profile,
-including Ctrl, Shift, Alt, AltGr and Meta/Super combinations. Click **Stop** to save.
+including Ctrl, Shift, Alt, AltGr and Meta/Super combinations. Click the record button again to stop and save.
 Switching profiles, resetting, hiding or leaving the window, and closing the application
 also stop and save the recording, keeping the actions captured so far.
 

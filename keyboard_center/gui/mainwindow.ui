@@ -345,14 +345,20 @@ QLabel#asd:pressed {
           </item>
           <item>
            <widget class="QPushButton" name="recordButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
             <property name="toolTip">
              <string>record keys in this window and append them to the selected profile</string>
             </property>
-            <property name="text">
-             <string>Record</string>
+            <property name="accessibleName">
+             <string>Record keys</string>
             </property>
             <property name="icon">
              <iconset theme="media-record"/>

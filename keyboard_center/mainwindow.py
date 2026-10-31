@@ -286,12 +286,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         self.keyRecorder.start()
-        self.recordButton.setText("Stop")
+        self.recordButton.setToolTip("stop recording and save the profile")
         self.keyListWidget.setEnabled(False)
         self.addBox.setEnabled(False)
         self.clearAllButton.setEnabled(False)
         self.useScripting.setEnabled(False)
-        self.bottomStatusBar.showMessage("Recording keys — click Stop to finish and save")
+        self.bottomStatusBar.showMessage("Recording keys — click the record button again to finish and save")
 
     def addRecordedKey(self, value: config.KeyValue):
         self.keyListWidgetContents.addWidget(KeyPressWidget(self, value))
@@ -306,7 +306,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.keyRecorder.stop()
         self.recordButton.setChecked(False)
-        self.recordButton.setText("Record")
+        self.recordButton.setToolTip("record keys in this window and append them to the selected profile")
         self.keyListWidget.setEnabled(True)
         self.addBox.setEnabled(True)
         self.clearAllButton.setEnabled(True)
