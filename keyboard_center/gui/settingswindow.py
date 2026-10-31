@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
     QCheckBox,
+    QComboBox,
+    QFormLayout,
     QVBoxLayout,
     QDialogButtonBox
 )
@@ -36,11 +38,18 @@ class SettingsWindow(QDialog):
         self.showNotifications = QCheckBox("show notifications", self)
         self.minimize = QCheckBox("minimize to tray on start", self)
         self.openRGB = QCheckBox("enable OpenRGB integration", self)
+        self.appearance = QComboBox(self)
+        self.appearance.addItem("auto (default)", "auto")
+        self.appearance.addItem("light", "light")
+        self.appearance.addItem("dark", "dark")
+        appearanceLayout = QFormLayout()
+        appearanceLayout.addRow("Appearance:", self.appearance)
 
         self.mainlayout.addWidget(title)
         self.mainlayout.addWidget(self.showNotifications)
         self.mainlayout.addWidget(self.minimize)
         self.mainlayout.addWidget(self.openRGB)
+        self.mainlayout.addLayout(appearanceLayout)
         self.mainlayout.addWidget(confirmButtons)
 
         confirmButtons.accepted.connect(self.accept)
@@ -50,9 +59,12 @@ class SettingsWindow(QDialog):
         self.showNotifications.setChecked(self.config.data.settings.showNotifications)
         self.minimize.setChecked(self.config.data.settings.minimizeOnStart)
         self.openRGB.setChecked(self.config.data.settings.useOpenRGB)
+        index = self.appearance.findData(self.config.data.settings.appearance)
+        self.appearance.setCurrentIndex(max(0, index))
 
     def accept(self):
         self.config.data.settings.showNotifications = self.showNotifications.isChecked()
         self.config.data.settings.minimizeOnStart = self.minimize.isChecked()
         self.config.data.settings.useOpenRGB = self.openRGB.isChecked()
+        self.config.data.settings.appearance = self.appearance.currentData()
         return super().accept()
