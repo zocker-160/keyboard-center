@@ -21,6 +21,7 @@ from .gui.tray import TrayIcon
 from .gui.Ui_mainwindow import Ui_MainWindow
 from .gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
 from .gui.settingswindow import SettingsWindow
+from .gui.KeyRecorder import KeyRecorder
 
 from .lua import lua
 from .config import config
@@ -77,6 +78,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.logger.debug("setting up GUI")
         self.setupUi(self)
         self.setWindowIcon(self.icon)
+        self.keyRecorder = KeyRecorder(self)
         self.initProfileButtons()
 
     def initProfileButtons(self):
@@ -139,6 +141,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.addKey.clicked.connect(self.addBlankKeyWidget)
         self.addDelay.clicked.connect(self.addBlankDelayWidget)
         self.addCommand.clicked.connect(self.addBlankCommandWidget)
+        self.recordButton.toggled.connect(self.toggleRecording)
+        self.keyRecorder.onNewKey.connect(self.addRecordedKey)
+        self.keyRecorder.onStop.connect(self.stopRecording)
+        self.app.aboutToQuit.connect(self.stopRecording)
         self.saveButton.clicked.connect(lambda: self.saveData(saveToFile=True))
         self.toTrayButton.clicked.connect(self.hide)
         self.clearAllButton.clicked.connect(self.keyListWidgetContents.clearAllEntries)
@@ -211,6 +217,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             raise
 
     def setCurrMkey(self, key: Mkey, save=True):
+        if not self.stopRecording():
+            return
         if save and not self.saveData():
             return
         
@@ -219,6 +227,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loadData()
 
     def setCurrGkey(self, key: Gkey, save=True):
+        if not self.stopRecording():
+            return
         if save and not self.saveData():
             return
 
@@ -236,6 +246,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _serviceHealthCheck(self):
         if not self.service or not self.service.isRunning():
+            if not self.stopRecording():
+                return
             self.healthCheck.stop()
 
             self.logger.debug("restarting service...")
@@ -247,6 +259,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.supportedDevice.setText("no supported device found :(")
         self.saveButton.setDisabled(True)
         self.resetButton.setDisabled(True)
+        self.recordButton.setDisabled(True)
 
         self.keyListWidgetContents.clearAllEntries()
 
@@ -259,6 +272,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def toggleScriptingMode(self, currValue: bool):
         self.keyListWidget.setEnabled(not currValue)
         self.addBox.setEnabled(not currValue)
+        self.recordButton.setEnabled(not currValue and self.saveButton.isEnabled())
+
+    def toggleRecording(self, recording: bool):
+        if not recording:
+            self.stopRecording()
+            return
+
+        # Validate existing actions before appending to them.
+        if not self.saveData():
+            self.recordButton.setChecked(False)
+            return
+
+        self.keyRecorder.start()
+        self.recordButton.setText("Stop")
+        self.keyListWidget.setEnabled(False)
+        self.addBox.setEnabled(False)
+        self.clearAllButton.setEnabled(False)
+        self.useScripting.setEnabled(False)
+        self.bottomStatusBar.showMessage("Recording keys — click Stop to finish and save")
+
+    def addRecordedKey(self, value: config.KeyValue):
+        widget = KeyPressWidget(self, value)
+        self.keyListWidgetContents.addWidget(widget)
+        self.keyListWidget.ensureWidgetVisible(widget)
+
+    def stopRecording(self) -> bool:
+        if not self.keyRecorder.isRecording:
+            return True
+
+        self.keyRecorder.stop()
+        self.recordButton.setChecked(False)
+        self.recordButton.setText("Record")
+        self.keyListWidget.setEnabled(True)
+        self.addBox.setEnabled(True)
+        self.clearAllButton.setEnabled(True)
+        self.useScripting.setEnabled(True)
+        self.bottomStatusBar.clearMessage()
+        return self.saveData(saveToFile=True)
 
     def addBlankKeyWidget(self):
         self.keyListWidgetContents.addWidget(KeyPressWidget(self))
@@ -270,6 +321,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.keyListWidgetContents.addWidget(CommandWidget(self))
 
     def saveData(self, saveToFile=False) -> bool:
+        if self.keyRecorder.isRecording:
+            return self.stopRecording()
         self.logger.debug("saving")
 
         try:
@@ -311,6 +364,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
 
     def loadData(self):
+        if not self.stopRecording():
+            return
         self.logger.debug(f"loading {self.currMkey.name} / {self.currGkey.name}")
 
         self.openRGBedit.setText(self.config.data.getRGBprofile(self.currMkey))
@@ -342,6 +397,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return super().keyPressEvent(a0)
 
     def closeEvent(self, event: QCloseEvent):
+        if not self.stopRecording():
+            event.ignore()
+            return
         if not self.isHidden():
             r = self.showQuestionMSG("Do you want to save unsaved changes?")
 
@@ -416,6 +474,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tray.showInfoIcon(title, msg, iconPath)
 
     def forceRestart(self):
+        if not self.stopRecording():
+            return
         try:
             self.logger.debug("force restarting service")
             self.service.quit(True)
