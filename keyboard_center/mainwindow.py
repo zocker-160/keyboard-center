@@ -21,6 +21,7 @@ from .gui.tray import TrayIcon
 from .gui.Ui_mainwindow import Ui_MainWindow
 from .gui.customwidgets import CommandWidget, DelayWidget, KeyPressWidget, CEntryButton
 from .gui.settingswindow import SettingsWindow
+from .gui.theme import SystemTheme
 
 from .lua import lua
 from .config import config
@@ -55,6 +56,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.healthCheck.timeout.connect(self._serviceHealthCheck)
 
         self.config = self.loadConfiguration()
+        self.theme = SystemTheme(self.app, self.config.data.settings.appearance)
         
         self.initBackgroundService()
         self.initUsbDevice()
@@ -478,6 +480,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         settings = SettingsWindow(self, self.config)
         if settings.exec() == 1:
             self.config.save()
+            self.theme.setMode(self.config.data.settings.appearance)
 
 
     ### other ui stuff

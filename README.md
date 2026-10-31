@@ -71,6 +71,18 @@ If you try to open a secondary instance, it ~will~ should reactivate the primary
 
 ## Settings
 
+The Appearance dropdown offers `auto (default)`, `light`, and `dark`. Saving
+applies the selection immediately and remembers it for the next launch. Light
+and dark use Qt's Fusion style with matching background and text colors.
+
+Auto preserves native Qt themes and explicit Qt theme/style overrides. When Qt
+is using its default appearance, it follows the desktop's light/dark preference
+through the [XDG Settings portal](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Settings.html),
+including changes while the app is running. This uses the same mechanism on
+X11 and Wayland and requires a working `xdg-desktop-portal` Settings backend for
+your desktop. Without a preference, the default Qt appearance is kept; the
+dropdown can still select light or dark. The selected icon theme is preserved.
+
 Settings are stored in a `settings.json` file, which is located at
 - `$XDG_CONFIG_HOME/keyboard-center` **or** if not defined
 - `$HOME/.config/keyboard-center`

@@ -79,6 +79,7 @@ class Settings:
     minimizeOnStart: bool = False
     showNotifications: bool = False
     useOpenRGB: bool = True
+    appearance: str = "auto"
 
     usbTimeout: int = 1 # in s
     usbSendDelay: int = 0.2 # in s
