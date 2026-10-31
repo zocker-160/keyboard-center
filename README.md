@@ -58,6 +58,17 @@ NOTE: v2 only works with Ubuntu 24.04 LTS and newer due to Python3.12 dependency
 
 **note:** if you install OpenRGB after Keyboard Center, you will need to restart it.
 
+## Recording macros
+
+Select a memory and macro key, then click **Record** next to the delete profile button.
+Key presses in the Keyboard Center window are appended to the selected profile,
+including Ctrl, Shift, Alt, AltGr and Meta/Super combinations. Click **Stop** to save.
+Switching profiles, resetting, hiding or leaving the window, and closing the application
+also stop and save the recording, keeping the actions captured so far.
+
+Recording adds one action per key press; automatic key repeat and timing are not recorded.
+Use the existing delay actions to add pauses. Recording is available when **use LUA script** is off.
+
 ## LUA scripting
 
 The basics of LUA scripting are explained in the [LUA template](src/lua/template.lua). \

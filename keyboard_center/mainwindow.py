@@ -145,6 +145,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.keyRecorder.onNewKey.connect(self.addRecordedKey)
         self.keyRecorder.onStop.connect(self.stopRecording)
         self.app.aboutToQuit.connect(self.stopRecording)
+        self.keyListWidget.verticalScrollBar().rangeChanged.connect(self.scrollRecording)
         self.saveButton.clicked.connect(lambda: self.saveData(saveToFile=True))
         self.toTrayButton.clicked.connect(self.hide)
         self.clearAllButton.clicked.connect(self.keyListWidgetContents.clearAllEntries)
@@ -293,9 +294,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.bottomStatusBar.showMessage("Recording keys — click Stop to finish and save")
 
     def addRecordedKey(self, value: config.KeyValue):
-        widget = KeyPressWidget(self, value)
-        self.keyListWidgetContents.addWidget(widget)
-        self.keyListWidget.ensureWidgetVisible(widget)
+        self.keyListWidgetContents.addWidget(KeyPressWidget(self, value))
+
+    def scrollRecording(self, minimum: int, maximum: int):
+        if self.keyRecorder.isRecording:
+            self.keyListWidget.verticalScrollBar().setValue(maximum)
 
     def stopRecording(self) -> bool:
         if not self.keyRecorder.isRecording:

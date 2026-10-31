@@ -3,18 +3,14 @@ from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QWidget
 
 from ..config import config
-from ..devices.allkeys import Modifiers
 
 
 MODIFIER_KEYS = {
-    Modifiers.L_CTRL: config.Modifiers.CTRL,
-    Modifiers.R_CTRL: config.Modifiers.CTRL,
-    Modifiers.L_SHIFT: config.Modifiers.SHIFT,
-    Modifiers.R_SHIFT: config.Modifiers.SHIFT,
-    Modifiers.L_ALT: config.Modifiers.ALT,
-    Modifiers.R_ALT: config.Modifiers.ALTGR,
-    Modifiers.L_META: config.Modifiers.META,
-    Modifiers.R_META: config.Modifiers.META,
+    Qt.Key_Control: config.Modifiers.CTRL,
+    Qt.Key_Shift: config.Modifiers.SHIFT,
+    Qt.Key_Alt: config.Modifiers.ALT,
+    Qt.Key_AltGr: config.Modifiers.ALTGR,
+    Qt.Key_Meta: config.Modifiers.META,
 }
 
 QT_MODIFIERS = {
@@ -41,13 +37,14 @@ class KeyRecorder(QObject):
         self.modifiers.clear()
         self.isRecording = True
         self.app.installEventFilter(self)
+        self.parent().setFocus()
 
     def stop(self):
         self.app.removeEventFilter(self)
         self.isRecording = False
 
         # A modifier pressed on its own is also a valid action.
-        for value in self.modifiers.values():
+        for _, value in self.modifiers.values():
             if value is not None:
                 self.onNewKey.emit(value)
         self.modifiers.clear()
@@ -57,8 +54,17 @@ class KeyRecorder(QObject):
             self.onStop.emit()
             return False
 
+        if event.type() == QEvent.Show and isinstance(obj, QWidget) and obj.windowType() == Qt.Popup:
+            self.onStop.emit()
+            return False
+
         if not isinstance(obj, QWidget) or obj.window() != self.parent():
             return False
+
+        # Text input methods can consume dead keys before Qt sends key events.
+        if event.type() == QEvent.FocusIn and obj != self.parent():
+            self.parent().setFocus()
+            return True
 
         if event.type() == QEvent.ShortcutOverride:
             event.accept()
@@ -76,7 +82,7 @@ class KeyRecorder(QObject):
             return True
 
         if event.type() == QEvent.KeyRelease:
-            value = self.modifiers.pop(keycode, None)
+            _, value = self.modifiers.pop(keycode, (None, None))
             if value is not None:
                 self.onNewKey.emit(value)
             return True
@@ -86,12 +92,12 @@ class KeyRecorder(QObject):
             if event.modifiers() & qtModifier:
                 flags |= modifier
 
-        modifier = MODIFIER_KEYS.get(keycode)
+        modifier = MODIFIER_KEYS.get(event.key())
         if modifier is not None:
             flags &= ~modifier
-        for pressed in self.modifiers:
-            flags |= MODIFIER_KEYS[pressed]
-            self.modifiers[pressed] = None
+        for pressed, (heldModifier, _) in self.modifiers.items():
+            flags |= heldModifier
+            self.modifiers[pressed] = (heldModifier, None)
 
         key = Qt.Key_Tab if event.key() == Qt.Key_Backtab else event.key()
         string = QKeySequence(key).toString()
@@ -103,7 +109,7 @@ class KeyRecorder(QObject):
         value = config.KeyValue(
             modFlags=flags, keycode=keycode, string=string or f"0x{keycode}")
         if modifier is not None:
-            self.modifiers[keycode] = value
+            self.modifiers[keycode] = (modifier, value)
         else:
             self.onNewKey.emit(value)
         return True
