@@ -259,7 +259,7 @@ class BackgroundService(QThread):
             else:
                 for value in entry.values:
                     self._emitSingle(value, wait=False)
-                    time.sleep(entry.gamemode)
+                    time.sleep(entry.gamemode / 1000)
 
         elif entry.type == config.EntryType.SCRIPT:
             keyUp = Event()
