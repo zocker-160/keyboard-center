@@ -28,7 +28,8 @@ ICON_LOCATION = os.path.join(
     PARENT_LOCATION, "assets", "input-keyboard-virtual.png"
 )
 
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtDBus import QDBusConnection
 
 class NoKeyboardException(Exception):
     pass
@@ -71,10 +72,25 @@ class BackgroundService(QThread):
         self.devmode = devmode
         self.retryCount = self.config.data.settings.retryCount
         self.retryTimeout = self.config.data.settings.retryTimeout
+        self.resumeEvent = Event()
 
         self.logger.info("setting up service")
         self.logger.debug("searching for supported keyboard")
         self._initKeyboard()
+
+        if not QDBusConnection.systemBus().connect(
+            "org.freedesktop.login1", "/org/freedesktop/login1",
+            "org.freedesktop.login1.Manager", "PrepareForSleep",
+            self._prepareForSleep,
+        ):
+            self.logger.warning("Could not subscribe to system resume notifications")
+
+    @pyqtSlot(bool)
+    def _prepareForSleep(self, sleeping: bool):
+        if not sleeping:
+            # USB resets on resume can restore the built-in G-key mappings
+            # without closing our HID handle. Reconfigure in the service thread.
+            self.resumeEvent.set()
 
     def _initKeyboard(self, retryCount=0):
         if retryCount >= self.config.data.settings.retryCount:
@@ -380,6 +396,13 @@ class BackgroundService(QThread):
             errorCount = 0
             while not self.stopEvent.isSet():
                 try:
+                    if self.resumeEvent.is_set():
+                        self.logger.info("Restoring keyboard configuration after resume")
+                        if self.keyboardDev.disableGKeys:
+                            self._disableGkeyMapping()
+                        self._switchProfile(self.currProfile)
+                        self.resumeEvent.clear()
+
                     fromKeyboard = hdev.read(
                         self.keyboardEndpoint.wMaxPacketSize, usbTimeout)
 
@@ -387,7 +410,7 @@ class BackgroundService(QThread):
                         self._handleRawData(bytes(fromKeyboard))
                         errorCount = 0
 
-                except HIDException as e:
+                except (HIDException, HIDFailedToOpenException) as e:
                     self.logger.error(f"HIDerror: ({e})")
 
                     if errorCount > 5:
